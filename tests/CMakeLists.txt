@@ -6,8 +6,10 @@ enable_testing()
 # 默认不添加，如果启用 THR_BUILD_TESTS 则默认添加
 if(THR_BUILD_TESTS)
     option(THR_BUILD_BASE_TESTS "Build the tests in the tests/base directory" ON)
+    option(THR_BUILD_ECS_TESTS "Build the tests in the tests/ecs directory" ON)
 else()
     option(THR_BUILD_BASE_TESTS "Build the tests in the tests/base directory" OFF)
+    option(THR_BUILD_ECS_TESTS "Build the tests in the tests/ecs directory" OFF)
 endif()
 
 if(THR_BUILD_BASE_TESTS)
@@ -79,4 +81,32 @@ if(THR_BUILD_BASE_TESTS)
     # todo : 解决下面的测试失败的问题
     # add_test(NAME RunTestBase2 COMMAND test_assert_msg)
     # set_tests_properties(RunTestBase2 PROPERTIES WILL_FAIL TRUE)
+endif()
+
+if(THR_BUILD_ECS_TESTS)
+    # 设置输出目录
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
+
+    # 构建程序
+
+    # 设置链接文件
+    add_executable(test_scene_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_scene_system.cpp)
+
+    # 链接第三方库
+    target_link_libraries(test_scene_system
+        PUBLIC
+        thr_compiler_flags
+        thr
+    )
+
+    # 添加安装支持
+    install(TARGETS test_scene_system DESTINATION bin/tests)
+
+    # 添加测试支持
+    add_test(NAME RunTestEcs2 COMMAND test_scene_system)
+    # todo : 修复此错误
+    # add_test(NAME TestEcs2StandardUse COMMAND test_scene_system)
+    # set_tests_properties(TestEcs2StandardUse
+    # PROPERTIES PASS_REGULAR_EXPRESSION "创建场景1\n将孩子1添加到场景1中\n现在孩子1的父亲有：\n\\d+\n将孩子2添加到场景1中\n现在场景1的子实体有：\n\\d+ \\d+\n将孩子1从场景1中删除\n现在孩子1的父亲有：\n创建场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\nid: 2 entity: \\d+\n销毁场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\n删除所有场景\n现在registry拥有场景：\\s*")
+
 endif()

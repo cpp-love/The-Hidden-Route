@@ -1,0 +1,10 @@
+\page file_versions scene_components.hpp 版本历史
+\tableofcontent
+
+# scene_components.hpp 版本历史
+
+## \[0.1.0-1] - 2026-05-02 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+
+### Added(新增)
+
+1. 添加了几个基本的与场景有关的组件 `thr::ecs::game_scenes`, `thr::ecs::father_scenes`
