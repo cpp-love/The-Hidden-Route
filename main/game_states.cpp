@@ -10,14 +10,19 @@
  */
 
 #include "game_states.hpp"
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/maze_line_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
+#include "thr/ecs/systems/maze_render_system.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <spdlog/spdlog.h>
+#include <vector>
 
-namespace thr::main {
+namespace mainhelper {
 
     // settings_menu
     settings_menu::settings_menu() noexcept { connect_dispatcher(); }
@@ -37,13 +42,13 @@ namespace thr::main {
         }
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->code == sf::Keyboard::Key::Escape) {
-                m_outside_dispather->enqueue<ecs::game_state_pop_event>();
+                m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>();
                 return true;
             }
         }
         return false;
     }
-    void settings_menu::update(ecs::milliseconds_f delta_time) noexcept {
+    void settings_menu::update(thr::ecs::milliseconds_f delta_time) noexcept {
         spdlog::trace("settings_menu updated, time: {}", delta_time);
     }
     void settings_menu::draw(sf::RenderTarget &render) noexcept {
@@ -72,19 +77,19 @@ namespace thr::main {
         }
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->code == sf::Keyboard::Key::S) {
-                m_outside_dispather->enqueue<ecs::game_state_push_event>(
+                m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                     std::make_unique<settings_menu>());
                 return true;
             }
             if (key_pressed->code == sf::Keyboard::Key::G) {
-                m_outside_dispather->enqueue<ecs::game_state_push_event>(
+                m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                     std::make_unique<game_screen>());
                 return true;
             }
         }
         return false;
     }
-    void main_menu::update(ecs::milliseconds_f delta_time) noexcept {
+    void main_menu::update(thr::ecs::milliseconds_f delta_time) noexcept {
         spdlog::trace("main_menu updated, time: {}", delta_time);
     }
     void main_menu::draw(sf::RenderTarget &render) noexcept {
@@ -96,7 +101,29 @@ namespace thr::main {
     void main_menu::disconnect_dispatcher() noexcept {}
 
     // game_screen
-    game_screen::game_screen() noexcept { connect_dispatcher(); }
+    game_screen::game_screen() noexcept {
+        m_registry.ctx().emplace<thr::ecs::line_strips>(
+            std::vector<std::vector<sf::Vector2f>>{{
+                                                       {1, 2},
+                                                       {300, 200},
+                                                       {100, 200},
+                                                   },
+                                                   {{100, 2}, {500, 200}, {400, 100}},
+                                                   {{1, 200}, {300, 400}, {600, 550}}},
+            sf::Color::Red);
+        entt::entity entity = m_registry.create();
+        m_registry.emplace<thr::ecs::segment>(entity, thr::ecs::segment{.start_center = {600, 600},
+                                                                        .length = 100.f,
+                                                                        .walked_precent = 0.5f,
+                                                                        .dir = thr::ecs::direction::up});
+        entt::entity entity2 = m_registry.create();
+        m_registry.emplace<thr::ecs::segment>(entity2,
+                                              thr::ecs::segment{.start_center = {250, 400},
+                                                                .length = 100.f,
+                                                                .walked_precent = 0.5f,
+                                                                .dir = thr::ecs::direction::right});
+        connect_dispatcher();
+    }
 
     void game_screen::on_pause() noexcept {
         spdlog::trace("game_screen paused");
@@ -113,30 +140,28 @@ namespace thr::main {
         }
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->code == sf::Keyboard::Key::S) {
-                m_outside_dispather->enqueue<ecs::game_state_push_event>(
+                m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                     std::make_unique<settings_menu>());
                 return true;
             }
             if (key_pressed->code == sf::Keyboard::Key::Escape) {
-                m_outside_dispather->enqueue<ecs::game_state_pop_event>();
+                m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>();
                 return true;
             }
             if (key_pressed->code == sf::Keyboard::Key::P) {
-                m_outside_dispather->enqueue<ecs::game_state_push_event>(std::make_unique<pause_menu>());
+                m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
+                    std::make_unique<pause_menu>());
                 return true;
             }
         }
         return false;
     }
-    void game_screen::update(ecs::milliseconds_f delta_time) noexcept {
+    void game_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
         spdlog::trace("game_screen updated, time: {}", delta_time);
     }
     void game_screen::draw(sf::RenderTarget &render) noexcept {
         spdlog::trace("game_screen drew");
-        sf::CircleShape circle{200};
-        render.draw(circle);
-        sf::RectangleShape rect{{20, 200}};
-        render.draw(rect);
+        thr::ecs::maze_render_system::draw(m_registry, render);
     }
     void game_screen::connect_dispatcher() noexcept {}
     void game_screen::disconnect_dispatcher() noexcept {}
@@ -159,18 +184,18 @@ namespace thr::main {
         }
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->code == sf::Keyboard::Key::Escape) {
-                m_outside_dispather->enqueue<ecs::game_state_pop_event>();
+                m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>();
                 return true;
             }
         }
         return false;
     }
-    void pause_menu::update(ecs::milliseconds_f delta_time) noexcept {
+    void pause_menu::update(thr::ecs::milliseconds_f delta_time) noexcept {
         spdlog::trace("pause_menu updated, time: {}", delta_time);
     }
     void pause_menu::draw(sf::RenderTarget &render) noexcept {
         spdlog::trace("pause_menu drew");
-        sf::CircleShape circle{200};
+        sf::CircleShape circle{100};
         render.draw(circle);
         sf::RectangleShape rect{{20, 200}};
         rect.setPosition({114, 514});
@@ -179,4 +204,4 @@ namespace thr::main {
     void pause_menu::connect_dispatcher() noexcept {}
     void pause_menu::disconnect_dispatcher() noexcept {}
 
-} // namespace thr::main
+} // namespace mainhelper

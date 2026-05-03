@@ -43,7 +43,7 @@ int main() {
 
     sf::RenderWindow             window(sf::VideoMode({800, 600}), "test game state manager");
     thr::ecs::game_state_manager manager;
-    manager.push_state(std::make_unique<thr::main::main_menu>());
+    manager.push_state(std::make_unique<mainhelper::main_menu>());
 
     auto prev = thr::ecs::clock::now();
     while (window.isOpen()) {

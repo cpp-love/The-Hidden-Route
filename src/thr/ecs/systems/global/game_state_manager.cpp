@@ -12,9 +12,7 @@
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/base/assert_msg.hpp"
 #include "thr/ecs/components/global/game_state_components.hpp"
-#include <algorithm>
-#include <cmath>
-#include <entt/entity/fwd.hpp>
+#include <entt/entity/entity.hpp>
 #include <memory>
 #include <ranges>
 #include <spdlog/spdlog.h>

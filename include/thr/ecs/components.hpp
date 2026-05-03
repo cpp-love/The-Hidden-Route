@@ -15,5 +15,6 @@
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/game_state_components.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
+#include "thr/ecs/components/maze_line_components.hpp"
 
 #endif // THR_ECS_COMPONENTS_HPP
