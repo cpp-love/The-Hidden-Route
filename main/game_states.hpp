@@ -13,6 +13,7 @@
 #define THR_MAIN_GAME_STATES_HPP
 
 #include "thr/ecs/components/global/game_state_components.hpp"
+#include <entt/entity/registry.hpp>
 
 namespace mainhelper {
 

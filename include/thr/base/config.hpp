@@ -17,16 +17,25 @@
 namespace thr {
 
     using version_type = std::uint16_t;               ///< thr版本类型
-    using level_identifier_type = std::uint16_t;      ///< 关卡标识符类型
     constexpr version_type version_major_offset = 11; ///< thr主版本偏移量
     constexpr version_type version_major = 0;         ///< thr主版本号
     constexpr version_type version_minor_offset = 6;  ///< thr次版本偏移量
     constexpr version_type version_minor = 1;         ///< thr次版本号
     constexpr version_type version_patch_offset = 0;  ///< thr修订版本偏移量
     constexpr version_type version_patch = 0;         ///< thr修订版本号
-    constexpr version_type version = (version_major << version_major_offset)
-                                     + (version_minor << version_minor_offset)
-                                     + (version_patch << version_patch_offset); ///< thr版本号
+    /**
+     * @brief 构建版本号。
+     * @param [in] major 主版本号。
+     * @param [in] minor 次版本号。
+     * @param [in] patch 修订版本号。
+     * @return version_type 生成的版本号。
+     */
+    constexpr version_type make_version(version_type major, version_type minor, version_type patch) {
+        return (major << version_major_offset) + (minor << version_minor_offset)
+               + (patch << version_patch_offset);
+    }
+    constexpr version_type version =
+        make_version(version_major, version_minor, version_patch); ///< thr版本号
 } // namespace thr
 
 #endif // THR_BASE_CONFIG_HPP

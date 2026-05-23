@@ -14,7 +14,9 @@
 
 #include "thr/ecs/components/global/game_state_components.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <entt/signal/dispatcher.hpp>
 #include <vector>
+
 
 namespace thr::ecs {
 

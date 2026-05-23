@@ -11,6 +11,7 @@
 
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include "thr/base/assert_msg.hpp"
+#include "thr/base/config.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include <entt/entity/registry.hpp>
 #include <utility>
@@ -22,9 +23,9 @@ namespace thr::ecs {
         /**
          * @brief 获取 @ref game_scenes 对象，没有就创建
          * @param [in] registry 注册表
-         * @return std::map<level_identifier_type, std::set<entt::entity>>& 在 `registry.ctx()` 上创建的对象
+         * @return std::map<scene_identifier_type, std::set<entt::entity>>& 在 `registry.ctx()` 上创建的对象
          */
-        std::map<level_identifier_type, std::set<entt::entity>> &
+        std::map<scene_identifier_type, std::set<entt::entity>> &
         get_or_create_scenes(entt::registry &registry) {
             if (!registry.ctx().contains<game_scenes>()) {
                 registry.ctx().emplace<game_scenes>();
@@ -39,7 +40,7 @@ namespace thr::ecs {
          * @return std::pair<std::set<entt::entity> &, bool> 子实体列表和是否已经创建过
          */
         std::pair<std::set<entt::entity> &, bool>
-        get_or_create_scene_children(entt::registry &registry, level_identifier_type scene_id) {
+        get_or_create_scene_children(entt::registry &registry, scene_identifier_type scene_id) {
             auto &scenes_childrens = get_or_create_scenes(registry);
             auto [iter, not_inserted] = scenes_childrens.try_emplace(scene_id);
             if (not_inserted) {
@@ -50,10 +51,10 @@ namespace thr::ecs {
 
     } // namespace
 
-    bool scene_system::insert_scene(entt::registry &registry, level_identifier_type scene_id) noexcept {
+    bool scene_system::insert_scene(entt::registry &registry, scene_identifier_type scene_id) noexcept {
         return get_or_create_scene_children(registry, scene_id).second;
     }
-    bool scene_system::erase_scene(entt::registry &registry, level_identifier_type scene_id) noexcept {
+    bool scene_system::erase_scene(entt::registry &registry, scene_identifier_type scene_id) noexcept {
         auto &scenes_childrens = get_or_create_scenes(registry);
         auto  scene_it = scenes_childrens.find(scene_id);
         if (scene_it == scenes_childrens.end()) {
@@ -81,11 +82,11 @@ namespace thr::ecs {
         }
         registry.clear<father_scenes>();
     }
-    [[nodiscard]] const std::map<level_identifier_type, std::set<entt::entity>> &
+    [[nodiscard]] const std::map<scene_identifier_type, std::set<entt::entity>> &
     scene_system::get_scenes(entt::registry &registry) noexcept {
         return get_or_create_scenes(registry);
     }
-    bool scene_system::insert_to_scene(entt::registry &registry, level_identifier_type scene_id,
+    bool scene_system::insert_to_scene(entt::registry &registry, scene_identifier_type scene_id,
                                        entt::entity child_entity) noexcept {
         auto                 &children = get_or_create_scene_children(registry, scene_id).first;
         bool                  is_inserted = children.insert(child_entity).second;
@@ -94,7 +95,7 @@ namespace thr::ecs {
         THR_ASSERT_MSG(is_inserted == is_inserted2, "子实体和父场景的两处登记处的信息错误地不一致");
         return is_inserted;
     }
-    bool scene_system::erase_from_scene(entt::registry &registry, level_identifier_type scene_id,
+    bool scene_system::erase_from_scene(entt::registry &registry, scene_identifier_type scene_id,
                                         entt::entity child_entity) noexcept {
         auto                 &children = get_or_create_scene_children(registry, scene_id).first;
         bool                  is_inserted = static_cast<bool>(children.erase(child_entity));
@@ -103,12 +104,22 @@ namespace thr::ecs {
         THR_ASSERT_MSG(is_inserted == is_inserted2, "子实体和父场景的两处登记处的信息错误地不一致");
         return is_inserted;
     }
+    void scene_system::erase_from_all_scenes(entt::registry &registry,
+                                             entt::entity    child_entity) noexcept {
+        auto &fathers = registry.get_or_emplace<father_scenes>(child_entity).m_fathers;
+        for (scene_identifier_type scene_id : fathers) {
+            auto &children = get_or_create_scene_children(registry, scene_id).first;
+            bool  is_inserted = static_cast<bool>(children.erase(child_entity));
+            THR_ASSERT_MSG(is_inserted, "子实体和父场景的两处登记处的信息错误地不一致");
+        }
+        fathers.clear();
+    }
     [[nodiscard]] const std::set<entt::entity> &
-    scene_system::get_scene_children(entt::registry &registry, level_identifier_type scene_id) noexcept {
+    scene_system::get_scene_children(entt::registry &registry, scene_identifier_type scene_id) noexcept {
         return get_or_create_scene_children(registry, scene_id).first;
     }
 
-    [[nodiscard]] const std::set<level_identifier_type> &
+    [[nodiscard]] const std::set<scene_identifier_type> &
     scene_system::get_father_scenes(entt::registry &registry, entt::entity child_entity) noexcept {
         return registry.get_or_emplace<father_scenes>(child_entity).m_fathers;
     }

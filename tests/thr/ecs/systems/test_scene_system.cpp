@@ -32,8 +32,8 @@ int main() {
     SetConsoleCP(CP_UTF8);
 #endif // _WIN32
 
-    entt::registry                       registry;
-    constexpr thr::level_identifier_type scene1_id = 1;
+    entt::registry                            registry;
+    constexpr thr::ecs::scene_identifier_type scene1_id = 1;
 
     std::println("创建场景1（id：{}）", scene1_id);
     bool succeeded = thr::ecs::scene_system::insert_scene(registry, scene1_id);
@@ -64,35 +64,38 @@ int main() {
     THR_ASSERT_MSG(!succeeded, "错误：不应二次删除成功");
     std::println("现在孩子1的父亲有：{}", thr::ecs::scene_system::get_father_scenes(registry, child1));
 
-    constexpr thr::level_identifier_type scene2_id = 2;
+    constexpr thr::ecs::scene_identifier_type scene2_id = 2;
     std::println("创建场景2（id：{}）", scene2_id);
     succeeded = thr::ecs::scene_system::insert_scene(registry, scene2_id);
     THR_ASSERT_MSG(succeeded, "错误：不应创建失败");
-    std::println("现在registry拥有场景：{}",
-                 thr::ecs::scene_system::get_scenes(registry)
-                     | std::views::transform(
-                         [](const std::pair<thr::level_identifier_type, std::set<entt::entity>> &pair) {
-                             return pair.first;
-                         }));
+    std::println(
+        "现在registry拥有场景：{}",
+        thr::ecs::scene_system::get_scenes(registry)
+            | std::views::transform(
+                [](const std::pair<thr::ecs::scene_identifier_type, std::set<entt::entity>> &pair) {
+                    return pair.first;
+                }));
     std::println("销毁场景2");
     succeeded = thr::ecs::scene_system::erase_scene(registry, scene2_id);
     THR_ASSERT_MSG(succeeded, "错误：不应删除场景2失败");
     succeeded = thr::ecs::scene_system::erase_scene(registry, scene2_id);
     THR_ASSERT_MSG(!succeeded, "错误：不应二次删除场景2成功");
-    std::println("现在registry拥有场景：{}",
-                 thr::ecs::scene_system::get_scenes(registry)
-                     | std::views::transform(
-                         [](const std::pair<thr::level_identifier_type, std::set<entt::entity>> &pair) {
-                             return pair.first;
-                         }));
+    std::println(
+        "现在registry拥有场景：{}",
+        thr::ecs::scene_system::get_scenes(registry)
+            | std::views::transform(
+                [](const std::pair<thr::ecs::scene_identifier_type, std::set<entt::entity>> &pair) {
+                    return pair.first;
+                }));
     std::println("删除所有场景");
     thr::ecs::scene_system::clear_scenes(registry);
-    std::println("现在registry拥有场景：{}",
-                 thr::ecs::scene_system::get_scenes(registry)
-                     | std::views::transform(
-                         [](const std::pair<thr::level_identifier_type, std::set<entt::entity>> &pair) {
-                             return pair.first;
-                         }));
+    std::println(
+        "现在registry拥有场景：{}",
+        thr::ecs::scene_system::get_scenes(registry)
+            | std::views::transform(
+                [](const std::pair<thr::ecs::scene_identifier_type, std::set<entt::entity>> &pair) {
+                    return pair.first;
+                }));
 
     return 0;
 }

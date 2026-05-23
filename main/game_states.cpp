@@ -10,7 +10,6 @@
  */
 
 #include "game_states.hpp"
-#include "thr/ecs/components/maze_line_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/maze_render_system.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
@@ -19,9 +18,10 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <entt/signal/dispatcher.hpp>
 #include <spdlog/spdlog.h>
-#include <vector>
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 namespace mainhelper {
 
     // settings_menu
@@ -205,3 +205,4 @@ namespace mainhelper {
     void pause_menu::disconnect_dispatcher() noexcept {}
 
 } // namespace mainhelper
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

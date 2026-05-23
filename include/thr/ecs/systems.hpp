@@ -15,5 +15,6 @@
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include "thr/ecs/systems/maze_render_system.hpp"
+#include "thr/ecs/systems/maze_serialization_system.hpp"
 
 #endif // THR_ECS_SYSTEMS_HPP

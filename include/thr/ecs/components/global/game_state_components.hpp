@@ -17,9 +17,7 @@
 #include "thr/ecs/components/global/game_base.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Window/Event.hpp>
-#include <entt/entity/registry.hpp>
-#include <entt/signal/dispatcher.hpp>
-#include <entt/signal/fwd.hpp>
+#include <entt/fwd.hpp>
 #include <memory>
 
 namespace thr::ecs {

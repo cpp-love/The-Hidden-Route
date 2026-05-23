@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef TNRW_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP
-#define TNRW_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP
+#ifndef THR_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP
+#define THR_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP
 
 #include "thr/ecs/components/maze_line_components.hpp"
 #include <SFML/Graphics/RenderStates.hpp>
@@ -19,6 +19,7 @@
 
 namespace thr::ecs {
 
+    /// @brief 迷宫渲染系统。
     class maze_render_system {
       public:
         /**
@@ -33,4 +34,4 @@ namespace thr::ecs {
 
 }; // namespace thr::ecs
 
-#endif // TNRW_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP
+#endif // THR_ECS_SYSTEMS_MAZE_RENDER_SYSTEM_HPP

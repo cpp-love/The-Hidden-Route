@@ -13,7 +13,9 @@
 
 1. [ ] feat(base): `Unwraped<std::optional/expected>` & `AsThrow<std::optional/expected>`
 
-<!-- ## 模块 ecs -->
+## 模块 ecs
+
+1. [ ] test(ecs): 为 `thr::ecs::game_state_manager` 添加测试。
 
 <!-- ## 模块 math -->
 
