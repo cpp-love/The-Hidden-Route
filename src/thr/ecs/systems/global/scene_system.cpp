@@ -14,6 +14,8 @@
 #include "thr/base/config.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include <entt/entity/registry.hpp>
+#include <spdlog/common.h>
+#include <spdlog/spdlog.h>
 #include <utility>
 
 namespace thr::ecs {
@@ -44,7 +46,7 @@ namespace thr::ecs {
             auto &scenes_childrens = get_or_create_scenes(registry);
             auto [iter, not_inserted] = scenes_childrens.try_emplace(scene_id);
             if (not_inserted) {
-                spdlog::info("添加场景：标识符为{}", scene_id);
+                spdlog::debug("添加场景：标识符为 {}", scene_id);
             }
             return {iter->second, not_inserted};
         }
@@ -60,7 +62,7 @@ namespace thr::ecs {
         if (scene_it == scenes_childrens.end()) {
             return false;
         }
-        spdlog::info("删除场景：标识符为{}", scene_id);
+        spdlog::debug("删除场景：标识符为 {}", scene_id);
         // 删除子实体对场景的引用
         for (entt::entity child : scene_it->second) {
             auto                 &fathers = registry.get<father_scenes>(child).m_fathers;
@@ -77,7 +79,7 @@ namespace thr::ecs {
         }
         auto &scenes_childrens = registry.ctx().get<game_scenes>().m_scenes_childrens;
         for (auto it = scenes_childrens.begin(); it != scenes_childrens.end();) {
-            spdlog::info("删除场景：标识符为{}", it->first);
+            spdlog::debug("删除场景：标识符为 {}", it->first);
             it = scenes_childrens.erase(it);
         }
         registry.clear<father_scenes>();

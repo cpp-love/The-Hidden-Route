@@ -12,6 +12,7 @@
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/base/assert_msg.hpp"
 #include "thr/ecs/components/global/game_state_components.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <entt/entity/entity.hpp>
 #include <memory>
 #include <ranges>
@@ -19,13 +20,19 @@
 
 namespace thr::ecs {
 
-    game_state_manager::game_state_manager() noexcept {
+    game_state_manager::game_state_manager(sf::RenderWindow &window) noexcept
+        : m_window(window), m_gui(m_window) {
         m_dispatcher.sink<game_state_push_event>().connect<&game_state_manager::on_push_state>(this);
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
     }
 
+    game_state_manager::~game_state_manager() noexcept {
+        m_states.clear();
+        m_dispatcher.clear();
+    }
+
     void game_state_manager::push_state(game_state_base::ptr state) noexcept {
-        state->bind(m_dispatcher);
+        state->bind(m_dispatcher, m_window, m_gui);
         if (!m_states.empty()) {
             m_states.back()->on_pause();
         }
@@ -45,6 +52,9 @@ namespace thr::ecs {
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
     }
     bool game_state_manager::handle_event(const sf::Event &event) noexcept {
+        if (m_gui.handleEvent(event)) {
+            return true;
+        }
         for (auto &state : m_states | std::views::reverse) {
             if (state->handle_event(event)) {
                 return true;
@@ -64,7 +74,7 @@ namespace thr::ecs {
         }
         m_dispatcher.update();
     }
-    void game_state_manager::draw(sf::RenderTarget &render) noexcept {
+    void game_state_manager::draw() noexcept {
         /// @todo 添加更好的方式
         // 后面覆盖前面，所以前面先绘制
         std::ranges::subrange last_unblocked_range{[&] {
@@ -77,7 +87,8 @@ namespace thr::ecs {
                                                        return m_states.begin();
                                                    }(),
                                                    m_states.end()};
-        for (auto &state : last_unblocked_range) { state->draw(render); }
+        for (auto &state : last_unblocked_range) { state->draw(); }
+        m_gui.draw();
     }
 
     void game_state_manager::on_push_state(game_state_push_event &event) noexcept {

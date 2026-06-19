@@ -1,0 +1,20 @@
+\page file_versions level_serialization_system.cpp 版本历史
+\tableofcontent
+
+# level_serialization_system.cpp 版本历史
+
+## \[0.1.0-2] - 2026-06-19 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 同步 [`level.schema.json`](../../../../../schema/level-v0.1.0-2.schema.json) 的修改。
+
+### Fixed(bug 修复)
+
+1. 修复了 `thr::ecs::level_serialization_system::deserialize_from_json` 中如果 json 文件没有 `line_strips` 一项则不会插入空的 `thr::ecs::line_strips` 的问题。
+
+## \[0.1.0-1] - 2026-05-04 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+
+### Added(新增)
+
+1. 实现了迷宫序列化系统 `thr::ecs::level_serialization_system`。

@@ -2,8 +2,8 @@
  * @file main.cpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief *The Hidden Route* 游戏的主程序。
- * @version 0.1.0-1
- * @date 2026-05-02
+ * @version 0.1.0-2
+ * @date 2026-06-19
  * 
  * @copyright cpp-love
  * 
@@ -41,8 +41,8 @@ int main() {
     spdlog::set_default_logger(multi_sink_logger);
     spdlog::flush_on(spdlog::level::info);
 
-    sf::RenderWindow             window(sf::VideoMode({800, 600}), "test game state manager");
-    thr::ecs::game_state_manager manager;
+    sf::RenderWindow             window(sf::VideoMode({800, 600}), "The Hidden Route");
+    thr::ecs::game_state_manager manager(window);
     manager.push_state(std::make_unique<mainhelper::main_menu>());
 
     auto prev = thr::ecs::clock::now();
@@ -64,7 +64,7 @@ int main() {
 
         // render
         window.clear();
-        manager.draw(window);
+        manager.draw();
         window.display();
     }
 

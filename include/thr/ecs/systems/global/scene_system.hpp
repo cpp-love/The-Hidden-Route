@@ -2,8 +2,8 @@
  * @file scene_system.hpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief 声明了游戏场景系统。
- * @version 0.1.0-1
- * @date 2026-05-02
+ * @version 0.1.0-2
+ * @date 2026-06-07
  * 
  * @copyright cpp-love
  * 
@@ -17,9 +17,9 @@
 
 #include "thr/base/config.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
+#include <entt/entity/sparse_set.hpp>
 #include <entt/fwd.hpp>
 #include <generator>
-#include <ranges>
 
 namespace thr::ecs {
 
@@ -103,13 +103,20 @@ namespace thr::ecs {
          * @brief 获取与指定实体在同一场景内的实体列表。
          * @param [in] registry 注册表。
          * @param [in] entity 指定的实体。
-         * @return std::generator<const entt::entity &> 实体列表生成器。
+         * @return std::generator<const entt::entity &> 实体列表生成器，保证生成的列表中没有重复的元素且不包含传入实体。
          */
         [[nodiscard]] static std::generator<const entt::entity &>
         get_entities_in_same_scene(entt::registry &registry, entt::entity entity) noexcept {
+            entt::sparse_set entity_set;
+            entity_set.push(entity);
             const auto &father_scenes = get_father_scenes(registry, entity);
             for (scene_identifier_type scene_id : father_scenes) {
-                co_yield std::ranges::elements_of(get_scene_children(registry, scene_id));
+                for (entt::entity current_entity : get_scene_children(registry, scene_id)) {
+                    if (!entity_set.contains(current_entity)) {
+                        entity_set.push(current_entity);
+                        co_yield current_entity;
+                    }
+                }
             }
         }
     };
