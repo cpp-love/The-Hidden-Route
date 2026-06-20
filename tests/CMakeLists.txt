@@ -19,7 +19,7 @@ if(THR_BUILD_BASE_TESTS)
     # 设置链接文件
     add_executable(test_assert_msg ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_assert_msg.cpp)
     add_executable(test_floating_point_compare ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_floating_point_compare.cpp)
-    add_executable(test_SFML_formatter ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_SFML_formatter.cpp)
+    add_executable(test_SFML_helper ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_SFML_helper.cpp)
     add_executable(test_overload ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_overload.cpp)
     add_executable(test_observable ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_observable.cpp)
 
@@ -36,7 +36,7 @@ if(THR_BUILD_BASE_TESTS)
         thr
     )
 
-    target_link_libraries(test_SFML_formatter
+    target_link_libraries(test_SFML_helper
         PUBLIC
         thr_compiler_flags
         thr
@@ -57,13 +57,13 @@ if(THR_BUILD_BASE_TESTS)
     # 添加安装支持
     install(
         TARGETS test_assert_msg test_floating_point_compare
-        test_SFML_formatter test_overload test_observable
+        test_SFML_helper test_overload test_observable
         DESTINATION bin/tests)
 
     # 添加测试支持
     add_test(NAME RunTestBase3 COMMAND test_floating_point_compare)
-    add_test(NAME RunTestBase4 COMMAND test_SFML_formatter)
-    add_test(NAME TestBase4StandardUse COMMAND test_SFML_formatter)
+    add_test(NAME RunTestBase4 COMMAND test_SFML_helper)
+    add_test(NAME TestBase4StandardUse COMMAND test_SFML_helper)
     set_tests_properties(TestBase4StandardUse
         PROPERTIES PASS_REGULAR_EXPRESSION "vec1 is \\(10.000, 10.000\\), vec2 is \\(11, 11\\), vec3 is \\(13, 10\\)\\s*"
     )

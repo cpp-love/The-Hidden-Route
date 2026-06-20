@@ -2,8 +2,8 @@
  * @file player_movement_system.cpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief 定义了玩家移动系统。
- * @version 0.1.0-1
- * @date 2026-05-30
+ * @version 0.1.0-2
+ * @date 2026-06-20
  * 
  * @copyright cpp-love
  * 
@@ -121,11 +121,11 @@ namespace thr::ecs {
                 }();
                 // 检测前面的两点。
                 sf::Vector2f to_front =
-                    direction_to_vector2f(dir, (player_under_ground::side_length / 2));
+                    direction_to_vector2f(dir, (player_under_ground::side_length() / 2));
                 sf::Vector2f to_left =
-                    direction_to_vector2f(rotate_90_ccw(dir), (player_under_ground::side_length / 2));
+                    direction_to_vector2f(rotate_90_ccw(dir), (player_under_ground::side_length() / 2));
                 sf::Vector2f to_right =
-                    direction_to_vector2f(rotate_90_cw(dir), (player_under_ground::side_length / 2));
+                    direction_to_vector2f(rotate_90_cw(dir), (player_under_ground::side_length() / 2));
                 if (rect.contains(next_position + to_front + to_left)) {
                     is_up_left_covered = true;
                 }
@@ -149,7 +149,8 @@ namespace thr::ecs {
                 if (node == nullptr) {
                     continue;
                 }
-                if (dir != registry.get<segment>(node->segment_entity).dir) {
+                if (dir != registry.get<segment>(node->segment_entity).dir
+                    || registry.get<segment>(node->segment_entity).walked_precent != 0.f) {
                     continue;
                 }
                 auto rect = [&] -> sf::FloatRect {
@@ -191,6 +192,7 @@ namespace thr::ecs {
         }
     }
 
+    /// @todo 添加恢复操作，并解决同时按下两个相邻方向键会产生大量记录导致撤回困难的问题。
     void player_movement_system::undo(entt::registry &registry, entt::entity player_entity) noexcept {
         auto &turnings = registry.get<turning_history>(player_entity).turnings;
         if (turnings.empty()) {

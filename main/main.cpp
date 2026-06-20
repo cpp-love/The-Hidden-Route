@@ -10,6 +10,7 @@
  */
 
 #include "game_states.hpp"
+#include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -63,7 +64,7 @@ int main() {
         prev = cur;
 
         // render
-        window.clear();
+        window.clear(thr::ecs::configs::singleton().background_color);
         manager.draw();
         window.display();
     }

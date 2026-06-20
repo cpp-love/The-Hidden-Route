@@ -3,6 +3,12 @@
 
 # player_movement_system.cpp 版本历史
 
+## \[0.1.0-2] - 2026-06-20 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+
+### Fixed(bug 修复)
+
+1. 修复了在地面下时可能进入已经走过的地面的问题。
+
 ## \[0.1.0-1] - 2026-05-30 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
 
 ### Added(新增)

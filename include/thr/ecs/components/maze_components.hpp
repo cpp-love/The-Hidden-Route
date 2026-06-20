@@ -14,6 +14,7 @@
 
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
+#include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -34,8 +35,16 @@ namespace thr::ecs {
 
     /// @brief 路径中直的一段。
     struct segment {
-        static constexpr float      width = 20.f;              ///< 路径宽度。
-        static constexpr sf::Color  color = sf::Color::Yellow; ///< 路径颜色。
+        /**
+         * @brief 从配置中获取路径宽度。
+         * @return float 路径宽度。
+         */
+        static float                width() { return configs::singleton().segment_width; }
+        /**
+         * @brief 从配置中获取路径颜色。
+         * @return sf::Color 路径颜色。
+         */
+        static sf::Color            color() { return configs::singleton().segment_color; }
 
         std::optional<entt::entity> prev{};                ///< （起始位置）连接的前一个路径实体。
         std::optional<entt::entity> next{};                ///< （终止位置）连接的后一个路径实体。
@@ -53,20 +62,20 @@ namespace thr::ecs {
             sf::Vector2f size;
             switch (dir) {
                 case direction::right:
-                    position -= {segment::width / 2, segment::width / 2};
-                    size += {length + segment::width, segment::width};
+                    position -= {segment::width() / 2, segment::width() / 2};
+                    size += {length + segment::width(), segment::width()};
                     break;
                 case direction::left:
-                    position += {segment::width / 2, segment::width / 2};
-                    size -= {length + segment::width, segment::width};
+                    position += {segment::width() / 2, segment::width() / 2};
+                    size -= {length + segment::width(), segment::width()};
                     break;
                 case direction::down:
-                    position -= {segment::width / 2, segment::width / 2};
-                    size += {segment::width, length + segment::width};
+                    position -= {segment::width() / 2, segment::width() / 2};
+                    size += {segment::width(), length + segment::width()};
                     break;
                 case direction::up:
-                    position += {segment::width / 2, segment::width / 2};
-                    size -= {segment::width, length + segment::width};
+                    position += {segment::width() / 2, segment::width() / 2};
+                    size -= {segment::width(), length + segment::width()};
                     break;
             }
             return {position, size};
@@ -81,20 +90,20 @@ namespace thr::ecs {
             sf::Vector2f size;
             switch (dir) {
                 case direction::right:
-                    position -= {segment::width / 2, segment::width / 2};
-                    size += {(length * walked_precent) + segment::width, segment::width};
+                    position -= {segment::width() / 2, segment::width() / 2};
+                    size += {(length * walked_precent) + segment::width(), segment::width()};
                     break;
                 case direction::left:
-                    position += {segment::width / 2, segment::width / 2};
-                    size -= {(length * walked_precent) + segment::width, segment::width};
+                    position += {segment::width() / 2, segment::width() / 2};
+                    size -= {(length * walked_precent) + segment::width(), segment::width()};
                     break;
                 case direction::down:
-                    position -= {segment::width / 2, segment::width / 2};
-                    size += {segment::width, (length * walked_precent) + segment::width};
+                    position -= {segment::width() / 2, segment::width() / 2};
+                    size += {segment::width(), (length * walked_precent) + segment::width()};
                     break;
                 case direction::up:
-                    position += {segment::width / 2, segment::width / 2};
-                    size -= {segment::width, (length * walked_precent) + segment::width};
+                    position += {segment::width() / 2, segment::width() / 2};
+                    size -= {segment::width(), (length * walked_precent) + segment::width()};
                     break;
             }
             return {position, size};

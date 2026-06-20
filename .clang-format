@@ -34,7 +34,7 @@ ReflowComments: Never # 禁止重新换行注释
 IndentCaseLabels: true # switch 语句中 case 的缩进
 
 FixNamespaceComments: true # 自动修复命名空间注释
-ShortNamespaceLines: 1 # 短命名空间单行显示
+ShortNamespaceLines: 0 # 短命名空间单行显示
 SortIncludes: { Enabled: true } # 头文件排序方式
 
 SpacesBeforeTrailingComments: 1 # 行尾注释前的空格数

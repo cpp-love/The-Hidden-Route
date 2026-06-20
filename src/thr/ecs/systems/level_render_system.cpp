@@ -13,6 +13,7 @@
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
+#include "thr/ecs/configs.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
@@ -30,20 +31,20 @@ namespace thr::ecs {
         // draw segments
         auto              list = registry.view<segment>();
         sf::RenderTexture render_texture{render.getSize()};
-        render_texture.clear();
+        render_texture.clear(configs::singleton().background_color);
         for (entt::entity entity : list) {
             const auto &seg = registry.get<segment>(entity);
             if (seg.walked_precent != 0.f) {
                 sf::FloatRect      bound = seg.get_walked_bounds();
                 sf::RectangleShape rect{bound.size};
                 rect.setPosition(bound.position);
-                rect.setFillColor(segment::color);
+                rect.setFillColor(segment::color());
                 render_texture.draw(rect);
             }
         }
         render_texture.display();
         sf::Sprite sprite{render_texture.getTexture()};
-        sprite.setColor({255, 255, 255, 128});
+        sprite.setColor(configs::singleton().segments_render_opacity);
         render.draw(sprite, states);
 
         // draw lines
@@ -56,22 +57,23 @@ namespace thr::ecs {
             const auto        &on_ground = registry.get<player_on_ground>(player);
             const auto        &seg = registry.get<segment>(on_ground.segment_entity);
             sf::RectangleShape rect_shape{
-                {player_on_ground::side_length, player_on_ground::side_length}};
-            rect_shape.setPosition(
-                seg.start_center + direction_to_vector2f(seg.dir, seg.length * seg.walked_precent)
-                - sf::Vector2f{player_on_ground::side_length / 2, player_on_ground::side_length / 2});
-            rect_shape.setFillColor(player_on_ground::color);
+                {player_on_ground::side_length(), player_on_ground::side_length()}};
+            rect_shape.setPosition(seg.start_center
+                                   + direction_to_vector2f(seg.dir, seg.length * seg.walked_precent)
+                                   - sf::Vector2f{player_on_ground::side_length() / 2,
+                                                  player_on_ground::side_length() / 2});
+            rect_shape.setFillColor(player_on_ground::color());
             render.draw(rect_shape, states);
         }
         const auto &player_under_grounds = registry.view<player_under_ground>();
         for (entt::entity player : player_under_grounds) {
             const auto        &under_ground = registry.get<player_under_ground>(player);
             sf::RectangleShape rect_shape{
-                {player_under_ground::side_length, player_under_ground::side_length}};
+                {player_under_ground::side_length(), player_under_ground::side_length()}};
             rect_shape.setPosition(under_ground.position
-                                   - sf::Vector2f{player_under_ground::side_length / 2,
-                                                  player_under_ground::side_length / 2});
-            rect_shape.setFillColor(player_under_ground::color);
+                                   - sf::Vector2f{player_under_ground::side_length() / 2,
+                                                  player_under_ground::side_length() / 2});
+            rect_shape.setFillColor(player_under_ground::color());
             render.draw(rect_shape, states);
         }
     }

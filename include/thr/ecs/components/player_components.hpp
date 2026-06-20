@@ -13,6 +13,7 @@
 #define THR_ECS_COMPONENTS_PLAYER_COMPONENTS_HPP
 
 #include "thr/ecs/components/global/game_base.hpp"
+#include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -26,31 +27,49 @@ namespace thr::ecs {
 
     /// @brief 在地面上的玩家。
     struct player_on_ground {
-        static constexpr sf::Color color = sf::Color::Blue; ///< 玩家颜色。
-        static constexpr float     side_length = 18.f;      ///< 玩家边长。
-        entt::entity               segment_entity;          ///< 玩家所在线段所属的实体。
+        /**
+         * @brief 从配置中获取玩家颜色。
+         * @return float 玩家颜色。
+         */
+        static sf::Color color() { return configs::singleton().player_on_ground_color; }
+        /**
+         * @brief 从配置中获取玩家边长。
+         * @return float 玩家边长。
+         */
+        static float     side_length() { return configs::singleton().player_on_ground_side_length; }
+
+        entt::entity     segment_entity; ///< 玩家所在线段所属的实体。
     };
 
     /// @brief 在地面下的玩家。
     struct player_under_ground {
-        static constexpr sf::Color color{0, 0, 255, 128}; ///< 玩家颜色。
-        static constexpr float     side_length = 18.f;    ///< 玩家边长。
-        sf::Vector2f               position;              ///< 玩家所在位置。
-        std::optional<direction>   prev_dir;              ///< 玩家上一次走的方向。
+        /**
+         * @brief 从配置中获取玩家颜色。
+         * @return sf::Color 玩家颜色。
+         */
+        static sf::Color color() { return configs::singleton().player_under_ground_color; }
+        /**
+         * @brief 从配置中获取玩家边长。
+         * @return float 玩家边长。
+         */
+        static float     side_length() { return configs::singleton().player_under_ground_side_length; }
+
+        sf::Vector2f     position;         ///< 玩家所在位置。
+        std::optional<direction> prev_dir; ///< 玩家上一次走的方向。
 
         /**
          * @brief 在构造 @ref player_under_ground 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
          * @param [in] entity 构造了 @ref player_under_ground 的实体。
          */
-        static void                on_construct(entt::registry &registry, entt::entity entity) {
+        static void              on_construct(entt::registry &registry, entt::entity entity) {
             const auto  &under_ground = registry.get<player_under_ground>(entity);
             sf::Vector2f start = under_ground.position
-                                 - sf::Vector2f{player_under_ground::side_length / 2,
-                                                player_under_ground::side_length / 2};
+                                 - sf::Vector2f{player_under_ground::side_length() / 2,
+                                                player_under_ground::side_length() / 2};
             sf::Vector2f end = under_ground.position
-                               + sf::Vector2f{player_under_ground::side_length / 2,
-                                              player_under_ground::side_length / 2};
+                               + sf::Vector2f{player_under_ground::side_length() / 2,
+                                              player_under_ground::side_length() / 2};
             int col_start = static_cast<int>(start.x / block_side_length);
             int col_end = static_cast<int>(end.x / block_side_length);
             int row_start = static_cast<int>(start.y / block_side_length);
