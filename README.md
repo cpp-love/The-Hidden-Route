@@ -14,6 +14,6 @@ Mazes, but the hidden route is defined by you.
 
 #### Implemented contents
 
-1. [x] have implemented [some basic systems](./include/ecs/systems)
-2. [x] have implemented [macro `THR_ASSERT_MSG` and function `thr::unreachable`](./include/base/assert_msg.hpp)
-3. [x] have implemented [some miscellaneous](./include/base/)
+1. [x] have implemented [some basic systems](./include/thr/ecs/systems)
+2. [x] have implemented [macro `THR_ASSERT_MSG` and function `thr::unreachable`](./include/thr/base/assert_msg.hpp)
+3. [x] have implemented [some miscellaneous](./include/thr/base/)

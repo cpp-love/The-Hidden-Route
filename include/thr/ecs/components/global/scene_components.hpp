@@ -8,9 +8,9 @@
  * @copyright cpp-love
  * 
  * @details
- * - 使用 `level_identifier_type` 来代指场景
+ * - 使用 `scene_identifier_type` 来代指场景
  * - 使用 `std::set<entt::entity>` 来存储场景的子实体
- * - 使用 `std::set<level_identifier_type>` 来存储父场景id
+ * - 使用 `std::set<scene_identifier_type>` 来存储父场景id
  * 
  */
 
@@ -24,15 +24,30 @@
 
 namespace thr::ecs {
 
+    using scene_identifier_type = std::uint16_t; ///< 场景标识符类型。
+
+    /**
+     * @brief 
+     * @param [in] row 
+     * @param [in] col 
+     * @return constexpr scene_identifier_type 
+     * @details 
+     * @note 
+     */
+    constexpr scene_identifier_type make_scene_identifier(scene_identifier_type row,
+                                                          scene_identifier_type col) {
+        return (static_cast<unsigned int>(row) << 8u) | (static_cast<unsigned int>(col) & 0xffu);
+    }
+
     /// @brief 总场景组件
     struct game_scenes final {
-        std::map<level_identifier_type, std::set<entt::entity>>
-            m_scenes_childrens; //< 映射：场景id -> 子实体列表
+        std::map<scene_identifier_type, std::set<entt::entity>>
+            m_scenes_childrens; //< 映射：场景id -> 子实体列表。
     };
 
     /// @brief 获取父场景实体的组件
     struct father_scenes final {
-        std::set<level_identifier_type> m_fathers; //< 父场景id
+        std::set<scene_identifier_type> m_fathers; //< 父场景id。
     };
 
 } // namespace thr::ecs

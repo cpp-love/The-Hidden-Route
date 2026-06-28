@@ -13,7 +13,7 @@
 
 ### Removed(移除)
 
-### Fixed(bug修复)
+### Fixed(bug 修复)
 
 ### Security(安全漏洞修复)
 

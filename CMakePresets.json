@@ -12,9 +12,17 @@
             "hidden": false,
             "generator": "Ninja",
             "cacheVariables": {
-                "THR_BUILD_HELPER": {
-                    "type": "BOOL",
-                    "value": "ON"
+                "CMAKE_C_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_CXX_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_C_COMPILER": {
+                    "type": "STR",
+                    "value": "gcc"
                 },
                 "CMAKE_CXX_COMPILER": {
                     "type": "STR",
@@ -25,6 +33,10 @@
                     "value": "DEBUG"
                 },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "THR_BUILD_HELPER": {
                     "type": "BOOL",
                     "value": "ON"
                 },
@@ -40,6 +52,18 @@
             "hidden": false,
             "generator": "Ninja",
             "cacheVariables": {
+                "CMAKE_C_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_CXX_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_C_COMPILER": {
+                    "type": "STR",
+                    "value": "gcc"
+                },
                 "CMAKE_CXX_COMPILER": {
                     "type": "STR",
                     "value": "g++"
@@ -60,10 +84,22 @@
         },
         {
             "name": "BuildOnly",
-            "description": "构建主程序",
+            "description": "构建主XX程序",
             "hidden": false,
             "generator": "Ninja",
             "cacheVariables": {
+                "CMAKE_C_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_CXX_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_C_COMPILER": {
+                    "type": "STR",
+                    "value": "gcc"
+                },
                 "CMAKE_CXX_COMPILER": {
                     "type": "STR",
                     "value": "g++"
@@ -84,6 +120,18 @@
             "hidden": false,
             "generator": "Ninja",
             "cacheVariables": {
+                "CMAKE_C_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_CXX_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_C_COMPILER": {
+                    "type": "STR",
+                    "value": "gcc"
+                },
                 "CMAKE_CXX_COMPILER": {
                     "type": "STR",
                     "value": "g++"

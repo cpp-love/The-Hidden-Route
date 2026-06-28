@@ -2,8 +2,8 @@
  * @file game_states.hpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief 声明了一些具体的游戏状态。
- * @version 0.1.0-1
- * @date 2026-05-02
+ * @version 0.1.0-2
+ * @date 2026-06-19
  * 
  * @copyright cpp-love
  * 
@@ -13,11 +13,13 @@
 #define THR_MAIN_GAME_STATES_HPP
 
 #include "thr/ecs/components/global/game_state_components.hpp"
+#include <entt/entity/entity.hpp>
+#include <entt/entity/registry.hpp>
 
-namespace thr::main {
+namespace mainhelper {
 
     /// @brief 设置状态类
-    class settings_menu : public ecs::game_state_base {
+    class settings_menu : public thr::ecs::game_state_base {
       public:
         /// @copydoc game_state_base::game_state_base()
         settings_menu() noexcept;
@@ -30,7 +32,7 @@ namespace thr::main {
         /// @copydoc game_state_base::operator=(game_state_base &&rhs)
         settings_menu &operator=(settings_menu &&rhs) noexcept = delete;
         /// @copydoc game_state_base::~game_state_base
-        ~settings_menu() noexcept override = default;
+        ~settings_menu() noexcept override;
         /// @copydoc game_state_base::on_pause
         void on_pause() noexcept override;
         /// @copydoc game_state_base::on_resume
@@ -38,9 +40,9 @@ namespace thr::main {
         /// @copydoc game_state_base::on_handle_event
         bool handle_event(const sf::Event &event) noexcept override;
         /// @copydoc game_state_base::update
-        void update(ecs::milliseconds_f delta_time) noexcept override;
+        void update(thr::ecs::milliseconds_f delta_time) noexcept override;
         /// @copydoc game_state_base::draw
-        void draw(sf::RenderTarget &render) noexcept override;
+        void draw() noexcept override;
 
       private:
         /// @brief 连接调度器
@@ -52,7 +54,7 @@ namespace thr::main {
     };
 
     /// @brief 主页状态类
-    class main_menu : public ecs::game_state_base {
+    class main_menu : public thr::ecs::game_state_base {
       public:
         /// @copydoc game_state_base::game_state_base()
         main_menu() noexcept;
@@ -65,7 +67,7 @@ namespace thr::main {
         /// @copydoc game_state_base::operator=(game_state_base &&rhs)
         main_menu &operator=(main_menu &&rhs) noexcept = delete;
         /// @copydoc game_state_base::~game_state_base
-        ~main_menu() noexcept override = default;
+        ~main_menu() noexcept override;
         /// @copydoc game_state_base::on_pause
         void on_pause() noexcept override;
         /// @copydoc game_state_base::on_resume
@@ -73,9 +75,13 @@ namespace thr::main {
         /// @copydoc game_state_base::on_handle_event
         bool handle_event(const sf::Event &event) noexcept override;
         /// @copydoc game_state_base::update
-        void update(ecs::milliseconds_f delta_time) noexcept override;
+        void update(thr::ecs::milliseconds_f delta_time) noexcept override;
         /// @copydoc game_state_base::draw
-        void draw(sf::RenderTarget &render) noexcept override;
+        void draw() noexcept override;
+
+      protected:
+        /// @copydoc game_state_base::init
+        void init() noexcept override;
 
       private:
         /// @brief 连接调度器
@@ -87,7 +93,7 @@ namespace thr::main {
     };
 
     /// @brief 游戏界面状态类
-    class game_screen : public ecs::game_state_base {
+    class game_screen : public thr::ecs::game_state_base {
       public:
         /// @copydoc game_state_base::game_state_base()
         game_screen() noexcept;
@@ -100,7 +106,7 @@ namespace thr::main {
         /// @copydoc game_state_base::operator=(game_state_base &&rhs)
         game_screen &operator=(game_screen &&rhs) noexcept = delete;
         /// @copydoc game_state_base::~game_state_base
-        ~game_screen() noexcept override = default;
+        ~game_screen() noexcept override;
         /// @copydoc game_state_base::on_pause
         void on_pause() noexcept override;
         /// @copydoc game_state_base::on_resume
@@ -108,21 +114,26 @@ namespace thr::main {
         /// @copydoc game_state_base::on_handle_event
         bool handle_event(const sf::Event &event) noexcept override;
         /// @copydoc game_state_base::update
-        void update(ecs::milliseconds_f delta_time) noexcept override;
+        void update(thr::ecs::milliseconds_f delta_time) noexcept override;
         /// @copydoc game_state_base::draw
-        void draw(sf::RenderTarget &render) noexcept override;
+        void draw() noexcept override;
+
+      protected:
+        /// @copydoc game_state_base::init
+        void init() noexcept override;
 
       private:
-        /// @brief 连接调度器
+        /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
-        /// @brief 断开连接调度器
+        /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停
-        entt::registry m_registry;          ///< 注册表
+        bool           m_is_paused = false; ///< 是否暂停。
+        entt::registry m_registry;          ///< 注册表。
+        entt::entity   m_player_entity;     ///< 玩家实体。
     };
 
     /// @brief 暂停界面状态类
-    class pause_menu : public ecs::game_state_base {
+    class pause_menu : public thr::ecs::game_state_base {
       public:
         /// @copydoc game_state_base::game_state_base()
         pause_menu() noexcept;
@@ -135,7 +146,7 @@ namespace thr::main {
         /// @copydoc game_state_base::operator=(game_state_base &&rhs)
         pause_menu &operator=(pause_menu &&rhs) noexcept = delete;
         /// @copydoc game_state_base::~game_state_base
-        ~pause_menu() noexcept override = default;
+        ~pause_menu() noexcept override;
         /// @copydoc game_state_base::on_pause
         void               on_pause() noexcept override;
         /// @copydoc game_state_base::on_resume
@@ -143,9 +154,9 @@ namespace thr::main {
         /// @copydoc game_state_base::on_handle_event
         bool               handle_event(const sf::Event &event) noexcept override;
         /// @copydoc game_state_base::update
-        void               update(ecs::milliseconds_f delta_time) noexcept override;
+        void               update(thr::ecs::milliseconds_f delta_time) noexcept override;
         /// @copydoc game_state_base::draw
-        void               draw(sf::RenderTarget &render) noexcept override;
+        void               draw() noexcept override;
         /// @copybrief game_state_base::should_block_passing_down
         [[nodiscard]] bool should_block_passing_down() noexcept override { return false; }
 
@@ -158,6 +169,6 @@ namespace thr::main {
         entt::registry m_registry;          ///< 注册表
     };
 
-} // namespace thr::main
+} // namespace mainhelper
 
 #endif // THR_MAIN_GAME_STATES_HPP

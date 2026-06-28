@@ -1,0 +1,181 @@
+{
+    "$schema": "https://json-schema.org/draft-04/schema#",
+    "title": "迷宫数据样式",
+    "description": "此格式为迷宫数据的样式，用于存储迷宫。",
+    "type": "object",
+    "properties": {
+        "segments": {
+            "title": "迷宫路径中的一段路径",
+            "description": "这些路径将用来操控玩家行走。",
+            "type": "array",
+            "items": {
+                "title": "迷宫路径中直的一段",
+                "type": "object",
+                "properties": {
+                    "prev": {
+                        "title": "路径（起始位置）连接的前面一个路径实体",
+                        "description": "应填写列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                        "oneOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "next": {
+                        "title": "路径（终止位置）连接的后面一个路径实体",
+                        "description": "应填写列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                        "oneOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "start_center": {
+                        "title": "路径起始位置的中心点",
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "title": "横坐标",
+                                "type": "number",
+                                "minimum": 0.0
+                            },
+                            "y": {
+                                "title": "纵坐标",
+                                "type": "number",
+                                "minimum": 0.0
+                            }
+                        },
+                        "required": [
+                            "x",
+                            "y"
+                        ]
+                    },
+                    "length": {
+                        "title": "路径段的长度",
+                        "type": "number",
+                        "minimum": 0.0
+                    },
+                    "walked_precent": {
+                        "title": "路径段的被走过的百分比",
+                        "type": "number",
+                        "minimum": 0.0,
+                        "maximum": 1.0,
+                        "default": 0.0
+                    },
+                    "dir": {
+                        "title": "线段的方向",
+                        "description": "从起始位置到终止位置的方向。",
+                        "type": "string",
+                        "enum": [
+                            "right",
+                            "down",
+                            "left",
+                            "up"
+                        ]
+                    }
+                },
+                "required": [
+                    "start_center",
+                    "length",
+                    "dir"
+                ]
+            },
+            "minItems": 1
+        },
+        "line_strips": {
+            "title": "迷宫中的折线",
+            "description": "只是一些装饰性的折线，不操控玩家。",
+            "type": "object",
+            "properties": {
+                "width": {
+                    "title": "折线宽度",
+                    "type": "number",
+                    "minimum": 0.0,
+                    "default": 5.0
+                },
+                "color": {
+                    "title": "折线颜色",
+                    "description": "目前仅支持： black, blue, cyan, green, magenta, red, transparent, white, yellow 这几种颜色。",
+                    "type": "string",
+                    "enum": [
+                        "black",
+                        "blue",
+                        "cyan",
+                        "green",
+                        "magenta",
+                        "red",
+                        "transparent",
+                        "white",
+                        "yellow"
+                    ],
+                    "default": "white"
+                },
+                "vertexs": {
+                    "title": "所有折线的点集",
+                    "type": "array",
+                    "items": {
+                        "description": "一条折线的点集",
+                        "type": "array",
+                        "items": {
+                            "description": "一个点",
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "title": "横坐标",
+                                    "type": "number",
+                                    "minimum": 0.0
+                                },
+                                "y": {
+                                    "title": "纵坐标",
+                                    "type": "number",
+                                    "minimum": 0.0
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        },
+                        "minItems": 1
+                    },
+                    "default": []
+                }
+            }
+        },
+        "level_info": {
+            "title": "关卡信息",
+            "properties": {
+                "start_segment_entity": {
+                    "title": "起始段落对应的实体",
+                    "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "end_segment_entity": {
+                    "title": "结束段落对应的实体",
+                    "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "start_segment_entity",
+                "end_segment_entity"
+            ]
+        }
+    },
+    "required": [
+        "level_info",
+        "segments"
+    ]
+}

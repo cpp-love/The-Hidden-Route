@@ -2,14 +2,15 @@
  * @file main.cpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief *The Hidden Route* 游戏的主程序。
- * @version 0.1.0-1
- * @date 2026-05-02
+ * @version 0.1.0-2
+ * @date 2026-06-19
  * 
  * @copyright cpp-love
  * 
  */
 
 #include "game_states.hpp"
+#include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -41,9 +42,9 @@ int main() {
     spdlog::set_default_logger(multi_sink_logger);
     spdlog::flush_on(spdlog::level::info);
 
-    sf::RenderWindow             window(sf::VideoMode({800, 600}), "test game state manager");
-    thr::ecs::game_state_manager manager;
-    manager.push_state(std::make_unique<thr::main::main_menu>());
+    sf::RenderWindow             window(sf::VideoMode({800, 600}), "The Hidden Route");
+    thr::ecs::game_state_manager manager(window);
+    manager.push_state(std::make_unique<mainhelper::main_menu>());
 
     auto prev = thr::ecs::clock::now();
     while (window.isOpen()) {
@@ -63,8 +64,8 @@ int main() {
         prev = cur;
 
         // render
-        window.clear();
-        manager.draw(window);
+        window.clear(thr::ecs::configs::singleton().background_color);
+        manager.draw();
         window.display();
     }
 

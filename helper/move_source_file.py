@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-移动C/C++文件。
+移动 C/C++ 文件。
 
 Affiliated with the project: The Hidden Route.
 project version: 0.1.0
-file version: 0.1.0-1
-last modified date: 2026-05-01
+file version: 0.1.0-3
+last modified date: 2026-06-20
+changes:
+1. 修复不会自动更改头文件守卫的问题。
 """
 
 import re
@@ -18,7 +20,7 @@ from typing import Iterator
 
 def move_file(source: Path, destination: Path):
     """
-    使用git移动文件。
+    使用 git 移动文件。
 
     Args:
         source: 要移动的文件。
@@ -33,7 +35,7 @@ def move_file(source: Path, destination: Path):
         timeout=1000,
     )
 
-    print(f"移动文件{source}到{destination}")
+    print(f"移动文件 {source} 到 {destination}")
 
     message: str = ""
     if result.stdout:
@@ -98,6 +100,9 @@ def main():
     )
     if not destination.suffix in helper_base.C_CPP_FILE_EXTENSION:
         raise Exception("要移动的文件不是C/C++文件")
+    if destination.suffix != source.suffix:
+        if input("warning: 原文件的后缀名与移动后的不一致，是否继续？(Y/[N])") != "Y":
+            return
     workspace_folder: Path = helper_base.filter_invalid_path(
         Path(args.workspacefolder), helper_base.PathType.DIRECTORY
     )
@@ -122,7 +127,14 @@ def main():
         # 更改相对应的名称
         all_files: Iterator[Path] = chain.from_iterable(
             get_folder_files(workspace_folder / subfolder)
-            for subfolder in ["file_versions", "helper", "include", "src", "tests"]
+            for subfolder in [
+                "file_versions",
+                "helper",
+                "include",
+                "src",
+                "tests",
+                "main",
+            ]
         )
         for file in all_files:
             file_content: str = ""
@@ -135,6 +147,7 @@ def main():
                         break
                     line_unchanged: str = line
                     if source.is_relative_to(workspace_folder / "include"):
+                        # include 文件路径替换
                         line = re.sub(
                             r"\b"
                             + source.relative_to(
@@ -147,8 +160,9 @@ def main():
                             line,
                         )
                     line = re.sub(r"\b" + source.name + r"\b", destination.name, line)
+                    line = re.sub(source.stem.upper(), destination.stem.upper(), line)
                     if line_unchanged != line:
-                        print(f"{file}文件的第{line_number}行发生变化：")
+                        print(f"{file} 文件的第 {line_number} 行发生变化：")
                         print(f"{line_unchanged.rstrip('\n')}")
                         print(f"->")
                         print(f"{line.rstrip('\n')}")

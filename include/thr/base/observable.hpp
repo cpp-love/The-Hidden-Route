@@ -136,8 +136,8 @@ namespace thr {
                 return std::forward<FuncT>(function)(std::forward<SelfT>(self).m_value,
                                                      std::forward<Args>(args)...);
             } else {
-                std::invoke_result_t<FuncT, value_t, Args...> result = std::forward<FuncT>(function)(
-                    std::forward<SelfT>(self).m_value, std::forward<Args>(args)...);
+                decltype(auto) result = std::forward<FuncT>(function)(std::forward<SelfT>(self).m_value,
+                                                                      std::forward<Args>(args)...);
                 std::forward<SelfT>(self).notify_callback();
                 return result;
             }

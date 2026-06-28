@@ -18,6 +18,6 @@
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/base/observable.hpp"
 #include "thr/base/overload.hpp"
-#include "thr/base/sfml_formatter.hpp"
+#include "thr/base/sfml_helper.hpp"
 
 #endif // THR_BASE_HPP
