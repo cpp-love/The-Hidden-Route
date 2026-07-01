@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(The-Hidden-Route ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/game_states.cpp)
 
 # 包含头文件目录
-target_include_directories(thr
+target_include_directories(The-Hidden-Route
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

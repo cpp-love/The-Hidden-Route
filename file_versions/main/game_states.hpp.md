@@ -3,6 +3,12 @@
 
 # game_states.hpp 版本历史
 
+## \[0.1.0-3] - 2026-07-01 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+
+### Added(新增)
+
+1. 配合 [main/game_states.cpp](../../main/game_states.cpp) 的修改，为 `mainhelper::game_screen` 添加数据成员 `m_winned_time`。
+
 ## \[0.1.0-2] - 2026-06-19 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
 
 ### Changed(修改)

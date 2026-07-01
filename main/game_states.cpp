@@ -2,8 +2,8 @@
  * @file game_states.cpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-2
- * @date 2026-06-19
+ * @version 0.1.0-3
+ * @date 2026-07-01
  * 
  * @copyright cpp-love
  * 
@@ -11,6 +11,7 @@
  */
 
 #include "game_states.hpp"
+#include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
@@ -20,8 +21,11 @@
 #include "thr/ecs/systems/player_movement_system.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/System/String.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -29,10 +33,26 @@
 #include <TGUI/Font.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/Button.hpp>
+#include <algorithm>
+#include <chrono>
+#include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+
+namespace {
+
+    const sf::Font &get_sfml_font() {
+        static sf::Font font("font.otf");
+        return font;
+    };
+    const tgui::Font &get_tgui_font() {
+        static tgui::Font font("font.otf");
+        return font;
+    };
+
+} // namespace
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 namespace mainhelper {
@@ -58,7 +78,7 @@ namespace mainhelper {
     }
 
     void main_menu::init() noexcept {
-        m_global_gui->setFont(tgui::Font{"font.otf"});
+        m_global_gui->setFont(get_tgui_font());
         tgui::Button::Ptr start_button = tgui::Button::create("点击进入游戏");
         start_button->setPosition({350, 250});
         start_button->setSize({100, 100});
@@ -126,40 +146,90 @@ namespace mainhelper {
         return false;
     }
     void game_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
-        constexpr float velocity_per_millisecond = 0.1f;
+        constexpr float velocity_per_millisecond = 0.2f;
+
+        if (m_winned_time.has_value()) {
+            using namespace std::chrono_literals;
+            if (thr::ecs::clock::now() - *m_winned_time >= 3s) {
+                m_outside_dispather->enqueue(thr::ecs::game_state_pop_event{});
+            }
+            return;
+        }
+
         if (m_window->hasFocus()) {
             float delta_length = velocity_per_millisecond * delta_time.count();
             // NOLINTNEXTLINE(readability-identifier-length)
             bool  up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
-                      || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up);
-            bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)
-                        || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down);
-            bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)
-                        || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left);
-            bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
-                         || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right);
+                       || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up);
+            bool  down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)
+                         || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down);
+            bool  left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)
+                         || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left);
+            bool  right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
+                          || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right);
 
+            bool  updated = false;
             if (up) {
                 if (!down) {
                     thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
                                                              thr::ecs::direction::up);
+                    updated = true;
                 }
             } else if (down) {
                 thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
                                                          thr::ecs::direction::down);
+                updated = true;
             }
             if (left) {
                 if (!right) {
                     thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
                                                              thr::ecs::direction::left);
+                    updated = true;
                 }
             } else if (right) {
                 thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
                                                          thr::ecs::direction::right);
+                updated = true;
+            }
+            if (updated) {
+                if (std::ranges::any_of(
+                        m_registry.view<thr::ecs::player_on_ground>(), [&](entt::entity entity) {
+                            return m_registry.get<thr::ecs::player_on_ground>(entity).segment_entity
+                                   == m_registry.ctx().get<thr::ecs::level_info>().end_segment_entity;
+                        })) {
+                    if (std::ranges::all_of(
+                            m_registry.view<thr::ecs::segment>(), [&](entt::entity entity) {
+                                return thr::no_nan_inf_f{
+                                           m_registry.get<thr::ecs::segment>(entity).walked_precent}
+                                       == thr::no_nan_inf_f{1};
+                            })) {
+                        // 赢了。
+                        m_winned_time = thr::ecs::clock::now();
+                    }
+                }
             }
         }
     }
-    void game_screen::draw() noexcept { thr::ecs::level_render_system::draw(m_registry, *m_window); }
+    void game_screen::draw() noexcept {
+        thr::ecs::level_render_system::draw(m_registry, *m_window);
+
+        if (m_winned_time.has_value()) {
+
+            std::string string = std::format("你赢了！\n{} 秒后退出",
+                                             3
+                                                 - std::chrono::duration_cast<std::chrono::seconds>(
+                                                       thr::ecs::clock::now() - *m_winned_time)
+                                                       .count());
+            sf::Text    text(get_sfml_font(), sf::String::fromUtf8(string.begin(), string.end()));
+            text.setLineAlignment(sf::Text::LineAlignment::Center);
+            text.setPosition(m_window->getView().getCenter());
+            sf::RectangleShape rect(text.getGlobalBounds().size);
+            rect.setPosition(text.getGlobalBounds().position);
+            rect.setFillColor(sf::Color::Black);
+            m_window->draw(rect);
+            m_window->draw(text);
+        }
+    }
     void game_screen::connect_dispatcher() noexcept {
         thr::ecs::segment::connect_listener(m_registry);
         thr::ecs::node::connect_listener(m_registry);

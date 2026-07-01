@@ -2,8 +2,8 @@
  * @file player_movement_system.cpp
  * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
  * @brief 定义了玩家移动系统。
- * @version 0.1.0-2
- * @date 2026-06-20
+ * @version 0.1.0-3
+ * @date 2026-07-01
  * 
  * @copyright cpp-love
  * 
@@ -61,6 +61,9 @@ namespace thr::ecs {
                             return 0;
                         })
                         .or_else([&] -> std::optional<int> {
+                            if (seg_entity == registry.ctx().get<level_info>().end_segment_entity) {
+                                return {};
+                            }
                             if (dir == seg.dir) {
                                 // 进入地下模式。
                                 turnings.emplace_back(*on_ground);
