@@ -110,8 +110,8 @@ namespace thr::ecs {
                                              entt::entity    child_entity) noexcept {
         auto &fathers = registry.get_or_emplace<father_scenes>(child_entity).m_fathers;
         for (scene_identifier_type scene_id : fathers) {
-            auto &children = get_or_create_scene_children(registry, scene_id).first;
-            bool  is_inserted = static_cast<bool>(children.erase(child_entity));
+            auto                 &children = get_or_create_scene_children(registry, scene_id).first;
+            [[maybe_unused]] bool is_inserted = static_cast<bool>(children.erase(child_entity));
             THR_ASSERT_MSG(is_inserted, "子实体和父场景的两处登记处的信息错误地不一致");
         }
         fathers.clear();

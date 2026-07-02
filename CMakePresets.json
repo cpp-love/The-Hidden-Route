@@ -20,14 +20,6 @@
                     "type": "STR",
                     "value": "ccache"
                 },
-                "CMAKE_C_COMPILER": {
-                    "type": "STR",
-                    "value": "gcc"
-                },
-                "CMAKE_CXX_COMPILER": {
-                    "type": "STR",
-                    "value": "g++"
-                },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
                     "value": "DEBUG"
@@ -60,14 +52,6 @@
                     "type": "STR",
                     "value": "ccache"
                 },
-                "CMAKE_C_COMPILER": {
-                    "type": "STR",
-                    "value": "gcc"
-                },
-                "CMAKE_CXX_COMPILER": {
-                    "type": "STR",
-                    "value": "g++"
-                },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
                     "value": "DEBUG"
@@ -96,14 +80,6 @@
                     "type": "STR",
                     "value": "ccache"
                 },
-                "CMAKE_C_COMPILER": {
-                    "type": "STR",
-                    "value": "gcc"
-                },
-                "CMAKE_CXX_COMPILER": {
-                    "type": "STR",
-                    "value": "g++"
-                },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
                     "value": "DEBUG"
@@ -127,14 +103,6 @@
                 "CMAKE_CXX_COMPILER_LAUNCHER": {
                     "type": "STR",
                     "value": "ccache"
-                },
-                "CMAKE_C_COMPILER": {
-                    "type": "STR",
-                    "value": "gcc"
-                },
-                "CMAKE_CXX_COMPILER": {
-                    "type": "STR",
-                    "value": "g++"
                 },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",

@@ -56,7 +56,7 @@ namespace thr::details {
      * @param [in] message 断言失败时输出的消息（默认为 `std::nullopt`)
      * @param [in] stack_trace 堆栈信息（默认为当前堆栈）
      */
-    [[noreturn]] constexpr void
+    [[noreturn]] inline void
     assert_fail(std::string_view expr, const std::source_location &loc,
                 std::optional<std::string> message = std::nullopt,
                 const std::stacktrace     &stack_trace = std::stacktrace::current()) noexcept {
@@ -101,14 +101,18 @@ namespace thr::details {
         if (condition) {
             return;
         }
-        try {
-            assert_fail(expr, loc, std::format(fmt, std::forward<Args>(args)...));
-        } catch (std::exception &exception) {
-            assert_fail(expr, loc,
-                        "Due to the following exception, we lost assertion message.\n"
-                            + std::string(exception.what()));
-        } catch (...) {
-            assert_fail(expr, loc, "Due to the unknown exception, we lost assertion message.\n");
+        if (std::is_constant_evaluated()) {
+            std::unreachable();
+        } else {
+            try {
+                assert_fail(expr, loc, std::format(fmt, std::forward<Args>(args)...));
+            } catch (std::exception &exception) {
+                assert_fail(expr, loc,
+                            "Due to the following exception, we lost assertion message.\n"
+                                + std::string(exception.what()));
+            } catch (...) {
+                assert_fail(expr, loc, "Due to the unknown exception, we lost assertion message.\n");
+            }
         }
     }
 
@@ -124,25 +128,55 @@ namespace thr::details {
         if (condition) {
             return;
         }
-        assert_fail(expr, loc, std::move(message));
+        if (std::is_constant_evaluated()) {
+            std::unreachable();
+        } else {
+            assert_fail(expr, loc, std::move(message));
+        }
     }
 
+    /**
+     * @brief 判断类型是否为 `std::basic_format_string` 的实例化的 trait。
+     * @tparam T 要判断的类型。
+     */
+    template <typename T>
+    struct is_basic_format_string : std::false_type {};
+
+    template <typename... Args>
+    struct is_basic_format_string<std::basic_format_string<Args...>> : std::true_type {};
+
+    /**
+     * @brief 在构造原始类型的同时自动记录 `std::source_location` 的结构体。
+     * @tparam T 原始类型。
+     */
     template <typename T>
     struct with_source_location {
-        T                    value;
-        std::source_location loc;
+        T                    value; ///< 原始类型的值。
+        std::source_location loc;   ///< 位置。
 
         // NOLINTBEGIN(hicpp-explicit-conversions)
         /**
-         * @brief 构造一个包含 `T` 类型的对象
-         * @tparam U 值的类型
-         * @param [in] val 值
-         * @param [in] location 源码位置（可忽略，默认为调用的位置）
-         * @param [in] trace 堆栈信息（可忽略，默认为调用处的堆栈）
+         * @brief 构造一个包含 `T` 类型的对象。
+         * @tparam U 传入的值的类型。
+         * @param [in] val 传入的值。
+         * @param [in] location 源码位置（可忽略，默认为调用的位置）。
          */
         template <typename U>
-            requires std::constructible_from<T, U>
+            requires std::constructible_from<T, U> && (!is_basic_format_string<T>::value)
         constexpr with_source_location(
+            U &&val, std::source_location location = std::source_location::current()) noexcept
+            : value(std::forward<U>(val)), loc(location) {}
+
+        /**
+         * @brief 构造一个包含 `T` 类型的对象（对 `T` 是 `std::basic_format_string` 模板类的实例化这种情况的特化）。
+         * @tparam U 传入的值的类型。
+         * @param [in] val 传入的值。
+         * @param [in] location 源码位置（可忽略，默认为调用的位置）。
+         * @details 为解决 MSVC 的编译问题，添加此特化，将原本的 `constexpr` 限定改为 `consteval`。
+         */
+        template <typename U>
+            requires std::constructible_from<T, U> && is_basic_format_string<T>::value
+        consteval with_source_location(
             U &&val, std::source_location location = std::source_location::current()) noexcept
             : value(std::forward<U>(val)), loc(location) {}
         // NOLINTEND(hicpp-explicit-conversions)
@@ -152,6 +186,7 @@ namespace thr::details {
 /// @endcond
 
 namespace thr {
+
     /**
      * @brief 带消息的 `std::unreachable`（执行到正常情况无法到达的位置时的处理函数）
      * @param [in] message 若执行到不该执行的的此处时输出的消息（默认为空，即 `std::nullopt`)
@@ -173,15 +208,15 @@ namespace thr {
     [[noreturn]] constexpr void
     unreachable([[maybe_unused]] details::with_source_location<std::optional<std::string>> message =
                     std::nullopt) noexcept {
-#ifdef NEBUG
-        std::unreachable();
-#else
-        if consteval {
+        if (std::is_constant_evaluated()) {
             std::unreachable();
         } else {
+#ifdef NDEBUG
+            std::unreachable();
+#else
             std::string stack_trace_message = details::get_stack_trace_message();
             // 输出信息
-            if (message.value != std::nullopt) {
+            if (message.value.has_value()) {
                 spdlog::critical("Control reached an unreachable place at {}:{}:{} (in function :{}):\n"
                                  ">> Message: {}\n"
                                  "Stack trace:\n"
@@ -201,8 +236,8 @@ namespace thr {
 
             // 终止程序
             std::abort();
-        }
 #endif // NDEBUG
+        }
     }
 
     /**
@@ -229,12 +264,16 @@ namespace thr {
     [[noreturn]] constexpr void
     unreachable([[maybe_unused]] details::with_source_location<std::format_string<Args...>> fmt,
                 [[maybe_unused]] Args &&...args) noexcept {
-#ifdef NEBUG
-        std::unreachable();
+        if (std::is_constant_evaluated()) {
+            std::unreachable();
+        } else {
+#ifdef NDEBUG
+            std::unreachable();
 #else
-        unreachable(details::with_source_location<std::optional<std::string>>{
-            std::format(fmt.value, std::forward<Args>(args)...), fmt.loc});
+            unreachable(details::with_source_location<std::optional<std::string>>{
+                std::format(fmt.value, std::forward<Args>(args)...), fmt.loc});
 #endif // NDEBUG
+        }
     }
 } // namespace thr
 
@@ -255,7 +294,14 @@ namespace thr {
  * ```
  */
 #ifdef NDEBUG
-#define THR_ASSERT_MSG(expr, ...) static_cast<void>(0)
+#define THR_ASSERT_MSG(expr, ...)                                                                       \
+    do {                                                                                                \
+        if (std::is_constant_evaluated()) {                                                             \
+            if (expr) {                                                                                 \
+                std::unreachable();                                                                     \
+            }                                                                                           \
+        }                                                                                               \
+    } while (0)
 #else
 #define THR_ASSERT_MSG(expr, ...)                                                                       \
     ::thr::details::assert_check(expr, #expr, std::source_location::current() __VA_OPT__(, ) __VA_ARGS__)

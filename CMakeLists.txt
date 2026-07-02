@@ -36,7 +36,7 @@ target_compile_options(thr_compiler_flags
     $<${gcc_like_cxx}:$<BUILD_INTERFACE:$<$<CONFIG:Release>:-O2>>>
 )
 
-# 添加gcc对c++23 `print` / `println` 函数的 `Windows` 版本的支持
+# 添加对 gcc 的 c++23 `print` / `println` 函数的 `Windows` 版本的支持
 set(gcc_cxx $<COMPILE_LANG_AND_ID:CXX,GNU>)
 if(gcc_cxx)
     target_link_libraries(thr_compiler_flags
@@ -44,6 +44,12 @@ if(gcc_cxx)
         $<BUILD_INTERFACE:-lstdc++exp>
     )
 endif()
+
+# 添加对 MSVC 的支持
+target_compile_options(thr_compiler_flags
+    INTERFACE
+    $<${msvc_cxx}:$<BUILD_INTERFACE:/Zc:preprocessor>>
+)
 
 # 包含头文件目录
 

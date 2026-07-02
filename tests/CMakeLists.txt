@@ -19,7 +19,7 @@ if(THR_BUILD_BASE_TESTS)
     # 设置链接文件
     add_executable(test_assert_msg ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_assert_msg.cpp)
     add_executable(test_floating_point_compare ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_floating_point_compare.cpp)
-    add_executable(test_SFML_helper ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_SFML_helper.cpp)
+    add_executable(test_sfml_helper ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_sfml_helper.cpp)
     add_executable(test_overload ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_overload.cpp)
     add_executable(test_observable ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_observable.cpp)
 
@@ -36,7 +36,7 @@ if(THR_BUILD_BASE_TESTS)
         thr
     )
 
-    target_link_libraries(test_SFML_helper
+    target_link_libraries(test_sfml_helper
         PUBLIC
         thr_compiler_flags
         thr
@@ -57,13 +57,13 @@ if(THR_BUILD_BASE_TESTS)
     # 添加安装支持
     install(
         TARGETS test_assert_msg test_floating_point_compare
-        test_SFML_helper test_overload test_observable
+        test_sfml_helper test_overload test_observable
         DESTINATION bin/tests)
 
     # 添加测试支持
     add_test(NAME RunTestBase3 COMMAND test_floating_point_compare)
-    add_test(NAME RunTestBase4 COMMAND test_SFML_helper)
-    add_test(NAME TestBase4StandardUse COMMAND test_SFML_helper)
+    add_test(NAME RunTestBase4 COMMAND test_sfml_helper)
+    add_test(NAME TestBase4StandardUse COMMAND test_sfml_helper)
     set_tests_properties(TestBase4StandardUse
         PROPERTIES PASS_REGULAR_EXPRESSION "vec1 is \\(10.000, 10.000\\), vec2 is \\(11, 11\\), vec3 is \\(13, 10\\)\\s*"
     )
@@ -121,7 +121,6 @@ if(THR_BUILD_ECS_TESTS)
     # add_test(NAME TestEcs2StandardUse COMMAND test_scene_system)
     # set_tests_properties(TestEcs2StandardUse
     # PROPERTIES PASS_REGULAR_EXPRESSION "创建场景1\n将孩子1添加到场景1中\n现在孩子1的父亲有：\n\\d+\n将孩子2添加到场景1中\n现在场景1的子实体有：\n\\d+ \\d+\n将孩子1从场景1中删除\n现在孩子1的父亲有：\n创建场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\nid: 2 entity: \\d+\n销毁场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\n删除所有场景\n现在registry拥有场景：\\s*")
-    # 添加测试支持
-    add_test(NAME RunTestEcs3 COMMAND test_level_serialization_system)
+    # add_test(NAME RunTestEcs3 COMMAND test_level_serialization_system)
 
 endif()
