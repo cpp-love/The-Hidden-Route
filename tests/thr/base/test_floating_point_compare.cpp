@@ -1,6 +1,6 @@
 /**
  * @file test_floating_point_compare.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief `thr::no_nan_inf` 和 `thr::has_nan_inf` 的测试用例和使用示例。
  * @version 0.1.0-1
  * @date 2026-05-02

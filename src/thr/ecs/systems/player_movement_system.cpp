@@ -1,6 +1,6 @@
 /**
  * @file player_movement_system.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了玩家移动系统。
  * @version 0.1.0-3
  * @date 2026-07-01

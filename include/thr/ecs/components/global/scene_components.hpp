@@ -1,6 +1,6 @@
 /**
  * @file scene_components.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了总场景组件和获取父场景实体的组件
  * @version 0.1.0-1
  * @date 2026-05-02

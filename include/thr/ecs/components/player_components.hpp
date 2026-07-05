@@ -1,6 +1,6 @@
 /**
  * @file player_components.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了玩家相关的组件。
  * @version 0.1.0-1
  * @date 2026-05-23
@@ -70,10 +70,10 @@ namespace thr::ecs {
             sf::Vector2f end = under_ground.position
                                + sf::Vector2f{player_under_ground::side_length() / 2,
                                               player_under_ground::side_length() / 2};
-            int col_start = static_cast<int>(start.x / block_side_length);
-            int col_end = static_cast<int>(end.x / block_side_length);
-            int row_start = static_cast<int>(start.y / block_side_length);
-            int row_end = static_cast<int>(end.y / block_side_length);
+            int          col_start = static_cast<int>(start.x / block_side_length);
+            int          col_end = static_cast<int>(end.x / block_side_length);
+            int          row_start = static_cast<int>(start.y / block_side_length);
+            int          row_end = static_cast<int>(end.y / block_side_length);
             for (int row = row_start; row <= row_end; ++row) {
                 for (int col = col_start; col <= col_end; ++col) {
                     auto scene_id = make_scene_identifier(row, col);
@@ -103,7 +103,7 @@ namespace thr::ecs {
         }
 
         /**
-         * @brief 添加监听器，用于自动调用 @ref on_connect, @ref on_update, @ref on_distroy 来设置其所属场景。
+         * @brief 添加监听器，用于自动调用 @ref on_construct, @ref on_update, @ref on_destroy 来设置其所属场景。
          * @param [in] registry 注册表。
          */
         static void connect_listener(entt::registry &registry) {
@@ -113,7 +113,7 @@ namespace thr::ecs {
         }
 
         /**
-         * @brief 移除监听器，用于取消自动调用 @ref on_connect, @ref on_update, @ref on_distroy 来设置其所属场景。
+         * @brief 移除监听器，用于取消自动调用 @ref on_construct, @ref on_update, @ref on_destroy 来设置其所属场景。
          * @param [in] registry 注册表。
          */
         static void disconnect_listener(entt::registry &registry) {

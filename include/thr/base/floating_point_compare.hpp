@@ -1,6 +1,6 @@
 /**
  * @file floating_point_compare.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了浮点数的比较运算（包含误差）
  * @version 0.1.0-1
  * @date 2026-05-01
@@ -22,7 +22,7 @@ namespace thr {
     namespace details {
 
         /**
-         * @brief 浮点数包装器，用于提取 @ref thr::FastFloat 和 @ref thr::SafeFloat 的重复部分
+         * @brief 浮点数包装器，用于提取 @ref thr::no_nan_inf 和 @ref thr::has_nan_inf 的重复部分
          * @tparam T 要包装的浮点类型
          * @warning 该类是私有的，用户不应直接访问
          */

@@ -1,9 +1,4 @@
-\page changelog_page 开发日志
-\tableofcontents
-
-# 目录
-
-[TOC]
+<!--! \page changelog_page 开发日志 -->
 
 # [《隐秘之路》(*The Hidden Route*)](https://github.com/cpp-love/The-Hidden-Route "The-Hidden-Route - GitHub") 开发日志
 

@@ -1,9 +1,9 @@
 /**
  * @file generate_file_version.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 生成文件版本历史的模板文件
- * @version 0.1.0-1
- * @date 2026-05-01
+ * @version 0.1.0-2
+ * @date 2026-07-05
  * 
  * @copyright cpp-love
  * 
@@ -26,6 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include <print>
+#include <set>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -67,26 +68,40 @@ std::string get_create_date(const std::filesystem::path &file) {
     return {};
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+std::set<std::string> file_pages; //< 本次生成的所有文件页。
+
 /**
- * @brief 生成单个文件的版本文件
- * @param [in] workspace_folder 工作区目录
- * @param [in] file 文件位置
- * @param [in] authors 作者（们）
- * @return true 生成成功
- * @return false 生成失败
+ * @brief 生成单个文件的版本文件。
+ * @param [in] workspace_folder 工作区目录。
+ * @param [in] file 文件位置。
+ * @param [in] authors 作者（们）。
+ * @param [in] template_file_string_view 模板文件内容。
+ * @return true 生成成功。
+ * @return false 生成失败。
  */
 bool generate_one_file(const std::filesystem::path &workspace_folder, const std::filesystem::path &file,
-                       std::string_view authors, std::string_view file_string_view) {
+                       std::string_view authors, std::string_view template_file_string_view) {
     std::filesystem::path output_file(
         workspace_folder / "file_versions"s
         / std::filesystem::relative(file, workspace_folder).concat(".md"s)); //< 输出文件目录
+    std::string file_name = file.filename().generic_string();                //< 文件名称。
+    std::string file_name_replaced = file_name; //< 文件名称，但是 . 被替换为 _。
+    file_name_replaced.replace(file_name_replaced.find('.'), 1, "_");
+    const auto file_ext = file.extension(); //< 文件扩展名。
 
-    const auto file_ext = file.extension();
-    if (std::filesystem::exists(output_file)
-        || (file_ext != ".cpp" && file_ext != ".hpp" && file_ext != ".c" && file_ext != ".h"
-            && file_ext != ".cc" && file_ext != ".hh" && file_ext != ".cxx" && file_ext != ".hxx"
-            && file_ext != ".py")) {
-        // 避免覆盖文件和生成无关文件
+    if ((file_ext != ".cpp" && file_ext != ".hpp" && file_ext != ".c" && file_ext != ".h"
+         && file_ext != ".cc" && file_ext != ".hh" && file_ext != ".cxx" && file_ext != ".hxx"
+         && file_ext != ".py")) {
+        // 避免生成无关文件。
+        return true;
+    }
+
+    // 记录当前页。
+    file_pages.insert(file_name_replaced);
+
+    if (std::filesystem::exists(output_file)) {
+        // 避免覆盖文件。
         return true;
     }
 
@@ -112,37 +127,82 @@ bool generate_one_file(const std::filesystem::path &workspace_folder, const std:
         date_string = std::format("{:%F}", time);
     }
 
-    std::string file_name = file.filename().generic_string(); //< 文件名称
     std::string formatted_string =
-        std::vformat(file_string_view, std::make_format_args(file_name, date_string, authors));
+        std::vformat(template_file_string_view,
+                     std::make_format_args(file_name_replaced, file_name, date_string, authors));
     output.write(formatted_string.data(), static_cast<std::streamsize>(formatted_string.size()));
     return true;
 }
 
 /**
- * @brief 生成单个文件夹的版本文件
- * @param [in] workspace_folder 工作区目录
- * @param [in] directory 文件夹位置
- * @param [in] authors 作者（们）
- * @return true 生成成功
- * @return false 生成失败
+ * @brief 生成单个文件夹的版本文件。
+ * @param [in] workspace_folder 工作区目录。
+ * @param [in] directory 文件夹位置。
+ * @param [in] authors 作者（们）。
+ * @param [in] template_file_string_view 模板文件内容。
+ * @return true 生成成功。
+ * @return false 生成失败。
  */
 bool generate_one_directory(
     const std::filesystem::path &workspace_folder, // NOLINT(bugprone-easily-swappable-parameters)
     const std::filesystem::path &directory, std::string_view authors,
-    std::string_view file_string_view) {
+    std::string_view template_file_string_view) {
     auto process_entry = [&](const std::filesystem::directory_entry &entry) -> bool {
         if (entry.is_directory()) {
-            return generate_one_directory(workspace_folder, entry.path(), authors, file_string_view);
+            return generate_one_directory(workspace_folder, entry.path(), authors,
+                                          template_file_string_view);
         }
         if (entry.is_regular_file()) {
-            return generate_one_file(workspace_folder, entry.path(), authors, file_string_view);
+            return generate_one_file(workspace_folder, entry.path(), authors, template_file_string_view);
         }
         std::println(":: 错误：{} 不是文件（夹）", entry.path().generic_string());
         return false;
     };
 
     return std::ranges::all_of(std::filesystem::directory_iterator(directory), process_entry);
+}
+
+/**
+ * @brief 将 `file_pages` 添加到 `file_versions/file_versions.md`
+ * @param [in] workspace_folder 工作区目录。
+ * @return true 生成成功。
+ * @return false 生成失败。
+ */
+bool add_file_pages(const std::filesystem::path &workspace_folder) {
+    auto          file_path = workspace_folder / "file_versions/file_versions.dox"s;
+
+    std::ifstream input(file_path, std::ios::binary);
+    if (!input) {
+        std::println(stderr, ":: 错误：打开文件（位置：{}）失败", file_path.generic_string());
+        return false;
+    }
+
+    std::string buf;
+    while (input >> buf) {
+        if (buf == "\\subpage") {
+            input >> buf;
+            file_pages.insert(buf);
+        }
+    }
+
+    input.close();
+
+    std::ofstream output(file_path, std::ios::binary);
+    if (!output) {
+        std::println(stderr, ":: 错误：打开文件（位置：{}）失败", file_path.generic_string());
+        return false;
+    }
+
+    std::println(output, "/*!");
+    std::println(output, " * \\page file_versions 文件版本历史");
+    std::println(output, " * ");
+    for (const std::string &page : file_pages) {
+        std::println(output, " * \\subpage {}", page);
+        std::println(output, " * ");
+    }
+    std::println(output, " */");
+
+    return true;
 }
 
 int main(int argc, char *argv[]) {
@@ -229,6 +289,10 @@ int main(int argc, char *argv[]) {
         if (!generate_one_directory(workspace_folder, file, authors, file_string_view)) {
             return -1;
         }
+    }
+
+    if (!add_file_pages(workspace_folder)) {
+        return -1;
     }
 
     return 0;

@@ -1,9 +1,8 @@
-\page file_versions level_serialization_system.cpp 版本历史
-\tableofcontent
+<!--! \page level_serialization_system_cpp level_serialization_system.cpp 版本历史 -->
 
 # level_serialization_system.cpp 版本历史
 
-## \[0.1.0-2] - 2026-06-19 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-2] - 2026-06-19 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)
 
@@ -13,7 +12,7 @@
 
 1. 修复了 `thr::ecs::level_serialization_system::deserialize_from_json` 中如果 json 文件没有 `line_strips` 一项则不会插入空的 `thr::ecs::line_strips` 的问题。
 
-## \[0.1.0-1] - 2026-05-04 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-1] - 2026-05-04 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 

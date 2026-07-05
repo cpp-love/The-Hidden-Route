@@ -1,6 +1,6 @@
 /**
  * @file observable.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了一个相对方便的被观察者模板
  * @version 0.1.0-1
  * @date 2026-05-01

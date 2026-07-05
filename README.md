@@ -1,3 +1,5 @@
+<!--! \page readme_md The English README of "The Hidden Route" -->
+
 # *The Hidden Route*
 
 **WARNING! This English document might be later than [the Chinese one](./README.zh.md)!**

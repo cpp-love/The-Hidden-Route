@@ -1,6 +1,6 @@
 /**
  * @file sfml_helper.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 添加第三方库 SFML 对其他库/标准库的支持。
  * @version 0.1.0-2
  * @date 2026-06-20

@@ -1,6 +1,6 @@
 /**
  * @file assert_msg.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 添加了支持自定义消息的 `assert` 和支持自定义消息的 `std::unreachable`
  * @version 0.1.0-1
  * @date 2026-05-01

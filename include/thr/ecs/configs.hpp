@@ -1,6 +1,6 @@
 /**
  * @file configs.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了集中获取一些配置的类。
  * @version 0.1.0-1
  * @date 2026-06-20

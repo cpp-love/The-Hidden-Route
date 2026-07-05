@@ -1,3 +1,5 @@
+<!--! \page readme_zh_md 《隐秘之路》的中文 README -->
+
 # 《隐秘之路》
 
 ## 介绍

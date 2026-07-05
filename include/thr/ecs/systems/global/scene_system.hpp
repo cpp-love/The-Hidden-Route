@@ -1,6 +1,6 @@
 /**
  * @file scene_system.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏场景系统。
  * @version 0.1.0-2
  * @date 2026-06-07

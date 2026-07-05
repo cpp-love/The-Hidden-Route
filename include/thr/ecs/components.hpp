@@ -1,6 +1,6 @@
 /**
  * @file components.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief ecs 命名空间内容的组件部分的汇总文件。
  * @version 0.1.0-1
  * @date 2026-05-02

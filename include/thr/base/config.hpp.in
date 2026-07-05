@@ -1,6 +1,6 @@
 /**
  * @file config.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief thr项目的基本配置信息。
  * @version 0.1.0-2
  * @date 2025-08-16

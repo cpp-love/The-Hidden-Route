@@ -1,9 +1,14 @@
-\page file_versions generate_file_version.cpp 版本历史
-\tableofcontent
+<!--! \page generate_file_version_cpp generate_file_version.cpp 版本历史 -->
 
 # generate_file_version.cpp 版本历史
 
-## \[0.1.0-1] - 2025-05-01 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-2] - 2025-07-05 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 同步对模板文件的修改。
+
+## \[0.1.0-1] - 2025-05-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 

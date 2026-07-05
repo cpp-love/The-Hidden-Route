@@ -1,9 +1,8 @@
-\page file_versions sfml_helper.hpp 版本历史
-\tableofcontent
+<!--! \page sfml_helper_hpp sfml_helper.hpp 版本历史 -->
 
 # sfml_helper.hpp 版本历史
 
-## \[0.1.0-2] - 2026-06-20 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-2] - 2026-06-20 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 
@@ -17,7 +16,7 @@
 
 1. 修复了 `std::formatter` 特化中对 `ctx.out()` 的误用。
 
-## \[0.1.0-1] - 2026-05-01 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-1] - 2026-05-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 

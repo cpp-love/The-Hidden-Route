@@ -1,6 +1,6 @@
 /**
  * @file level_serialization_system.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
  * @version 0.1.0-2
  * @date 2026-06-19
@@ -199,8 +199,8 @@ namespace thr::ecs {
         // deserialize level_info
         const auto &level_info_json = json["level_info"];
         level_info  level_info{
-             .start_segment_entity = segment_entities.at(level_info_json["start_segment_entity"]),
-             .end_segment_entity = segment_entities.at(level_info_json["end_segment_entity"])};
+            .start_segment_entity = segment_entities.at(level_info_json["start_segment_entity"]),
+            .end_segment_entity = segment_entities.at(level_info_json["end_segment_entity"])};
         registry.ctx().emplace<struct level_info>(level_info);
     }
 

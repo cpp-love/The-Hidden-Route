@@ -1,6 +1,6 @@
 /**
  * @file file.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些与文件相关的函数。
  * @version 0.1.0-1
  * @date 2026-06-19

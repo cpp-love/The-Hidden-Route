@@ -1,6 +1,6 @@
 /**
  * @file game_states.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了一些具体的游戏状态。
  * @version 0.1.0-3
  * @date 2026-07-01

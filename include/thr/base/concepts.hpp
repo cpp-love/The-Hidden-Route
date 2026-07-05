@@ -1,6 +1,6 @@
 /**
  * @file concepts.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义一些标准库没有的概念和 type traits
  * @version 0.1.0-1
  * @date 2026-05-01
@@ -30,7 +30,7 @@ namespace thr {
                              is_variant_member<std::variant<Rest...>, T>> {};
 
     /**
-     * @brief 类型萃取： @ref tnrw::math::details::IsVariantMember 的值的模板缩写
+     * @brief 类型萃取： @ref is_variant_member 的值的模板缩写
      * @tparam Variant 变体类型
      * @tparam T 判断类型
      */

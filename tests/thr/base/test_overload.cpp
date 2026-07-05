@@ -1,6 +1,6 @@
 /**
  * @file test_overload.cpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief `thr::makeOverloaded` 的测试用例和使用示例
  * @version 0.1.0-1
  * @date 2026-05-02
@@ -46,14 +46,14 @@ int                         main() {
     auto overloaded_result = thr::make_overloaded(&object::get_value, func, func2, lambda, fobj);
     // 缺点：会抛弃 [[nodiscard]] 属性标记
     // 下面的代码没有警告
-    overloaded_result(); // 匹配 func
-    overloaded_result(2); // 匹配 func2，不匹配 lambda，因为模板比普通函数的优先级低
+    overloaded_result();                // 匹配 func
+    overloaded_result(2);               // 匹配 func2，不匹配 lambda，因为模板比普通函数的优先级低
     overloaded_result(true);            // 匹配 lambda 的 bool 实例化
     double res = overloaded_result(2.); // 匹配 fobj
     object obj(res);
-    res = overloaded_result(obj, true);  // 匹配 &Object::getValue
-    res = overloaded_result(&obj, true); // 还是匹配 &Object::getValue
-    res = overloaded_result(std::reference_wrapper{obj}, true); // 还是匹配 &Object::getValue
+    res = overloaded_result(obj, true);                           // 匹配 &Object::getValue
+    res = overloaded_result(&obj, true);                          // 还是匹配 &Object::getValue
+    res = overloaded_result(std::reference_wrapper{obj}, true);   // 还是匹配 &Object::getValue
     res = overloaded_result(std::make_unique<object>(obj), true); // 还是匹配 &Object::getValue
     auto lambda3 = [](object obj, bool arg) {
         std::println("call from lambda3");

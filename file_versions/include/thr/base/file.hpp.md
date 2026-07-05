@@ -1,9 +1,8 @@
-\page file_versions file.hpp 版本历史
-\tableofcontent
+<!--! \page file_hpp file.hpp 版本历史 -->
 
 # file.hpp 版本历史
 
-## \[0.1.0-1] - 2026-06-19 - cpp-love(<15865418+cpp-love@user.noreply.gitee.com>)
+## \[0.1.0-1] - 2026-06-19 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 

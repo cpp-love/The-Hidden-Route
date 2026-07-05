@@ -1,6 +1,6 @@
 /**
  * @file game_state_components.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏状态的组件。
  * @version 0.1.0-3
  * @date 2026-06-19

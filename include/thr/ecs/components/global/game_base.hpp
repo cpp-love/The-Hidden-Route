@@ -1,6 +1,6 @@
 /**
  * @file game_base.hpp
- * @author cpp-love (15865418+cpp-love@user.noreply.gitee.com)
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了游戏 ECS 系统的基础组件。
  * @version 0.1.0-2
  * @date 2026-05-23
