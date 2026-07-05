@@ -56,3 +56,6 @@ tmp/**
 
 # VSCode settings
 .vscode/**
+
+# CMake User Presets
+CMakeUserPresets.json
