@@ -1,0 +1,101 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "添加一些基础类型",
+    "$defs": {
+        "vector2f": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "title": "横坐标",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "y": {
+                    "title": "纵坐标",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            },
+            "required": [
+                "x",
+                "y"
+            ]
+        },
+        "vector3f": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "title": "横坐标",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "y": {
+                    "title": "纵坐标",
+                    "type": "number",
+                    "minimum": 0.0
+                },
+                "z": {
+                    "title": "竖坐标",
+                    "type": "number",
+                    "minimum": 0.0
+                }
+            },
+            "required": [
+                "x",
+                "y",
+                "z"
+            ]
+        },
+        "color": {
+            "title": "折线颜色",
+            "description": "目前仅支持： black, blue, cyan, green, magenta, red, transparent, white, yellow 这几种颜色。",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "enum": [
+                        "black",
+                        "blue",
+                        "cyan",
+                        "green",
+                        "magenta",
+                        "red",
+                        "transparent",
+                        "white",
+                        "yellow"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "r": {
+                            "title": "红色程度",
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "g": {
+                            "title": "绿色程度",
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "b": {
+                            "title": "蓝色程度",
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "a": {
+                            "title": "透明程度",
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 255
+                        }
+                    }
+                },
+                {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            ],
+            "default": "white"
+        }
+    }
+}

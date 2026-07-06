@@ -16,6 +16,8 @@ if(THR_BUILD_BASE_TESTS)
     # 设置输出目录
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
 
+    # 构建程序
+
     # 设置链接文件
     add_executable(test_assert_msg ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_assert_msg.cpp)
     add_executable(test_floating_point_compare ${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_floating_point_compare.cpp)
