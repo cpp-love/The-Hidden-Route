@@ -1,0 +1,32 @@
+{
+    "segment_color": {
+        "r": 230,
+        "g": 210,
+        "b": 0
+    },
+    "segment_width": 20,
+    "segments_render_opacity": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 90
+    },
+    "player_on_ground_color": {
+        "r": 40,
+        "g": 40,
+        "b": 170
+    },
+    "player_under_ground_color": {
+        "r": 40,
+        "g": 40,
+        "b": 170,
+        "a": 128
+    },
+    "player_on_ground_side_length": 18,
+    "player_under_ground_side_length": 18,
+    "background_color": {
+        "r": 25,
+        "g": 125,
+        "b": 245
+    }
+}

@@ -1,0 +1,299 @@
+/**
+ * @file generate_file_version.cpp
+ * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
+ * @brief 生成文件版本历史的模板文件
+ * @version 0.1.0-2
+ * @date 2026-07-05
+ * 
+ * @copyright cpp-love
+ * 
+ * @details
+ * - 这个文件是用来通过命令行参数生成文件版本历史的模板文件。
+ * - 使用方法：`./generate_file_version <workspace_folder> <file> <authors>` 或直接运行 `./generate_file_version` 后根据提示操作
+ *   - `<workspace_folder>` 是工作区目录
+ *   - `<file>` 是文件（夹）路径
+ *   - `<authors>` 是作者名称
+ *   - `<file_relative>` 是文件或文件夹内的子文件相对工作区的路径（运行时根据 `<workspace_folder>` 和 `<file>` 推导出来的）
+ *   - 生成的文件将保存在 `file_versions/<file_relative>`
+ *   - 生成的文件内容将基于 `<workspace_folder>/helper/file_version.template.md` 模板文件
+ */
+
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <print>
+#include <set>
+#include <string>
+#include <string_view>
+#include <system_error>
+#include <vector>
+
+using namespace std::string_literals;
+
+/// @brief 处理大小不合适的参数
+void process_unsuited_args() {
+    std::println(":: 错误：参数过多或过少，请输入正确数量的参数，参数的正确顺序为<workspace_folder> "
+                 "<file> <authors>");
+}
+
+/**
+ * @brief 获取文件创建日期
+ * @param [in] file 文件位置
+ * @return std::string 文件的创建日期，如果获取不到则为空
+ * @note 此函数是根据文件头的 `Doxygen` 注释中的 `@date` 推导出来的
+ */
+std::string get_create_date(const std::filesystem::path &file) {
+    std::ifstream fin(file);
+    if (!fin) {
+        return {};
+    }
+    std::string date;
+    if (fin >> date) {
+        if (date == "/**") {
+            while (fin >> date) {
+                if (date == "@date") {
+                    fin >> date;
+                    return date;
+                }
+                if (date == "*/") {
+                    break;
+                }
+            }
+        }
+    }
+    return {};
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+std::set<std::string> file_pages; //< 本次生成的所有文件页。
+
+/**
+ * @brief 生成单个文件的版本文件。
+ * @param [in] workspace_folder 工作区目录。
+ * @param [in] file 文件位置。
+ * @param [in] authors 作者（们）。
+ * @param [in] template_file_string_view 模板文件内容。
+ * @return true 生成成功。
+ * @return false 生成失败。
+ */
+bool generate_one_file(const std::filesystem::path &workspace_folder, const std::filesystem::path &file,
+                       std::string_view authors, std::string_view template_file_string_view) {
+    std::filesystem::path output_file(
+        workspace_folder / "file_versions"s
+        / std::filesystem::relative(file, workspace_folder).concat(".md"s)); //< 输出文件目录
+    std::string file_name = file.filename().generic_string();                //< 文件名称。
+    std::string file_name_replaced = file_name; //< 文件名称，但是 . 被替换为 _。
+    file_name_replaced.replace(file_name_replaced.find('.'), 1, "_");
+    const auto file_ext = file.extension(); //< 文件扩展名。
+
+    if ((file_ext != ".cpp" && file_ext != ".hpp" && file_ext != ".c" && file_ext != ".h"
+         && file_ext != ".cc" && file_ext != ".hh" && file_ext != ".cxx" && file_ext != ".hxx"
+         && file_ext != ".py")) {
+        // 避免生成无关文件。
+        return true;
+    }
+
+    // 记录当前页。
+    file_pages.insert(file_name_replaced);
+
+    if (std::filesystem::exists(output_file)) {
+        // 避免覆盖文件。
+        return true;
+    }
+
+    std::error_code err_code; //< 错误码
+    std::filesystem::create_directories(output_file.parent_path(),
+                                        err_code); //< 创建输出文件
+    if (err_code) {
+        std::println(stderr, ":: 错误：{}", err_code.message());
+        return false;
+    }
+
+    // 创建输出流
+    std::ofstream output(output_file, std::ios::binary); //< 输出文件输出流
+    if (!output) {
+        std::println(stderr, ":: 错误：打开输出文件（位置：{}）失败", output_file.generic_string());
+        return false;
+    }
+
+    // 获得当前日期（根据文件或当前日期）
+    std::string date_string = get_create_date(file);
+    if (date_string.empty()) {
+        std::chrono::zoned_time time(std::chrono::current_zone(), std::chrono::system_clock::now());
+        date_string = std::format("{:%F}", time);
+    }
+
+    std::string formatted_string =
+        std::vformat(template_file_string_view,
+                     std::make_format_args(file_name_replaced, file_name, date_string, authors));
+    output.write(formatted_string.data(), static_cast<std::streamsize>(formatted_string.size()));
+    return true;
+}
+
+/**
+ * @brief 生成单个文件夹的版本文件。
+ * @param [in] workspace_folder 工作区目录。
+ * @param [in] directory 文件夹位置。
+ * @param [in] authors 作者（们）。
+ * @param [in] template_file_string_view 模板文件内容。
+ * @return true 生成成功。
+ * @return false 生成失败。
+ */
+bool generate_one_directory(
+    const std::filesystem::path &workspace_folder, // NOLINT(bugprone-easily-swappable-parameters)
+    const std::filesystem::path &directory, std::string_view authors,
+    std::string_view template_file_string_view) {
+    auto process_entry = [&](const std::filesystem::directory_entry &entry) -> bool {
+        if (entry.is_directory()) {
+            return generate_one_directory(workspace_folder, entry.path(), authors,
+                                          template_file_string_view);
+        }
+        if (entry.is_regular_file()) {
+            return generate_one_file(workspace_folder, entry.path(), authors, template_file_string_view);
+        }
+        std::println(":: 错误：{} 不是文件（夹）", entry.path().generic_string());
+        return false;
+    };
+
+    return std::ranges::all_of(std::filesystem::directory_iterator(directory), process_entry);
+}
+
+/**
+ * @brief 将 `file_pages` 添加到 `file_versions/file_versions.md`
+ * @param [in] workspace_folder 工作区目录。
+ * @return true 生成成功。
+ * @return false 生成失败。
+ */
+bool add_file_pages(const std::filesystem::path &workspace_folder) {
+    auto          file_path = workspace_folder / "file_versions/file_versions.dox"s;
+
+    std::ifstream input(file_path, std::ios::binary);
+    if (!input) {
+        std::println(stderr, ":: 错误：打开文件（位置：{}）失败", file_path.generic_string());
+        return false;
+    }
+
+    std::string buf;
+    while (input >> buf) {
+        if (buf == "\\subpage") {
+            input >> buf;
+            file_pages.insert(buf);
+        }
+    }
+
+    input.close();
+
+    std::ofstream output(file_path, std::ios::binary);
+    if (!output) {
+        std::println(stderr, ":: 错误：打开文件（位置：{}）失败", file_path.generic_string());
+        return false;
+    }
+
+    std::println(output, "/*!");
+    std::println(output, " * \\page file_versions 文件版本历史");
+    std::println(output, " * ");
+    for (const std::string &page : file_pages) {
+        std::println(output, " * \\subpage {}", page);
+        std::println(output, " * ");
+    }
+    std::println(output, " */");
+
+    return true;
+}
+
+int main(int argc, char *argv[]) {
+
+    std::vector<char *>   args(argv,
+                               argv + argc); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    // 处理命令行参数或接收输入
+    std::filesystem::path workspace_folder; //< 工作区目录
+    std::filesystem::path file;             //< 文件路径
+    std::string           authors;          //< 作者
+    if (argc == 1) {
+        std::println(":: 请输入工作区目录：");
+        std::string tmp; //< 临时输入存储
+        std::getline(std::cin, tmp);
+        std::error_code err_code; //< 错误码
+        workspace_folder = std::filesystem::canonical(tmp, err_code);
+        if (err_code) {
+            std::println(stderr, ":: 错误：{}", err_code.message());
+            return -1;
+        }
+        std::println(":: 请输入文件路径：");
+        std::getline(std::cin, tmp);
+        file = std::filesystem::canonical(tmp, err_code);
+        if (err_code) {
+            std::println(stderr, ":: 错误：{}", err_code.message());
+            return -1;
+        }
+        std::println(":: 请输入作者：");
+        std::getline(std::cin, authors);
+    } else if (argc == 4) {
+        std::error_code err_code; //< 错误码
+        workspace_folder = std::filesystem::canonical(args[1], err_code);
+        if (err_code) {
+            std::println(stderr, ":: 错误：{}", err_code.message());
+            return -1;
+        }
+        file = std::filesystem::canonical(args[2], err_code);
+        if (err_code) {
+            std::println(stderr, ":: 错误：{}", err_code.message());
+            return -1;
+        }
+        authors = args[3];
+    } else {
+        process_unsuited_args();
+        return -1;
+    }
+    if (!std::filesystem::is_directory(workspace_folder)) {
+        std::println(":: 错误：工作区目录指向位置不是一个目录");
+        return -1;
+    }
+
+    // 判断是否有效
+    bool is_file = std::filesystem::is_regular_file(file);
+    if (!is_file && !std::filesystem::is_directory(file)) {
+        std::println("错误：文件路径指向位置不是文件（夹）");
+        return -1;
+    }
+
+    // 创建输入流
+    std::filesystem::path template_file(workspace_folder / "helper"s
+                                        / "file_version.template.md"s); //< 模板文件目录
+    std::ifstream         input(template_file,
+                                std::ios::binary      // NOLINT(hicpp-signed-bitwise)
+                                    | std::ios::ate); //< 模板文件输入流
+    if (!input) {
+        std::println(stderr, ":: 错误：打开模板文件（位置：{}）失败", template_file.generic_string());
+        return -1;
+    }
+    // 文件不大，直接整个读取
+    std::streamsize   file_size = input.tellg(); //< 模板文件大小
+    std::vector<char> file_data(file_size);      //< 文件存储
+    input.seekg(0);                              //< 将输入流重定向到开头
+    input.read(file_data.data(), file_size);
+    std::string_view file_string_view(file_data.data(), file_data.size()); //< 文件内容
+
+    if (is_file) {
+        // 是单个文件
+        if (!generate_one_file(workspace_folder, file, authors, file_string_view)) {
+            return -1;
+        }
+    } else {
+        // 是目录
+        if (!generate_one_directory(workspace_folder, file, authors, file_string_view)) {
+            return -1;
+        }
+    }
+
+    if (!add_file_pages(workspace_folder)) {
+        return -1;
+    }
+
+    return 0;
+}
