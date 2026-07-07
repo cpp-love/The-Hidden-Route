@@ -1,0 +1,28 @@
+{
+    "$schema": "../schema/level_graph-v0.1.0-2.schema.json",
+    "level_nodes": [
+        {
+            "relative_entities": [
+                1
+            ],
+            "position": {
+                "x": 200,
+                "y": 300
+            },
+            "name": "level1",
+            "locked": false
+        },
+        {
+            "relative_entities": [
+                0
+            ],
+            "position": {
+                "x": 600,
+                "y": 300
+            },
+            "name": "level2",
+            "locked": true
+        }
+    ],
+    "start_level": 0
+}

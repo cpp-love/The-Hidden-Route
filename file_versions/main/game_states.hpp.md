@@ -2,6 +2,12 @@
 
 # game_states.hpp 版本历史
 
+## \[0.1.0-4] - 2026-07-07 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加关卡图界面 `mainhelper::level_graph_screen`。
+
 ## \[0.1.0-3] - 2026-07-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

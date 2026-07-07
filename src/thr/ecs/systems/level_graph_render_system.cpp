@@ -37,8 +37,8 @@ namespace thr::ecs {
         void                   remove_existing_nodes(tgui::Gui &gui) noexcept {
             auto widgets = gui.getWidgets();
             for (const auto &widget : widgets) {
-                const tgui::String widget_name = widget->getWidgetName();
-                if (widget_name.starts_with(tgui::String(level_graph_render_system::widget_prefix))) {
+                if (widget->getWidgetName().starts_with(
+                        tgui::String(level_graph_render_system::widget_prefix))) {
                     gui.remove(widget);
                 }
             }
@@ -58,7 +58,7 @@ namespace thr::ecs {
     void level_graph_render_system::draw(const entt::registry &registry, tgui::Gui &gui,
                                          entt::entity entity, node_callback on_click) noexcept {
         THR_ASSERT_MSG(registry.valid(entity), "起始实体无效。");
-        remove_existing_nodes(gui);
+        // 不每次销毁并重建所有按钮，复用已有 widgets，减少频繁创建影响 UI。
         sf::RenderTarget *render_target = gui.getTarget(); //< 渲染目标。
         THR_ASSERT_MSG(render_target != nullptr, "GUI 对象没有渲染目标。");
 
@@ -73,19 +73,28 @@ namespace thr::ecs {
 
             // 添加按钮。
             const auto       &node = registry.get<level_node>(current);
-            const std::size_t widget_id = visited.size() - 1;
-            const std::string widget_id_name = std::format("{}{}", widget_prefix, widget_id);
-            auto              button =
-                tgui::Button::create(node.locked ? std::format("{} [locked]", node.name) : node.name);
+            // 使用实体 id 作为 widget 名称，保证跨帧稳定性，便于复用。
+            const std::string widget_id_name =
+                std::format("{}{}", widget_prefix, entt::to_integral(current));
+            tgui::Button::Ptr  button = gui.get<tgui::Button>(widget_id_name);
             const sf::Vector2f pos = node.position;
-            button->setPosition({pos.x, pos.y});
-            button->setSize(tgui::Layout2d{button_size});
-            button->setEnabled(!node.locked);
-            button->setTextSize(14u);
-            if (on_click) {
-                button->onPress([on_click, current] { on_click(current); });
+            if (button) {
+                // 复用已有按钮：只更新状态和位置，避免重新分配和重复连接回调。
+                button->setText(node.locked ? std::format("{} [locked]", node.name) : node.name);
+                button->setPosition({pos.x, pos.y});
+                button->setSize(tgui::Layout2d{button_size});
+                button->setEnabled(!node.locked);
+            } else {
+                button = tgui::Button::create(node.locked ? std::format("{} [locked]", node.name)
+                                                          : node.name);
+                button->setPosition({pos.x, pos.y});
+                button->setSize(tgui::Layout2d{button_size});
+                button->setEnabled(!node.locked);
+                if (on_click) {
+                    button->onPress([on_click, current] { on_click(current); });
+                }
+                gui.add(button, widget_id_name);
             }
-            gui.add(button, widget_id_name);
 
             // 向下遍历。
             for (entt::entity next : node.relative_entities) {

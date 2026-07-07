@@ -2,8 +2,8 @@
  * @file game_states.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-3
- * @date 2026-07-01
+ * @version 0.1.0-4
+ * @date 2026-07-07
  * 
  * @copyright cpp-love
  * 
@@ -11,11 +11,16 @@
  */
 
 #include "game_states.hpp"
+#include "thr/base/assert_msg.hpp"
+#include "thr/base/file.hpp"
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
+#include "thr/ecs/components/level_graph_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
+#include "thr/ecs/systems/level_graph_render_system.hpp"
+#include "thr/ecs/systems/level_graph_serialization_system.hpp"
 #include "thr/ecs/systems/level_render_system.hpp"
 #include "thr/ecs/systems/level_serialization_system.hpp"
 #include "thr/ecs/systems/player_movement_system.hpp"
@@ -40,6 +45,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <string_view>
 
 namespace {
 
@@ -61,6 +67,7 @@ namespace mainhelper {
     settings_menu::settings_menu() noexcept { connect_dispatcher(); }
     settings_menu::~settings_menu() noexcept { disconnect_dispatcher(); }
 
+    void settings_menu::init() noexcept {}
     void settings_menu::on_pause() noexcept { m_is_paused = true; }
     void settings_menu::on_resume() noexcept { m_is_paused = false; }
     bool settings_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
@@ -85,7 +92,7 @@ namespace mainhelper {
         start_button->setTextSize(14u);
         start_button->onPress([&] {
             m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
-                std::make_unique<game_screen>());
+                std::make_unique<level_graph_screen>());
         });
         m_global_gui->add(start_button, "start_button");
     }
@@ -105,11 +112,127 @@ namespace mainhelper {
     void main_menu::connect_dispatcher() noexcept {}
     void main_menu::disconnect_dispatcher() noexcept {}
 
-    // game_screen
-    game_screen::game_screen() noexcept : m_player_entity(m_registry.create()) {
+    // level_graph_screen
+    level_graph_screen::level_graph_screen() noexcept {
+        // adapted from main_helper::game_screen::game_screen
         connect_dispatcher();
         nlohmann::json json;
-        std::ifstream  fin("level1.json");
+        std::ifstream  fin(
+            thr::get_executable_directory()
+                .and_then([](std::filesystem::path path) -> std::optional<std::filesystem::path> {
+                    // 先尝试可执行文件父文件夹目录下的配置文件。
+                    path /= "level_graph.json";
+                    if (std::filesystem::exists(path)) {
+                        return path;
+                    }
+                    return std::nullopt;
+                })
+                .or_else([] -> std::optional<std::filesystem::path> {
+                    // 再尝试工作目录下的配置文件。
+                    std::filesystem::path path = std::filesystem::current_path() / "level_graph.json";
+                    if (std::filesystem::exists(path)) {
+                        return path;
+                    }
+                    return std::nullopt;
+                })
+                .value() /*实在不行就抛异常爆炸*/);
+        fin >> json;
+        thr::ecs::level_graph_serialization_system::deserialize_from_json(m_registry, json);
+    }
+    level_graph_screen::~level_graph_screen() noexcept {
+        // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
+        // 清空按钮。
+        auto widgets = m_global_gui->getWidgets();
+        for (const auto &widget : widgets) {
+            if (widget->getWidgetName() == "level_graph_screen_exit_button"
+                || widget->getWidgetName().starts_with(
+                    tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
+                m_global_gui->remove(widget);
+            }
+        }
+        disconnect_dispatcher();
+    }
+
+    void level_graph_screen::init() noexcept {
+        tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
+        exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
+        m_global_gui->add(exit_button, "level_graph_screen_exit_button");
+    }
+    void level_graph_screen::on_pause() noexcept {
+        auto widgets = m_global_gui->getWidgets();
+        for (const auto &widget : widgets) {
+            if (widget->getWidgetName() == "level_graph_screen_exit_button"
+                || widget->getWidgetName().starts_with(
+                    tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
+                widget->setVisible(false);
+            }
+        }
+        m_is_paused = true;
+    }
+    void level_graph_screen::on_resume() noexcept {
+        auto widgets = m_global_gui->getWidgets();
+        for (const auto &widget : widgets) {
+            if (widget->getWidgetName() == "level_graph_screen_exit_button"
+                || widget->getWidgetName().starts_with(
+                    tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
+                widget->setVisible(true);
+            }
+        }
+        m_is_paused = false;
+    }
+    bool level_graph_screen::handle_event(const sf::Event &event) noexcept {
+        if (m_is_paused) {
+            return false;
+        }
+        if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
+            if (key_pressed->code == sf::Keyboard::Key::Escape) {
+                m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>();
+                return true;
+            }
+        }
+        return false;
+    }
+    void level_graph_screen::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
+    void level_graph_screen::draw() noexcept {
+        thr::ecs::level_graph_render_system::draw(
+            m_registry, *m_global_gui, m_registry.ctx().get<thr::ecs::start_level>().entity,
+            [&](entt::entity entity) {
+                const auto &node = m_registry.get<thr::ecs::level_node>(entity);
+                spdlog::info("进入关卡 {}", node.name);
+                THR_ASSERT_MSG(!node.locked, "节点不应未解锁");
+                m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
+                    std::make_unique<game_screen>(node.name));
+            });
+    }
+    void level_graph_screen::connect_dispatcher() noexcept {}
+    void level_graph_screen::disconnect_dispatcher() noexcept {}
+
+    // game_screen
+    game_screen::game_screen(std::string_view level_name) noexcept
+        : m_player_entity(m_registry.create()) {
+        connect_dispatcher();
+        nlohmann::json json;
+        // adapted from thr::ecs::configs::singleton
+        std::ifstream  fin(
+            thr::get_executable_directory()
+                .and_then([&](std::filesystem::path path) -> std::optional<std::filesystem::path> {
+                    // 先尝试可执行文件父文件夹目录下的配置文件。
+                    path /= std::format("{}.json", level_name);
+                    if (std::filesystem::exists(path)) {
+                        return path;
+                    }
+                    return std::nullopt;
+                })
+                .or_else([&] -> std::optional<std::filesystem::path> {
+                    // 再尝试工作目录下的配置文件。
+                    std::filesystem::path path =
+                        std::filesystem::current_path() / std::format("{}.json", level_name);
+                    if (std::filesystem::exists(path)) {
+                        return path;
+                    }
+                    return std::nullopt;
+                })
+                .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_serialization_system::deserialize_from_json(m_registry, json);
         m_registry.emplace<thr::ecs::player_on_ground>(
@@ -246,6 +369,7 @@ namespace mainhelper {
     pause_menu::pause_menu() noexcept { connect_dispatcher(); }
     pause_menu::~pause_menu() noexcept { disconnect_dispatcher(); }
 
+    void pause_menu::init() noexcept {}
     void pause_menu::on_pause() noexcept { m_is_paused = true; }
     void pause_menu::on_resume() noexcept { m_is_paused = false; }
     bool pause_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
