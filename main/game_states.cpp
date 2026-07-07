@@ -82,6 +82,7 @@ namespace mainhelper {
         tgui::Button::Ptr start_button = tgui::Button::create("点击进入游戏");
         start_button->setPosition({350, 250});
         start_button->setSize({100, 100});
+        start_button->setTextSize(14u);
         start_button->onPress([&] {
             m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                 std::make_unique<game_screen>());

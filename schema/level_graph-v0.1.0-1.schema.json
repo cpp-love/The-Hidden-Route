@@ -11,7 +11,7 @@
                 "title": "关卡图的单个节点",
                 "type": "object",
                 "properties": {
-                    "relative_entity": {
+                    "relative_entities": {
                         "title": "邻接的节点所属的实体列表",
                         "type": "array",
                         "items": {

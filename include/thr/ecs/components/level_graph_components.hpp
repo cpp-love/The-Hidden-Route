@@ -22,9 +22,9 @@ namespace thr::ecs {
 
     /// @brief 关卡图的节点。
     struct level_node {
-        std::vector<entt::entity> relative_entity; ///< 邻接的节点所属的实体。
-        sf::Vector2f              position;        ///< 节点在关卡图中的位置。
-        bool                      locked{};        ///< 节点是否锁住。
+        std::vector<entt::entity> relative_entities; ///< 邻接的节点所属的实体。
+        sf::Vector2f              position;          ///< 节点在关卡图中的位置。
+        bool                      locked{};          ///< 节点是否锁住。
     };
 
 } // namespace thr::ecs

@@ -95,6 +95,8 @@ if(THR_BUILD_ECS_TESTS)
     add_executable(test_scene_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_scene_system.cpp)
     add_executable(test_level_serialization_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_serialization_system.cpp)
     add_executable(test_level_render_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_render_system.cpp)
+    add_executable(test_level_graph_render_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_render_system.cpp)
+    add_executable(test_level_graph_serialization_system ${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_serialization_system.cpp)
 
     # 链接第三方库
     target_link_libraries(test_scene_system
@@ -112,9 +114,19 @@ if(THR_BUILD_ECS_TESTS)
         thr_compiler_flags
         thr
     )
+    target_link_libraries(test_level_graph_render_system
+        PUBLIC
+        thr_compiler_flags
+        thr
+    )
+    target_link_libraries(test_level_graph_serialization_system
+        PUBLIC
+        thr_compiler_flags
+        thr
+    )
 
     # 添加安装支持
-    install(TARGETS test_scene_system test_level_serialization_system test_level_render_system DESTINATION bin/tests)
+    install(TARGETS test_scene_system test_level_serialization_system test_level_render_system test_level_graph_render_system test_level_graph_serialization_system DESTINATION bin/tests)
     install(FILES maze.json DESTINATION bin/tests)
 
     # 添加测试支持
@@ -124,5 +136,6 @@ if(THR_BUILD_ECS_TESTS)
     # set_tests_properties(TestEcs2StandardUse
     # PROPERTIES PASS_REGULAR_EXPRESSION "创建场景1\n将孩子1添加到场景1中\n现在孩子1的父亲有：\n\\d+\n将孩子2添加到场景1中\n现在场景1的子实体有：\n\\d+ \\d+\n将孩子1从场景1中删除\n现在孩子1的父亲有：\n创建场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\nid: 2 entity: \\d+\n销毁场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\n删除所有场景\n现在registry拥有场景：\\s*")
     # add_test(NAME RunTestEcs3 COMMAND test_level_serialization_system)
+    add_test(NAME RunTestEcs4 COMMAND test_level_graph_serialization_system)
 
 endif()

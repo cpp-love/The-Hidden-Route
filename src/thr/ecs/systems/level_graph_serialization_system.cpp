@@ -33,8 +33,8 @@ namespace thr::ecs {
         for (entt::entity entity : list) {
             const auto &node = registry.get<level_node>(entity);
             nodes.push_back(
-                {{"relative_entity",
-                  node.relative_entity
+                {{"relative_entities",
+                  node.relative_entities
                       | std::views::transform([&](entt::entity entity) -> std::optional<std::size_t> {
                             auto iter = list_map.find(entity);
                             if (iter == list_map.end()) {

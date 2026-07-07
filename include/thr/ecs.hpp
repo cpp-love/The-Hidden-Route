@@ -13,6 +13,7 @@
 #define THR_ECS_HPP
 
 #include "thr/ecs/components.hpp"
+#include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems.hpp"
 
 /// @brief ecs 系统相关的命名空间。
