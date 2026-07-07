@@ -137,5 +137,6 @@ if(THR_BUILD_ECS_TESTS)
     # PROPERTIES PASS_REGULAR_EXPRESSION "创建场景1\n将孩子1添加到场景1中\n现在孩子1的父亲有：\n\\d+\n将孩子2添加到场景1中\n现在场景1的子实体有：\n\\d+ \\d+\n将孩子1从场景1中删除\n现在孩子1的父亲有：\n创建场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\nid: 2 entity: \\d+\n销毁场景2\n现在registry拥有场景：\nid: 1 entity: \\d+\n删除所有场景\n现在registry拥有场景：\\s*")
     # add_test(NAME RunTestEcs3 COMMAND test_level_serialization_system)
     add_test(NAME RunTestEcs4 COMMAND test_level_graph_serialization_system)
+    add_test(NAME RunTestEcs5 COMMAND test_level_graph_render_system)
 
 endif()

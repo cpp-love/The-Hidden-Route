@@ -11,12 +11,12 @@ add_library(thr ${SRC_FILES})
 include(FetchContent)
 
 FetchContent_Declare(
-    ENTT
+    EnTT
     GIT_REPOSITORY https://github.com/skypjack/entt.git
     GIT_TAG origin/main
     FIND_PACKAGE_ARGS 3.15.0 CONFIG QUIET
 )
-FetchContent_MakeAvailable(ENTT)
+FetchContent_MakeAvailable(EnTT)
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
@@ -47,16 +47,6 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS 3.12.0 CONFIG QUIET
 )
 FetchContent_MakeAvailable(nlohmann_json)
-
-# 包含头文件目录
-target_include_directories(thr
-    PUBLIC
-    ${EnTT_INCLUDE_DIRS}
-    ${spdlog_INCLUDE_DIRS}
-    ${SFML_INCLUDE_DIRS}
-    ${TGUI_INCLUDE_DIRS}
-    ${nlohmann_json_INCLUDE_DIRS}
-)
 
 # 链接编译器标志
 target_link_libraries(thr

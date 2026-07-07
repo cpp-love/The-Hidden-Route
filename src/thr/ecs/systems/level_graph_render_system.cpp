@@ -2,8 +2,8 @@
  * @file level_graph_render_system.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了渲染关卡图的系统。
- * @version 0.1.0-1
- * @date 2026-07-06
+ * @version 0.1.0-2
+ * @date 2026-07-07
  * 
  * @copyright cpp-love
  * 
@@ -18,6 +18,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <TGUI/Layout.hpp>
+#include <TGUI/String.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/Button.hpp>
 #include <entt/entity/entity.hpp>
@@ -31,14 +32,13 @@
 
 namespace thr::ecs {
     namespace {
-        constexpr std::string_view widget_prefix{"level_graph_node_"};
-        constexpr sf::Vector2f     button_size{80.f, 40.f};
+        constexpr sf::Vector2f button_size{80.f, 40.f};
 
-        void                       remove_existing_nodes(tgui::Gui &gui) noexcept {
+        void                   remove_existing_nodes(tgui::Gui &gui) noexcept {
             auto widgets = gui.getWidgets();
             for (const auto &widget : widgets) {
                 const tgui::String widget_name = widget->getWidgetName();
-                if (widget_name.toStdString().starts_with(widget_prefix)) {
+                if (widget_name.starts_with(tgui::String(level_graph_render_system::widget_prefix))) {
                     gui.remove(widget);
                 }
             }
@@ -72,10 +72,11 @@ namespace thr::ecs {
             }
 
             // 添加按钮。
-            const auto        &node = registry.get<level_node>(current);
-            const std::size_t  index = visited.size() - 1;
-            const std::string  widget_name = std::format("{}{}", widget_prefix, index);
-            auto               button = tgui::Button::create(node.locked ? "锁住" : "关卡");
+            const auto       &node = registry.get<level_node>(current);
+            const std::size_t widget_id = visited.size() - 1;
+            const std::string widget_id_name = std::format("{}{}", widget_prefix, widget_id);
+            auto              button =
+                tgui::Button::create(node.locked ? std::format("{} [locked]", node.name) : node.name);
             const sf::Vector2f pos = node.position;
             button->setPosition({pos.x, pos.y});
             button->setSize(tgui::Layout2d{button_size});
@@ -84,7 +85,7 @@ namespace thr::ecs {
             if (on_click) {
                 button->onPress([on_click, current] { on_click(current); });
             }
-            gui.add(button, widget_name);
+            gui.add(button, widget_id_name);
 
             // 向下遍历。
             for (entt::entity next : node.relative_entities) {
@@ -92,7 +93,7 @@ namespace thr::ecs {
                                entt::to_integral(next));
                 const auto &next_node = registry.get<level_node>(next);
                 if (!node.locked) {
-                    // 重复画无效果。
+                    // 重复画没有关系，因为无效果。
                     draw_edge(*render_target, node.position + button_size / 2.f,
                               next_node.position + button_size / 2.f, sf::Color::White);
                 }

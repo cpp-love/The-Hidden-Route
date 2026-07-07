@@ -26,6 +26,7 @@ namespace thr::ecs {
     /// @brief 渲染关卡图的系统。
     class level_graph_render_system {
       public:
+        static constexpr std::string_view widget_prefix{"level_graph_node_"}; ///< 添加的 TGUI 按钮名称。
         using node_callback = std::function<void(entt::entity)>;
 
         /**

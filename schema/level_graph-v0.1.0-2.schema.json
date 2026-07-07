@@ -26,6 +26,10 @@
                         "title": "节点在关卡图中的位置",
                         "$ref": "types.schema.json#/$defs/vector2f"
                     },
+                    "name": {
+                        "title": "节点名称",
+                        "type": "string"
+                    },
                     "locked": {
                         "title": "节点是否锁住",
                         "type": "boolean",
@@ -33,10 +37,21 @@
                     }
                 },
                 "required": [
-                    "position"
+                    "position",
+                    "name"
                 ]
             },
-            "default": []
+            "minItems": 1
+        },
+        "start_level": {
+            "title": "起始节点",
+            "description": "应填写列表的索引（从 0 开始计数），且不应超过列表的最大索引",
+            "type": "integer",
+            "minimum": 0
         }
-    }
+    },
+    "required": [
+        "level_nodes",
+        "start_level"
+    ]
 }

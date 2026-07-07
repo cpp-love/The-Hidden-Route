@@ -2,7 +2,7 @@
  * @file test_level_graph_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief `thr::ecs::level_graph_serialization_system` 的回归测试。
- * @version 0.1.0-1
+ * @version 0.1.0-2
  * @date 2026-07-07
  *
  * @copyright cpp-love
@@ -22,12 +22,15 @@ int main() {
     const entt::entity next_entity = registry.create();
 
     registry.emplace<thr::ecs::level_node>(start_entity, std::vector<entt::entity>{next_entity},
-                                           sf::Vector2f{100.f, 120.f}, false);
+                                           sf::Vector2f{100.f, 120.f}, "start", false);
     registry.emplace<thr::ecs::level_node>(next_entity, std::vector<entt::entity>{},
-                                           sf::Vector2f{220.f, 180.f}, true);
+                                           sf::Vector2f{220.f, 180.f}, "next", true);
+    registry.ctx().emplace<thr::ecs::start_level>(start_entity);
 
     const nlohmann::json json = thr::ecs::level_graph_serialization_system::serialize_to_json(registry);
     THR_ASSERT_MSG(json.contains("level_nodes"));
+    THR_ASSERT_MSG(json.contains("start_level"));
+    THR_ASSERT_MSG(json["start_level"].is_number_unsigned());
     THR_ASSERT_MSG(json["level_nodes"].size() == 2U);
 
     bool saw_linked_node = false;
