@@ -1,0 +1,57 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "关卡图数据样式",
+    "description": "此格式为关卡图数据的样式，用于存储关卡图。",
+    "type": "object",
+    "properties": {
+        "level_nodes": {
+            "title": "关卡图的节点列表",
+            "type": "array",
+            "items": {
+                "title": "关卡图的单个节点",
+                "type": "object",
+                "properties": {
+                    "relative_entities": {
+                        "title": "邻接的节点所属的实体列表",
+                        "type": "array",
+                        "items": {
+                            "title": "邻接的节点其中一个所属的实体",
+                            "description": "应填写列表的索引（从 0 开始计数），且不应超过列表的最大索引",
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "default": []
+                    },
+                    "position": {
+                        "title": "节点在关卡图中的位置",
+                        "$ref": "types.schema.json#/$defs/vector2f"
+                    },
+                    "name": {
+                        "title": "节点名称",
+                        "type": "string"
+                    },
+                    "locked": {
+                        "title": "节点是否锁住",
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                "required": [
+                    "position",
+                    "name"
+                ]
+            },
+            "minItems": 1
+        },
+        "start_level": {
+            "title": "起始节点",
+            "description": "应填写列表的索引（从 0 开始计数），且不应超过列表的最大索引",
+            "type": "integer",
+            "minimum": 0
+        }
+    },
+    "required": [
+        "level_nodes",
+        "start_level"
+    ]
+}

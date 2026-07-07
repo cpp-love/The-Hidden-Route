@@ -14,6 +14,8 @@
 
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
+#include "thr/ecs/systems/level_graph_render_system.hpp"
+#include "thr/ecs/systems/level_graph_serialization_system.hpp"
 #include "thr/ecs/systems/level_render_system.hpp"
 #include "thr/ecs/systems/level_serialization_system.hpp"
 #include "thr/ecs/systems/player_movement_system.hpp"

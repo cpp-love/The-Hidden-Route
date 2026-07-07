@@ -1,7 +1,7 @@
 {
-    "$schema": "https://json-schema.org/draft-04/schema#",
-    "title": "迷宫数据样式",
-    "description": "此格式为迷宫数据的样式，用于存储迷宫。",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "关卡数据样式",
+    "description": "此格式为关卡数据的样式，用于存储关卡。",
     "type": "object",
     "properties": {
         "segments": {
@@ -42,23 +42,7 @@
                     },
                     "start_center": {
                         "title": "路径起始位置的中心点",
-                        "type": "object",
-                        "properties": {
-                            "x": {
-                                "title": "横坐标",
-                                "type": "number",
-                                "minimum": 0.0
-                            },
-                            "y": {
-                                "title": "纵坐标",
-                                "type": "number",
-                                "minimum": 0.0
-                            }
-                        },
-                        "required": [
-                            "x",
-                            "y"
-                        ]
+                        "$ref": "types.schema.json#/$defs/vector2f"
                     },
                     "length": {
                         "title": "路径段的长度",
@@ -105,46 +89,17 @@
                 },
                 "color": {
                     "title": "折线颜色",
-                    "description": "目前仅支持： black, blue, cyan, green, magenta, red, transparent, white, yellow 这几种颜色。",
-                    "type": "string",
-                    "enum": [
-                        "black",
-                        "blue",
-                        "cyan",
-                        "green",
-                        "magenta",
-                        "red",
-                        "transparent",
-                        "white",
-                        "yellow"
-                    ],
-                    "default": "white"
+                    "$ref": "types.schema.json#/$defs/color"
                 },
                 "vertexs": {
                     "title": "所有折线的点集",
                     "type": "array",
                     "items": {
-                        "description": "一条折线的点集",
+                        "title": "一条折线的点集",
                         "type": "array",
                         "items": {
-                            "description": "一个点",
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "title": "横坐标",
-                                    "type": "number",
-                                    "minimum": 0.0
-                                },
-                                "y": {
-                                    "title": "纵坐标",
-                                    "type": "number",
-                                    "minimum": 0.0
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ]
+                            "title": "一个点",
+                            "$ref": "types.schema.json#/$defs/vector2f"
                         },
                         "minItems": 1
                     },

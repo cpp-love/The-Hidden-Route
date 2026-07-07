@@ -15,7 +15,6 @@
 #include "thr/base/file.hpp"
 #include "thr/base/sfml_helper.hpp"
 #include <SFML/Graphics/Color.hpp>
-#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>

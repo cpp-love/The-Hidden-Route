@@ -52,7 +52,6 @@ target_compile_options(thr_compiler_flags
 )
 
 # 包含头文件目录
-
 target_include_directories(thr_compiler_flags
     INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -65,10 +64,6 @@ target_compile_definitions(thr_compiler_flags
     $<BUILD_INTERFACE:$<$<CONFIG:Debug>:_DEBUG=1>>
     $<BUILD_INTERFACE:$<$<CONFIG:Release>:NDEBUG=1>>
 )
-
-
-# 设置输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # 添加子目录
 add_subdirectory(src)

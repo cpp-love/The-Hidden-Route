@@ -9,19 +9,19 @@
  * 
  */
 
+#undef NDEBUG
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/level_render_system.hpp"
+#include "thr/ecs/systems/level_serialization_system.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
-#include <iostream>
-#include <memory>
-#undef NDEBUG
-#include "thr/ecs/systems/level_serialization_system.hpp"
 #include <entt/entity/registry.hpp>
 #include <format>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <print>
 #include <thr/base/assert_msg.hpp>

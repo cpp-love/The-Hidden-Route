@@ -141,7 +141,8 @@ struct adl_serializer<sf::Color> {
      * @param [in] color 要序列化的颜色。
      * @details 
      * - 序列化格式说明：
-     *   - 永远采用反序列化的第 4 种格式（即 `sf::Color(<color_integer>)` 对应 `<color_integer>`）。
+     *   - 见 [types.schema.json](../../../schema/types.schema.json)。
+     *   - 永远采用第 4 种格式（即 `sf::Color(<color_integer>)` 对应 `<color_integer>`）。
      */
     static void to_json(json &json, const sf::Color &color) { json = color.toInteger(); }
 
@@ -205,9 +206,7 @@ struct adl_serializer<sf::Vector2<T>> {
      * @brief 序列化向量。
      * @param [out] json 存储序列化结果的 json。
      * @param [in] vector 要序列化的向量。
-     * @details 
-     * - 序列化格式说明：
-     *   - `sf::Vector2(<x>, <y>)` 对应 `{"x": <x>, "y": <y>}`
+     * @details 序列化格式见 [types.schema.json](../../../schema/types.schema.json)
      */
     static void to_json(json &json, const sf::Vector2<T> &vector) {
         json = {{"x", vector.x}, {"y", vector.y}};
@@ -217,9 +216,7 @@ struct adl_serializer<sf::Vector2<T>> {
      * @brief 反序列化向量。
      * @param [in] json 存储向量的 json。
      * @param [out] vector 存储反序列化结果的向量。
-     * @details 
-     * - 反序列化格式说明：
-     *   - `{"x": <x>, "y": <y>}` 对应 `sf::Vector2(<x>, <y>)`
+     * @details 反序列化格式见 [types.schema.json](../../../schema/types.schema.json)
      */
     static void from_json(const json &json, sf::Vector2<T> &vector) {
         if (json.is_object()) {
@@ -242,9 +239,7 @@ struct adl_serializer<sf::Vector3<T>> {
      * @brief 序列化向量。
      * @param [out] json 存储序列化结果的 json。
      * @param [in] vector 要序列化的向量。
-     * @details 
-     * - 序列化格式说明：
-     *   - `sf::Vector3(<x>, <y>, <z>)` 对应 `{"x": <x>, "y": <y>, "z": <z>}`
+     * @details 序列化格式见 [types.schema.json](../../../schema/types.schema.json)
      */
     static void to_json(json &json, const sf::Vector3<T> &vector) {
         json = {{"x", vector.x}, {"y", vector.y}, {"z", vector.z}};
@@ -254,9 +249,7 @@ struct adl_serializer<sf::Vector3<T>> {
      * @brief 反序列化向量。
      * @param [in] json 存储向量的 json。
      * @param [out] vector 存储反序列化结果的向量。
-     * @details 
-     * - 反序列化格式说明：
-     *   - `{"x": <x>, "y": <y>, "z": <z>}` 对应 `sf::Vector3(<x>, <y>, <z>)`
+     * @details 反序列化格式见 [types.schema.json](../../../schema/types.schema.json)
      */
     static void from_json(const json &json, sf::Vector3<T> &vector) {
         if (json.is_object()) {

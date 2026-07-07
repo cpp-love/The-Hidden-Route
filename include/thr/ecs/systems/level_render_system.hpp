@@ -1,7 +1,7 @@
 /**
  * @file level_render_system.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
- * @brief 声明了迷宫渲染系统。
+ * @brief 声明了渲染关卡的系统。
  * @version 0.1.0-1
  * @date 2026-05-02
  * 
@@ -19,7 +19,7 @@
 
 namespace thr::ecs {
 
-    /// @brief 渲染系统。
+    /// @brief 渲染关卡的系统。
     class level_render_system {
       public:
         /**
