@@ -17,6 +17,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
+#include <string>
 #include <vector>
 
 namespace thr::ecs {
@@ -31,7 +32,7 @@ namespace thr::ecs {
 
     /// @brief 起始关卡。
     struct start_level {
-        entt::entity entity; ///< 起始关卡对应的实体。
+        entt::entity entity{}; ///< 起始关卡对应的实体。
     };
 
 } // namespace thr::ecs
