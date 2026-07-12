@@ -35,7 +35,7 @@
 
 namespace thr::ecs {
     namespace {
-        constexpr float      button_scale = 0.075;
+        constexpr float      button_scale = 0.075f;
         const tgui::Layout2d button_size{tgui::RelativeValue(button_scale),
                                          tgui::RelativeValue(button_scale)}; ///< 按钮大小。
 

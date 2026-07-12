@@ -28,7 +28,7 @@ namespace thr::ecs::lua_bindings {
                              sol::lib::string);
 
         // 辅助函数。
-        auto concat = [tostring = sol::function(m_lua["tostring"])](sol::variadic_args args) {
+        auto concat = [tostring = m_lua["tostring"].get<sol::function>()](sol::variadic_args args) {
             std::string msg;
             for (const auto &var : args) {
                 if (!msg.empty()) {
