@@ -107,14 +107,7 @@ int                    main() {
     auto prev = thr::ecs::clock::now();
     while (window.isOpen()) {
         // handle event
-        while (const std::optional event = window.pollEvent()) {
-            if (!manager.handle_event(*event)) {
-                if (event->is<sf::Event::Closed>()) {
-                    spdlog::info("quit the window");
-                    window.close();
-                }
-            }
-        }
+        while (const std::optional event = window.pollEvent()) { manager.handle_event(*event); }
 
         // update
         auto cur = thr::ecs::clock::now();

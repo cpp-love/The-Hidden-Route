@@ -2,6 +2,20 @@
 
 # game_states.cpp 版本历史
 
+## \[0.1.0-6] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 将按钮改为圆角。
+
+## \[0.1.0-5] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 对 Lua 脚本的支持。
+2. 对自由调整窗口大小更好的支持（按钮不偏离预设方位）。
+3. 同步一些 API 的更新。
+
 ## \[0.1.0-4] - 2026-07-07 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

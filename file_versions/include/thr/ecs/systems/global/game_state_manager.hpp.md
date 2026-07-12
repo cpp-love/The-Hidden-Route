@@ -2,6 +2,19 @@
 
 # game_state_manager.hpp 版本历史
 
+## \[0.1.0-3] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 在 `m_gui` 中默认添加一个有游戏界面大小的 UI 面板组件成员，
+   - 其渲染在屏幕上的大小会与 SFML 的游戏渲染界面渲染在屏幕上的大小相同。
+   - **注意：** 其逻辑大小与 SFML 的游戏渲染界面的逻辑大小不同！
+2. 添加静态成员 `thr::ecs::game_state_manager::game_screen_panel_name`，用于提供上述的有游戏界面大小的 UI 面板组件的名称。
+3. 在 `thr::ecs::game_state_manager::handle_event` 函数中自动处理 `sf::Event::Closed` 和 `sf::Event::Resized` 事件
+   - 对于 `sf::Event::Closed`，采取直接关闭窗口。
+   - 对于 `sf::Event::Resized`，采取自动调整 SFML 窗口的视图，并调整上述的有游戏界面大小的 UI 面板组件的大小和位置，使其与 SFML 窗口匹配。
+4. 为 `m_gui` 添加默认字体。
+
 ## \[0.1.0-2] - 2026-06-19 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

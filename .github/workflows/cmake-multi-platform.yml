@@ -72,6 +72,11 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v13
+        with:
+          luaVersion: "5.4"
+
       - name: "[Linux Only]: Install Linux dependencies"
         if: runner.os == 'Linux'
         run: |
@@ -122,6 +127,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/.lua/"
           -S ${{ github.workspace }}
 
       - name: Build

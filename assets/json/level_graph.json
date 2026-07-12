@@ -1,5 +1,5 @@
 {
-    "$schema": "../schema/level_graph-v0.1.0-2.schema.json",
+    "$schema": "../../schema/level_graph-v0.1.0-2.schema.json",
     "level_nodes": [
         {
             "relative_entities": [

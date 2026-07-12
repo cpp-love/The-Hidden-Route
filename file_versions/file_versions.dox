@@ -15,11 +15,15 @@
  * 
  * \subpage ecs_hpp
  * 
+ * \subpage entity_wrapper_hpp
+ * 
  * \subpage file_cpp
  * 
  * \subpage file_hpp
  * 
  * \subpage floating_point_compare_hpp
+ * 
+ * \subpage game_api_hpp
  * 
  * \subpage game_base_hpp
  * 
@@ -34,6 +38,8 @@
  * \subpage game_states_hpp
  * 
  * \subpage generate_file_version_cpp
+ * 
+ * \subpage level_components_hpp
  * 
  * \subpage level_graph_components_hpp
  * 
@@ -52,6 +58,12 @@
  * \subpage level_serialization_system_cpp
  * 
  * \subpage level_serialization_system_hpp
+ * 
+ * \subpage lua_bindings_hpp
+ * 
+ * \subpage lua_manager_cpp
+ * 
+ * \subpage lua_manager_hpp
  * 
  * \subpage main_cpp
  * 

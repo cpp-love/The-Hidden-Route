@@ -1,5 +1,6 @@
 {
-    "$schema": "../schema/level-v0.1.0-3.schema.json",
+    "$schema": "../../schema/level-v0.1.0-4.schema.json",
+    "level_script": "level2.lua",
     "segments": [
         {
             "start_center": {
@@ -37,7 +38,10 @@
             },
             "length": 80,
             "dir": "up",
-            "prev": 2
+            "prev": 2,
+            "tags": [
+                0
+            ]
         },
         {
             "start_center": {

@@ -15,25 +15,44 @@
 #include "thr/base/file.hpp"
 #include "thr/base/sfml_helper.hpp"
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <TGUI/Font.hpp>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
+#include <utility>
 
 namespace thr::ecs {
 
     /// @brief 集中获取一些配置的类（采用单例模式）。
     class configs {
       public:
-        float     segment_width{};                   ///< 路径宽度。
-        sf::Color segment_color;                     ///< 路径颜色。
-        sf::Color segments_render_opacity{};         ///< 路径渲染透明度。
-        sf::Color player_on_ground_color;            ///< 在地面上的玩家颜色。
-        sf::Color player_under_ground_color;         ///< 在地面下的玩家颜色。
-        float     player_on_ground_side_length{};    ///< 在地面上的玩家边长。
-        float     player_under_ground_side_length{}; ///< 在地面下的玩家边长。
-        sf::Color background_color;                  ///< 背景颜色。
+        float                         segment_width{};                   ///< 路径宽度。
+        sf::Color                     segment_color;                     ///< 路径颜色。
+        sf::Color                     segments_render_opacity;           ///< 路径渲染透明度。
+        sf::Color                     player_on_ground_color;            ///< 在地面上的玩家颜色。
+        sf::Color                     player_under_ground_color;         ///< 在地面下的玩家颜色。
+        float                         player_on_ground_side_length{};    ///< 在地面上的玩家边长。
+        float                         player_under_ground_side_length{}; ///< 在地面下的玩家边长。
+        sf::Color                     background_color;                  ///< 背景颜色。
+        std::filesystem::path         font_path;                         ///< 字体路径。
+        sf::Vector2u                  game_screen_size;                  ///< 游戏屏幕大小。
+        /**
+         * @brief 获取 SFML 的字体。
+         * @return const sf::Font& SFML 的字体。
+         */
+        [[nodiscard]] const sf::Font &get_sfml_font() const {
+            static sf::Font font{font_path};
+            return font;
+        };
+        /**
+         * @brief 获取 TGUI 的字体。
+         * @return tgui::Font TGUI 的字体。
+         * @todo 不要每次都构造，但是像 `get_sfml_font()` 的方法无法正确处理 TGUI 的生命周期管理。
+         */
+        [[nodiscard]] tgui::Font get_tgui_font() const { return {font_path.generic_string()}; }
 
         /// @brief 删除复制构造函数。
         configs(const configs &rhs) = delete;
@@ -46,38 +65,22 @@ namespace thr::ecs {
 
         static const configs &singleton() {
             static const configs singleton = [] {
-                configs        configs;
                 nlohmann::json json;
                 std::ifstream  fin(
-                    get_executable_directory()
-                        .and_then(
-                            [](std::filesystem::path path) -> std::optional<std::filesystem::path> {
-                                // 先尝试可执行文件父文件夹目录下的配置文件。
-                                path /= "configs.json";
-                                if (std::filesystem::exists(path)) {
-                                    return path;
-                                }
-                                return std::nullopt;
-                            })
-                        .or_else([] -> std::optional<std::filesystem::path> {
-                            // 再尝试工作目录下的配置文件。
-                            std::filesystem::path path =
-                                std::filesystem::current_path() / "configs.json";
-                            if (std::filesystem::exists(path)) {
-                                return path;
-                            }
-                            return std::nullopt;
-                        })
-                        .value() /*实在不行就抛异常爆炸*/);
+                    get_existing_full_path("assets/json/configs.json").value() /*实在不行就抛异常爆炸*/);
                 fin >> json;
-                configs.segment_width = json["segment_width"];
-                configs.segment_color = json["segment_color"];
-                configs.segments_render_opacity = json["segments_render_opacity"];
-                configs.player_on_ground_color = json["player_on_ground_color"];
-                configs.player_under_ground_color = json["player_under_ground_color"];
-                configs.player_on_ground_side_length = json["player_on_ground_side_length"];
-                configs.player_under_ground_side_length = json["player_under_ground_side_length"];
-                configs.background_color = json["background_color"];
+                configs configs{
+                    get_existing_full_path(std::filesystem::path("assets/fonts") / json.at("font_path"))
+                        .value()};
+                configs.segment_width = json.at("segment_width");
+                configs.segment_color = json.at("segment_color");
+                configs.segments_render_opacity = json.at("segments_render_opacity");
+                configs.player_on_ground_color = json.at("player_on_ground_color");
+                configs.player_under_ground_color = json.at("player_under_ground_color");
+                configs.player_on_ground_side_length = json.at("player_on_ground_side_length");
+                configs.player_under_ground_side_length = json.at("player_under_ground_side_length");
+                configs.background_color = json.at("background_color");
+                configs.game_screen_size = json.at("game_screen_size");
                 return configs;
             }();
             return singleton;
@@ -86,13 +89,15 @@ namespace thr::ecs {
       private:
         /**
          * @brief 构建一个 configs 对象。
-         * @details 为遵循单例模式，将此函数设为私有，以防意外创建对象。
+         * @param [in] font_path 字体路径。
+         * @details 为遵循单例模式，将此函数设为私有，以防意外创建多余对象。
          */
-        constexpr configs() = default;
+        explicit configs(std::filesystem::path the_font_path) : font_path(std::move(the_font_path)) {}
+
         /**
          * @brief 构建一个 configs 对象。
          * @param [in] rhs 另一个对象。
-         * @details 为遵循单例模式，将此函数设为私有，以防意外创建对象。
+         * @details 为遵循单例模式，将此函数设为私有，以防意外创建多余对象。
          */
         configs(configs &&rhs) = default;
     };

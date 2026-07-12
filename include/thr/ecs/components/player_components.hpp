@@ -2,8 +2,8 @@
  * @file player_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了玩家相关的组件。
- * @version 0.1.0-1
- * @date 2026-05-23
+ * @version 0.1.0-2
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -126,12 +126,6 @@ namespace thr::ecs {
     /// @brief 转向的历史记录。
     struct turning_history {
         std::vector<std::variant<player_on_ground, player_under_ground>> turnings;
-    };
-
-    /// @brief 关卡的基本信息。
-    struct level_info {
-        entt::entity start_segment_entity; ///< 起始段落对应的实体。
-        entt::entity end_segment_entity;   ///< 结束段落对应的实体。
     };
 
 } // namespace thr::ecs

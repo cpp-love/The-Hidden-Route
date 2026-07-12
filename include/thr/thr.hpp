@@ -1,7 +1,7 @@
 /**
  * @file thr.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
- * @brief thr 总文件夹的汇总文件。
+ * @brief `thr` 总文件夹的汇总文件。
  * @version 0.1.0-1
  * @date 2026-05-02
  * 
@@ -12,7 +12,8 @@
 #ifndef THR_THR_HPP
 #define THR_THR_HPP
 
-#include "thr/base/fwd.hpp"
+#include "thr/base.hpp"
+#include "thr/ecs.hpp"
 
 /**
  * @brief *The Hidden Route* 游戏的命名空间。

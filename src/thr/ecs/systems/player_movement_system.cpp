@@ -14,6 +14,7 @@
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/base/overload.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
+#include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"

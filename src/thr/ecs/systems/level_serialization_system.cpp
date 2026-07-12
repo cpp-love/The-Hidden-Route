@@ -2,22 +2,24 @@
  * @file level_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
- * @version 0.1.0-3
- * @date 2026-07-06
+ * @version 0.1.0-4
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
  */
 
 #include "thr/ecs/systems/level_serialization_system.hpp"
+#include "thr/base/file.hpp"
 #include "thr/base/sfml_helper.hpp"
+#include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
-#include "thr/ecs/components/player_components.hpp"
 #include <entt/entity/registry.hpp>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <ranges>
-#include <string>
+#include <string_view>
 #include <utility>
 
 namespace thr::ecs {
@@ -45,27 +47,36 @@ namespace thr::ecs {
         for (auto [idx, entity] : list | std::views::enumerate) { list_map.try_emplace(entity, idx); }
         for (entt::entity entity : list) {
             const auto &seg = registry.get<segment>(entity);
-            segments.push_back(
-                {{"prev", seg.prev.and_then([&](entt::entity entity) -> std::optional<std::size_t> {
-                      auto it = list_map.find(entity);
-                      if (it == list_map.end()) {
-                          return {};
-                      }
-                      return it->second;
-                  })},
-                 {"next", seg.next.and_then([&](entt::entity entity) -> std::optional<std::size_t> {
-                      auto it = list_map.find(entity);
-                      if (it == list_map.end()) {
-                          return {};
-                      }
-                      return it->second;
-                  })},
-                 {"start_center", seg.start_center},
-                 {"length", seg.length},
-                 {"walked_precent", seg.walked_precent},
-                 {"dir", direction_to_name(seg.dir)}});
+            auto        transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
+                auto iter = list_map.find(entity);
+                if (iter == list_map.end()) {
+                    return {};
+                }
+                return iter->second;
+            };
+            segments.push_back({{"prev", seg.prev.and_then(transform_entity)},
+                                {"next", seg.next.and_then(transform_entity)},
+                                {"start_center", seg.start_center},
+                                {"length", seg.length},
+                                {"walked_precent", seg.walked_precent},
+                                {"dir", direction_to_name(seg.dir)},
+                                {"tags", [&] {
+                                     const auto *cur_tag = registry.try_get<tag>(entity);
+                                     if (cur_tag) {
+                                         return cur_tag->tag_ids;
+                                     }
+                                     return std::set<int>{};
+                                 }() | std::ranges::to<std::vector>()}});
         }
         json["segments"] = std::move(segments);
+
+        // serialize level_script
+        const auto *script = registry.ctx().find<level_script>();
+        if (script != nullptr) {
+            json["level_script"] = script->script_file_name;
+        } else {
+            json["level_script"] = nullptr;
+        }
 
         // serialize level_info
         const auto &level_info = registry.ctx().get<thr::ecs::level_info>();
@@ -105,12 +116,11 @@ namespace thr::ecs {
         registry.create(segment_entities.begin(), segment_entities.end());
 
         for (const auto &[seg_json, entity] : std::views::zip(segments_json, segment_entities)) {
-            segment seg;
-            seg.start_center = seg_json.at("start_center");
-            seg.length = seg_json.at("length");
-            seg.walked_precent = seg_json.value("walked_precent", 0.f);
-            seg.dir = name_to_direction(seg_json.at("dir").get<std::string>());
-            auto prev = seg_json.value("prev", nlohmann::json());
+            segment seg{.start_center = seg_json.at("start_center"),
+                        .length = seg_json.at("length"),
+                        .walked_precent = seg_json.value("walked_precent", 0.f),
+                        .dir = name_to_direction(seg_json.at("dir").get<std::string_view>())};
+            auto    prev = seg_json.value("prev", nlohmann::json());
             if (!prev.is_null()) {
                 seg.prev = segment_entities.at(prev);
             } else {
@@ -128,8 +138,22 @@ namespace thr::ecs {
                 registry.emplace<struct node>(node_entity, node);
             }
 
+            auto tags = seg_json.value("tags", std::vector<int>());
+            if (!tags.empty()) {
+                registry.emplace<tag>(entity, std::set<int>(std::from_range, tags));
+            }
+
             registry.emplace<segment>(entity, seg);
         }
+
+        // deserialize level_script
+        json.value("level_script", std::optional<std::string_view>())
+            .transform([&](std::string_view script) {
+                registry.ctx().emplace<level_script>(
+                    get_existing_full_path(std::filesystem::path("assets/lua_scripts") / script).value(),
+                    std::string(script));
+                return 0;
+            });
 
         // deserialize level_info
         const auto &level_info_json = json.at("level_info");

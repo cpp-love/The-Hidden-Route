@@ -2,6 +2,12 @@
 
 # game_states.hpp 版本历史
 
+## \[0.1.0-5] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 配合 [main/game_states.cpp](../../main/game_states.cpp) 添加对 Lua 脚本的支持，为 `mainhelper::game_screen` 添加数据成员 `m_lua_manager`。
+
 ## \[0.1.0-4] - 2026-07-07 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

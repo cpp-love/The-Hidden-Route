@@ -2,8 +2,8 @@
  * @file game_state_manager.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏状态管理系统。
- * @version 0.1.0-2
- * @date 2026-06-19
+ * @version 0.1.0-3
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -38,6 +38,8 @@ namespace thr::ecs {
         tgui::Gui                         m_gui;    ///< GUI 对象。
 
       public:
+        static const tgui::String game_screen_panel_name; ///< 有游戏界面大小的 UI 面板组件名称。
+
         /**
          * @brief 构建一个 game state manager 对象。
          * @param [in] window 渲染窗口。
