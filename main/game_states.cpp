@@ -2,7 +2,7 @@
  * @file game_states.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-5
+ * @version 0.1.0-6
  * @date 2026-07-12
  * 
  * @copyright cpp-love
@@ -43,6 +43,7 @@
 #include <TGUI/Font.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/Button.hpp>
+#include <TGUI/Widgets/Panel.hpp>
 #include <algorithm>
 #include <chrono>
 #include <entt/entity/fwd.hpp>
@@ -80,25 +81,25 @@ namespace mainhelper {
         tgui::Button::Ptr start_button = tgui::Button::create("点击进入游戏");
         start_button->setPosition({"(&.size - size) / 2", "(&.size - size) / 2"});
         start_button->setSize({"10%", "10%"});
-        start_button->setTextSize(14u);
         start_button->onPress([&] {
             m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                 std::make_unique<level_graph_screen>());
         });
+        start_button->getRenderer()->setRoundedBorderRadius(10.f);
         m_global_gui->add(start_button, "start_button");
     }
     void main_menu::on_pause() noexcept {
-        tgui::Button::Ptr start_button = m_global_gui->get<tgui::Button>("start_button");
-        start_button->setVisible(false);
+        m_global_gui->get("start_button")->setVisible(false);
         m_is_paused = true;
     }
     void main_menu::on_resume() noexcept {
-        tgui::Button::Ptr start_button = m_global_gui->get<tgui::Button>("start_button");
-        start_button->setVisible(true);
+        m_global_gui->get("start_button")->setVisible(true);
         m_is_paused = false;
     }
     bool main_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
-    void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
+    void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {
+        spdlog::debug(sf::Vector2f(m_global_gui->getView().getSize()));
+    }
     void main_menu::draw() noexcept {}
     void main_menu::connect_dispatcher() noexcept {}
     void main_menu::disconnect_dispatcher() noexcept {}
@@ -116,16 +117,16 @@ namespace mainhelper {
     level_graph_screen::~level_graph_screen() noexcept {
         // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
         // 清空按钮。
-        auto widgets =
-            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
-                ->getWidgets();
+        tgui::Panel::Ptr panel =
+            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name);
+        auto widgets = panel->getWidgets();
         for (const auto &widget : widgets) {
-            if (widget->getWidgetName() == "level_graph_screen_exit_button"
-                || widget->getWidgetName().starts_with(
+            if (widget->getWidgetName().starts_with(
                     tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
-                m_global_gui->remove(widget);
+                panel->remove(widget);
             }
         }
+        m_global_gui->remove(m_global_gui->get("level_graph_screen_exit_button"));
         disconnect_dispatcher();
     }
 
@@ -133,32 +134,33 @@ namespace mainhelper {
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
         exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
+        exit_button->getRenderer()->setRoundedBorderRadius(10.f);
         m_global_gui->add(exit_button, "level_graph_screen_exit_button");
     }
     void level_graph_screen::on_pause() noexcept {
         auto widgets =
-            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
+            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
                 ->getWidgets();
         for (const auto &widget : widgets) {
-            if (widget->getWidgetName() == "level_graph_screen_exit_button"
-                || widget->getWidgetName().starts_with(
+            if (widget->getWidgetName().starts_with(
                     tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
                 widget->setVisible(false);
             }
         }
+        m_global_gui->get("level_graph_screen_exit_button")->setVisible(false);
         m_is_paused = true;
     }
     void level_graph_screen::on_resume() noexcept {
         auto widgets =
-            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
+            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
                 ->getWidgets();
         for (const auto &widget : widgets) {
-            if (widget->getWidgetName() == "level_graph_screen_exit_button"
-                || widget->getWidgetName().starts_with(
+            if (widget->getWidgetName().starts_with(
                     tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
                 widget->setVisible(true);
             }
         }
+        m_global_gui->get("level_graph_screen_exit_button")->setVisible(true);
         m_is_paused = false;
     }
     bool level_graph_screen::handle_event(const sf::Event &event) noexcept {
@@ -177,7 +179,7 @@ namespace mainhelper {
     void level_graph_screen::draw() noexcept {
         thr::ecs::level_graph_render_system::draw(
             m_registry,
-            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name),
+            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name),
             *m_window, m_registry.ctx().get<thr::ecs::start_level>().entity, [&](entt::entity entity) {
                 const auto &node = m_registry.get<thr::ecs::level_node>(entity);
                 spdlog::info("进入关卡 {}", node.name);
@@ -228,6 +230,7 @@ namespace mainhelper {
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
         exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
+        exit_button->getRenderer()->setRoundedBorderRadius(10.f);
         m_global_gui->add(exit_button, "exit_button");
     }
     void game_screen::on_pause() noexcept { m_is_paused = true; }

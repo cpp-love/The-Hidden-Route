@@ -2,7 +2,7 @@
  * @file game_state_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了游戏状态系统。
- * @version 0.1.0-3
+ * @version 0.1.0-4
  * @date 2026-07-12
  * 
  * @copyright cpp-love
@@ -34,6 +34,7 @@ namespace thr::ecs {
         m_dispatcher.sink<game_state_push_event>().connect<&game_state_manager::on_push_state>(this);
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
         m_gui.setFont(thr::ecs::configs::singleton().get_tgui_font());
+        m_gui.setTextSize(14u);
         tgui::Panel::Ptr game_screen_panel = tgui::Panel::create();
         game_screen_panel->getRenderer()->setBackgroundColor(tgui::Color::Transparent);
         m_gui.add(game_screen_panel, game_screen_panel_name);
@@ -78,9 +79,9 @@ namespace thr::ecs {
             sf::View view{m_window.getView()};
             float    old_view_ratio =
                 static_cast<float>(view.getSize().x) / static_cast<float>(view.getSize().y);
-            sf::FloatRect        viewport{{0, 0}, {1, 1}};
-            tgui::Container::Ptr game_screen_panel =
-                m_gui.get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name);
+            sf::FloatRect    viewport{{0, 0}, {1, 1}};
+            tgui::Panel::Ptr game_screen_panel =
+                m_gui.get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name);
 
             // 根据长宽比计算视口位置和大小，确保黑边方向正确。
             if (window_ratio > old_view_ratio) {
@@ -100,6 +101,8 @@ namespace thr::ecs {
             // 创建并应用新的视口。
             view.setViewport(viewport);
             m_window.setView(view);
+            m_gui.setAbsoluteView(
+                {0, 0, static_cast<float>(resized->size.x), static_cast<float>(resized->size.y)});
             return true;
         }
 

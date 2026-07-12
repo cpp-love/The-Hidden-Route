@@ -2,6 +2,12 @@
 
 # game_state_manager.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Fixed(bug 修复)
+
+1. 修复了按钮与点击位置错位的问题。
+
 ## \[0.1.0-3] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

@@ -2,6 +2,12 @@
 
 # level_graph_render_system.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 将按钮改为圆角。
+
 ## \[0.1.0-3] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)

@@ -2,7 +2,7 @@
  * @file level_graph_render_system.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了渲染关卡图的系统。
- * @version 0.1.0-3
+ * @version 0.1.0-4
  * @date 2026-07-12
  * 
  * @copyright cpp-love
@@ -98,23 +98,20 @@ namespace thr::ecs {
                 tgui::RelativeValue(node.position.y
                                     / static_cast<float>(configs::singleton().game_screen_size.y))};
 
-            if (button != nullptr) {
-                // 复用已有按钮：只更新状态和位置，避免重新分配和重复连接回调。
-                button->setText(node.locked ? std::format("{} [locked]", node.name) : node.name);
-                button->setPosition(position);
-                button->setSize(tgui::Layout2d{button_size});
-                button->setEnabled(!node.locked);
-            } else {
-                button = tgui::Button::create(node.locked ? std::format("{} [locked]", node.name)
-                                                          : node.name);
-                button->setPosition(position);
-                button->setSize(button_size);
-                button->setEnabled(!node.locked);
+            if (button == nullptr) {
+                button = tgui::Button::create();
+                button->getRenderer()->setRoundedBorderRadius(10.f);
                 if (on_click) {
                     button->onPress([on_click, current] { on_click(current); });
                 }
                 container->add(button, widget_id_name);
             }
+            // 复用已有按钮：只更新状态和位置，避免重新分配和重复连接回调。
+            button->setPosition(position);
+            button->setSize(button_size);
+            button->setEnabled(!node.locked);
+            button->setText(node.locked ? std::format("{} [locked]", node.name) : node.name);
+
             sf::Vector2f half_button_real_size = {
                 static_cast<float>(configs::singleton().game_screen_size.x) * button_scale / 2,
                 static_cast<float>(configs::singleton().game_screen_size.y) * button_scale / 2};
