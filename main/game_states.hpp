@@ -2,8 +2,8 @@
  * @file game_states.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了一些具体的游戏状态。
- * @version 0.1.0-4
- * @date 2026-07-07
+ * @version 0.1.0-5
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -14,6 +14,7 @@
 
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/lua_bindings/lua_manager.hpp"
 #include <entt/entity/entity.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
@@ -172,13 +173,14 @@ namespace mainhelper {
 
       private:
         /// @brief 连接调度器。
-        void                                       connect_dispatcher() noexcept;
+        void                                               connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
-        void                                       disconnect_dispatcher() noexcept;
-        bool                                       m_is_paused = false; ///< 是否暂停。
-        std::optional<thr::ecs::clock::time_point> m_winned_time;       ///< 胜利时间。
-        entt::registry                             m_registry;          ///< 注册表。
-        entt::entity                               m_player_entity;     ///< 玩家实体。
+        void                                               disconnect_dispatcher() noexcept;
+        bool                                               m_is_paused = false; ///< 是否暂停。
+        std::optional<thr::ecs::clock::time_point>         m_winned_time;       ///< 胜利时间。
+        std::optional<thr::ecs::lua_bindings::lua_manager> m_lua_manager;       ///< Lua 管理器。
+        entt::registry                                     m_registry;          ///< 注册表。
+        entt::entity                                       m_player_entity;     ///< 玩家实体。
     };
 
     /// @brief 暂停界面状态类。

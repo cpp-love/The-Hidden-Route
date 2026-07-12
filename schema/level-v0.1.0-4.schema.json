@@ -66,6 +66,16 @@
                             "left",
                             "up"
                         ]
+                    },
+                    "tags": {
+                        "title": "路径段的标签",
+                        "description": "用于标记路径段的标签列表。",
+                        "type": "array",
+                        "items": {
+                            "title": "一个标签",
+                            "type": "integer"
+                        },
+                        "default": []
                     }
                 },
                 "required": [
@@ -106,6 +116,15 @@
                     "default": []
                 }
             }
+        },
+        "level_script": {
+            "title": "关卡对应的脚本",
+            "description": "关卡脚本的文件名（相对于 `assets/lua_scripts/` 目录），若没有则为 null。",
+            "type": [
+                "string",
+                "null"
+            ],
+            "default": null
         },
         "level_info": {
             "title": "关卡信息",

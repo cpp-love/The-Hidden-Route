@@ -2,8 +2,8 @@
  * @file main.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief *The Hidden Route* 游戏的主程序。
- * @version 0.1.0-2
- * @date 2026-06-19
+ * @version 0.1.0-3
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -42,20 +42,17 @@ int main() {
     spdlog::set_default_logger(multi_sink_logger);
     spdlog::flush_on(spdlog::level::info);
 
-    sf::RenderWindow             window(sf::VideoMode({800, 600}), "The Hidden Route");
+    sf::RenderWindow             window(sf::VideoMode(thr::ecs::configs::singleton().game_screen_size),
+                                        "The Hidden Route");
     thr::ecs::game_state_manager manager(window);
     manager.push_state(std::make_unique<mainhelper::main_menu>());
 
     auto prev = thr::ecs::clock::now();
-    while (window.isOpen()) {
+    while (true) {
         // handle event
-        while (const std::optional event = window.pollEvent()) {
-            if (!manager.handle_event(*event)) {
-                if (event->is<sf::Event::Closed>()) {
-                    spdlog::info("quit the window");
-                    window.close();
-                }
-            }
+        while (const std::optional event = window.pollEvent()) { manager.handle_event(*event); }
+        if (!window.isOpen()) {
+            break;
         }
 
         // update

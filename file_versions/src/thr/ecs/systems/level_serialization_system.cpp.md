@@ -2,6 +2,16 @@
 
 # level_serialization_system.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 同步 [`level.schema.json`](../../../../../schema/level-v0.1.0-2.schema.json) 的新增内容。
+
+### Changed(修改)
+
+1. 重构部分代码，提取重复部分。
+
 ## \[0.1.0-3] - 2026-07-02 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

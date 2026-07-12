@@ -6,4 +6,4 @@
 
 ### Added(新增)
 
-1. 汇总各种组件。
+1. `thr/ecs/components` 文件夹的汇总。

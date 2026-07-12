@@ -2,8 +2,8 @@
  * @file game_states.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-4
- * @date 2026-07-07
+ * @version 0.1.0-5
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -15,9 +15,13 @@
 #include "thr/base/file.hpp"
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
+#include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/level_graph_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
+#include "thr/ecs/configs.hpp"
+#include "thr/ecs/lua_bindings/entity_wrapper.hpp"
+#include "thr/ecs/lua_bindings/lua_manager.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/level_graph_render_system.hpp"
 #include "thr/ecs/systems/level_graph_serialization_system.hpp"
@@ -35,6 +39,7 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>
+#include <TGUI/Container.hpp>
 #include <TGUI/Font.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/Button.hpp>
@@ -42,25 +47,12 @@
 #include <chrono>
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
+#include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string_view>
 
-namespace {
-
-    const sf::Font &get_sfml_font() {
-        static sf::Font font("font.otf");
-        return font;
-    };
-    const tgui::Font &get_tgui_font() {
-        static tgui::Font font("font.otf");
-        return font;
-    };
-
-} // namespace
-
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 namespace mainhelper {
 
     // settings_menu
@@ -85,10 +77,9 @@ namespace mainhelper {
     }
 
     void main_menu::init() noexcept {
-        m_global_gui->setFont(get_tgui_font());
         tgui::Button::Ptr start_button = tgui::Button::create("点击进入游戏");
-        start_button->setPosition({350, 250});
-        start_button->setSize({100, 100});
+        start_button->setPosition({"(&.size - size) / 2", "(&.size - size) / 2"});
+        start_button->setSize({"10%", "10%"});
         start_button->setTextSize(14u);
         start_button->onPress([&] {
             m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
@@ -117,32 +108,17 @@ namespace mainhelper {
         // adapted from main_helper::game_screen::game_screen
         connect_dispatcher();
         nlohmann::json json;
-        std::ifstream  fin(
-            thr::get_executable_directory()
-                .and_then([](std::filesystem::path path) -> std::optional<std::filesystem::path> {
-                    // 先尝试可执行文件父文件夹目录下的配置文件。
-                    path /= "level_graph.json";
-                    if (std::filesystem::exists(path)) {
-                        return path;
-                    }
-                    return std::nullopt;
-                })
-                .or_else([] -> std::optional<std::filesystem::path> {
-                    // 再尝试工作目录下的配置文件。
-                    std::filesystem::path path = std::filesystem::current_path() / "level_graph.json";
-                    if (std::filesystem::exists(path)) {
-                        return path;
-                    }
-                    return std::nullopt;
-                })
-                .value() /*实在不行就抛异常爆炸*/);
+        std::ifstream  fin(thr::get_existing_full_path("assets/json/level_graph.json")
+                               .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_graph_serialization_system::deserialize_from_json(m_registry, json);
     }
     level_graph_screen::~level_graph_screen() noexcept {
         // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
         // 清空按钮。
-        auto widgets = m_global_gui->getWidgets();
+        auto widgets =
+            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
+                ->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName() == "level_graph_screen_exit_button"
                 || widget->getWidgetName().starts_with(
@@ -155,11 +131,14 @@ namespace mainhelper {
 
     void level_graph_screen::init() noexcept {
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
+        exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
         m_global_gui->add(exit_button, "level_graph_screen_exit_button");
     }
     void level_graph_screen::on_pause() noexcept {
-        auto widgets = m_global_gui->getWidgets();
+        auto widgets =
+            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
+                ->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName() == "level_graph_screen_exit_button"
                 || widget->getWidgetName().starts_with(
@@ -170,7 +149,9 @@ namespace mainhelper {
         m_is_paused = true;
     }
     void level_graph_screen::on_resume() noexcept {
-        auto widgets = m_global_gui->getWidgets();
+        auto widgets =
+            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name)
+                ->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName() == "level_graph_screen_exit_button"
                 || widget->getWidgetName().starts_with(
@@ -195,8 +176,9 @@ namespace mainhelper {
     void level_graph_screen::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
     void level_graph_screen::draw() noexcept {
         thr::ecs::level_graph_render_system::draw(
-            m_registry, *m_global_gui, m_registry.ctx().get<thr::ecs::start_level>().entity,
-            [&](entt::entity entity) {
+            m_registry,
+            m_global_gui->get<tgui::Container>(thr::ecs::game_state_manager::game_screen_panel_name),
+            *m_window, m_registry.ctx().get<thr::ecs::start_level>().entity, [&](entt::entity entity) {
                 const auto &node = m_registry.get<thr::ecs::level_node>(entity);
                 spdlog::info("进入关卡 {}", node.name);
                 THR_ASSERT_MSG(!node.locked, "节点不应未解锁");
@@ -213,33 +195,30 @@ namespace mainhelper {
         connect_dispatcher();
         nlohmann::json json;
         // adapted from thr::ecs::configs::singleton
-        std::ifstream  fin(
-            thr::get_executable_directory()
-                .and_then([&](std::filesystem::path path) -> std::optional<std::filesystem::path> {
-                    // 先尝试可执行文件父文件夹目录下的配置文件。
-                    path /= std::format("{}.json", level_name);
-                    if (std::filesystem::exists(path)) {
-                        return path;
-                    }
-                    return std::nullopt;
-                })
-                .or_else([&] -> std::optional<std::filesystem::path> {
-                    // 再尝试工作目录下的配置文件。
-                    std::filesystem::path path =
-                        std::filesystem::current_path() / std::format("{}.json", level_name);
-                    if (std::filesystem::exists(path)) {
-                        return path;
-                    }
-                    return std::nullopt;
-                })
-                .value() /*实在不行就抛异常爆炸*/);
+        std::ifstream  fin(thr::get_existing_full_path(std::format("assets/json/{}.json", level_name))
+                               .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_serialization_system::deserialize_from_json(m_registry, json);
         m_registry.emplace<thr::ecs::player_on_ground>(
             m_player_entity, m_registry.ctx().get<thr::ecs::level_info>().start_segment_entity);
         m_registry.emplace<thr::ecs::turning_history>(m_player_entity);
+        if (const auto *script = m_registry.ctx().find<thr::ecs::level_script>()) {
+            m_lua_manager = thr::ecs::lua_bindings::lua_manager{m_registry};
+            if (std::optional error = m_lua_manager->load_and_run_script_file(script->script_path)) {
+                spdlog::warn("Failed to load and run script file {}: {}",
+                             script->script_path.generic_string(), *error);
+            }
+            if (std::optional error = m_lua_manager->call_function("on_level_started")) {
+                spdlog::warn("Failed to call to lua function on_level_started: {}", *error);
+            }
+        }
     }
     game_screen::~game_screen() noexcept {
+        if (m_lua_manager.has_value()) {
+            if (std::optional error = m_lua_manager->call_function("on_level_ended")) {
+                spdlog::warn("Failed to call to lua function on_level_ended: {}", *error);
+            }
+        }
         tgui::Button::Ptr exit_button = m_global_gui->get<tgui::Button>("exit_button");
         m_global_gui->remove(exit_button);
         disconnect_dispatcher();
@@ -247,6 +226,7 @@ namespace mainhelper {
 
     void game_screen::init() noexcept {
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
+        exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
         m_global_gui->add(exit_button, "exit_button");
     }
@@ -316,17 +296,38 @@ namespace mainhelper {
                 updated = true;
             }
             if (updated) {
+                // 若走过有特殊标签的实体，触发 Lua 脚本。
+                if (m_lua_manager.has_value()) {
+                    for (const auto &[entity, on_ground] :
+                         m_registry.view<thr::ecs::player_on_ground>().each()) {
+                        const auto *cur_tag =
+                            m_registry.try_get<thr::ecs::tag>(on_ground.segment_entity);
+                        if (cur_tag != nullptr && !cur_tag->tag_ids.empty()) {
+                            // 走过的实体有特殊标签。
+                            if (std::optional error = m_lua_manager->call_function(
+                                    "on_special_segment_walked",
+                                    thr::ecs::lua_bindings::entity_wrapper{on_ground.segment_entity,
+                                                                           m_registry})) {
+                                spdlog::warn(
+                                    "Failed to call to lua function on_special_segment_walked: {}",
+                                    *error);
+                            }
+                        }
+                    }
+                }
+
+                // 判断是否胜利。
                 if (std::ranges::any_of(
                         m_registry.view<thr::ecs::player_on_ground>(), [&](entt::entity entity) {
                             return m_registry.get<thr::ecs::player_on_ground>(entity).segment_entity
                                    == m_registry.ctx().get<thr::ecs::level_info>().end_segment_entity;
-                        })) {
+                        })) { //< 是否走到终点段。
                     if (std::ranges::all_of(
                             m_registry.view<thr::ecs::segment>(), [&](entt::entity entity) {
                                 return thr::no_nan_inf_f{
                                            m_registry.get<thr::ecs::segment>(entity).walked_precent}
                                        == thr::no_nan_inf_f{1};
-                            })) {
+                            })) { //< 是否所有段都走完。
                         // 赢了。
                         m_winned_time = thr::ecs::clock::now();
                     }
@@ -344,7 +345,8 @@ namespace mainhelper {
                                                  - std::chrono::duration_cast<std::chrono::seconds>(
                                                        thr::ecs::clock::now() - *m_winned_time)
                                                        .count());
-            sf::Text    text(get_sfml_font(), sf::String::fromUtf8(string.begin(), string.end()));
+            sf::Text    text(thr::ecs::configs::singleton().get_sfml_font(),
+                             sf::String::fromUtf8(string.begin(), string.end()));
             text.setLineAlignment(sf::Text::LineAlignment::Center);
             text.setPosition(m_window->getView().getCenter());
             sf::RectangleShape rect(text.getGlobalBounds().size);
@@ -379,4 +381,3 @@ namespace mainhelper {
     void pause_menu::disconnect_dispatcher() noexcept {}
 
 } // namespace mainhelper
-// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

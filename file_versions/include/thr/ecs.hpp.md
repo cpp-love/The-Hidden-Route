@@ -6,4 +6,4 @@
 
 ### Added(新增)
 
-1. 汇总了 `thr::ecs` 命名空间（包含 `thr/ecs/components.hpp` 和 `thr/ecs/systems.hpp`）。
+1. `thr/ecs` 文件夹的汇总。

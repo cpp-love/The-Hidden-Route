@@ -2,8 +2,8 @@
  * @file test_level_graph_render_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief `thr::ecs::level_graph_render_system` 的简单回归测试。
- * @version 0.1.0-2
- * @date 2026-07-07
+ * @version 0.1.0-3
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -11,6 +11,7 @@
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
+#include <entt/entity/entity.hpp>
 #undef NDEBUG
 #include "thr/base/assert_msg.hpp"
 #include "thr/ecs/components/level_graph_components.hpp"
@@ -32,12 +33,14 @@ int main() {
     registry.emplace<thr::ecs::level_node>(next_entity, std::vector<entt::entity>{},
                                            sf::Vector2f{220.f, 160.f}, "next", true);
 
-    thr::ecs::level_graph_render_system::draw(registry, gui, start_entity);
+    thr::ecs::level_graph_render_system::draw(registry, gui.getContainer(), render, start_entity);
 
-    auto start_button = gui.get<tgui::Button>("level_graph_node_0");
+    auto start_button = gui.get<tgui::Button>(std::format(
+        "{}{}", thr::ecs::level_graph_render_system::widget_prefix, entt::to_integral(start_entity)));
     THR_ASSERT_MSG(start_button != nullptr);
     THR_ASSERT_MSG(start_button->getText() == "start");
-    auto next_button = gui.get<tgui::Button>("level_graph_node_1");
+    auto next_button = gui.get<tgui::Button>(std::format(
+        "{}{}", thr::ecs::level_graph_render_system::widget_prefix, entt::to_integral(next_entity)));
     THR_ASSERT_MSG(next_button != nullptr);
     THR_ASSERT_MSG(next_button->getText() == "next [locked]");
 

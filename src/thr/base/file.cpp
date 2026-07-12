@@ -2,8 +2,8 @@
  * @file file.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些与文件相关的函数。
- * @version 0.1.0-1
- * @date 2026-06-19
+ * @version 0.1.0-2
+ * @date 2026-07-12
  * 
  * @copyright cpp-love
  * 
@@ -83,7 +83,28 @@ namespace thr {
 
     std::optional<std::filesystem::path> get_executable_directory() noexcept {
         auto path = get_executable_path();
-        return path.transform([](std::filesystem::path path) { return path.parent_path(); });
+        return path.transform([](const std::filesystem::path &path) { return path.parent_path(); });
+    }
+
+    std::optional<std::filesystem::path>
+    get_existing_full_path(const std::filesystem::path &path) noexcept {
+        return get_executable_directory()
+            .and_then([&](std::filesystem::path folder_path) -> std::optional<std::filesystem::path> {
+                // 先尝试相对于可执行文件父文件夹。
+                folder_path /= path;
+                if (std::filesystem::exists(folder_path)) {
+                    return folder_path;
+                }
+                return std::nullopt;
+            })
+            .or_else([&] -> std::optional<std::filesystem::path> {
+                // 再尝试相对于工作目录。
+                std::filesystem::path full_path = std::filesystem::current_path() / path;
+                if (std::filesystem::exists(full_path)) {
+                    return full_path;
+                }
+                return std::nullopt;
+            });
     }
 
 } // namespace thr

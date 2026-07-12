@@ -28,5 +28,10 @@
         "r": 25,
         "g": 125,
         "b": 245
+    },
+    "font_path": "font.otf",
+    "game_screen_size": {
+        "x": 800,
+        "y": 600
     }
 }
