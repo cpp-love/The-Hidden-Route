@@ -2,6 +2,12 @@
 
 # game_states.cpp 版本历史
 
+## \[0.1.0-7] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加关卡解锁流程。
+
 ## \[0.1.0-6] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)

@@ -1,9 +1,9 @@
 /**
  * @file level_render_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
- * @brief 定义了迷宫渲染系统。
- * @version 0.1.0-3
- * @date 2026-07-12
+ * @brief 定义了关卡渲染系统。
+ * @version 0.1.0-4
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -52,14 +52,6 @@ namespace thr::ecs {
         const auto &lines = registry.ctx().get<line_strips>();
         render.draw(lines, states);
 
-        // draw texts
-        auto texts = registry.view<sf::Text>();
-        for (const auto &[entity, text] : texts.each()) { render.draw(text, states); }
-
-        // draw sprites
-        auto sprites = registry.view<sf::Sprite>();
-        for (const auto &[entity, sprite] : sprites.each()) { render.draw(sprite, states); }
-
         // draw players
         const auto &player_on_grounds = registry.view<player_on_ground>();
         for (entt::entity player : player_on_grounds) {
@@ -85,6 +77,14 @@ namespace thr::ecs {
             rect_shape.setFillColor(player_under_ground::color());
             render.draw(rect_shape, states);
         }
+
+        // draw texts
+        auto texts = registry.view<sf::Text>();
+        for (const auto &[entity, text] : texts.each()) { render.draw(text, states); }
+
+        // draw sprites
+        auto sprites = registry.view<sf::Sprite>();
+        for (const auto &[entity, sprite] : sprites.each()) { render.draw(sprite, states); }
     }
 
 } // namespace thr::ecs

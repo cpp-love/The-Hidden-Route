@@ -2,6 +2,12 @@
 
 # level_serialization_system.cpp 版本历史
 
+## \[0.1.0-5] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 为起点和终点添加 `start` 和 `end` 文本实体。
+
 ## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

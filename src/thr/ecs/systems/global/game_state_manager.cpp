@@ -2,8 +2,8 @@
  * @file game_state_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了游戏状态系统。
- * @version 0.1.0-4
- * @date 2026-07-12
+ * @version 0.1.0-5
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -45,7 +45,24 @@ namespace thr::ecs {
         m_dispatcher.clear();
     }
 
+    void game_state_manager::process_pending_states() noexcept {
+        while (!m_pending_states.empty()) {
+            auto state = std::move(m_pending_states.back());
+            m_pending_states.pop_back();
+            state->bind(m_dispatcher, m_window, m_gui);
+            if (!m_states.empty()) {
+                m_states.back()->on_pause();
+            }
+            m_states.push_back(std::move(state));
+        }
+    }
+
     void game_state_manager::push_state(game_state_base::ptr state) noexcept {
+        if (m_is_dispatching) {
+            m_pending_states.push_back(std::move(state));
+            return;
+        }
+
         state->bind(m_dispatcher, m_window, m_gui);
         if (!m_states.empty()) {
             m_states.back()->on_pause();
@@ -61,6 +78,8 @@ namespace thr::ecs {
     }
     void game_state_manager::reset() noexcept {
         m_states.clear();
+        m_pending_states.clear();
+        m_is_dispatching = false;
         m_dispatcher.clear();
         m_dispatcher.sink<game_state_push_event>().connect<&game_state_manager::on_push_state>(this);
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
@@ -127,7 +146,11 @@ namespace thr::ecs {
                 break;
             }
         }
+
+        m_is_dispatching = true;
         m_dispatcher.update();
+        m_is_dispatching = false;
+        process_pending_states();
     }
     void game_state_manager::draw() noexcept {
         /// @todo 添加更好的方式

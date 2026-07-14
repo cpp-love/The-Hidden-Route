@@ -2,8 +2,8 @@
  * @file game_states.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了一些具体的游戏状态。
- * @version 0.1.0-5
- * @date 2026-07-12
+ * @version 0.1.0-6
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -20,6 +20,9 @@
 #include <optional>
 
 namespace mainhelper {
+
+    /// @brief 关卡完成的事件组件。
+    struct level_finished_event {};
 
     /// @brief 设置状态类。
     class settings_menu : public thr::ecs::game_state_base {
@@ -52,12 +55,12 @@ namespace mainhelper {
         void init() noexcept override;
 
       private:
-        /// @brief 连接调度器
+        /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
-        /// @brief 断开连接调度器
+        /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停
-        entt::registry m_registry;          ///< 注册表
+        bool           m_is_paused = false; ///< 是否暂停。
+        entt::registry m_registry;          ///< 注册表。
     };
 
     /// @brief 主页状态类。
@@ -91,12 +94,12 @@ namespace mainhelper {
         void init() noexcept override;
 
       private:
-        /// @brief 连接调度器
+        /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
-        /// @brief 断开连接调度器
+        /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停
-        entt::registry m_registry;          ///< 注册表
+        bool           m_is_paused = false; ///< 是否暂停。
+        entt::registry m_registry;          ///< 注册表。
     };
 
     /// @brief 关卡图界面状态类。
@@ -130,12 +133,18 @@ namespace mainhelper {
         void init() noexcept override;
 
       private:
-        /// @brief 连接调度器
+        /**
+         * @brief 响应关卡完成的函数。
+         * @param [in] event 事件组件。
+         */
+        void           on_level_finished(level_finished_event event) noexcept;
+        /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
-        /// @brief 断开连接调度器
+        /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停
-        entt::registry m_registry;          ///< 注册表
+        bool           m_is_paused = false;      ///< 是否暂停。
+        entt::entity   m_current_level_entity{}; ///< 当前在玩的关卡对应的实体。
+        entt::registry m_registry;               ///< 注册表。
     };
 
     /// @brief 游戏界面状态类。
@@ -145,7 +154,7 @@ namespace mainhelper {
          * @brief 构建一个 game_screen 对象。
          * @param [in] level_name 关卡名称。
          */
-        game_screen(std::string_view level_name) noexcept;
+        explicit game_screen(std::string_view level_name) noexcept;
         /// @copydoc game_state_base::game_state_base(const game_state_base &rhs)
         game_screen(const game_screen &rhs) noexcept = delete;
         /// @copydoc game_state_base::game_state_base(game_state_base &&rhs)
@@ -216,12 +225,12 @@ namespace mainhelper {
         void init() noexcept override;
 
       private:
-        /// @brief 连接调度器
+        /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
-        /// @brief 断开连接调度器
+        /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停
-        entt::registry m_registry;          ///< 注册表
+        bool           m_is_paused = false; ///< 是否暂停。
+        entt::registry m_registry;          ///< 注册表。
     };
 
 } // namespace mainhelper

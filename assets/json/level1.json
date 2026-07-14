@@ -29,7 +29,10 @@
             "length": 250,
             "dir": "left",
             "prev": 1,
-            "next": 3
+            "next": 3,
+            "tags": [
+                0
+            ]
         },
         {
             "start_center": {
@@ -38,10 +41,7 @@
             },
             "length": 80,
             "dir": "up",
-            "prev": 2,
-            "tags": [
-                0
-            ]
+            "prev": 2
         },
         {
             "start_center": {
@@ -80,7 +80,10 @@
             "length": 150,
             "dir": "left",
             "prev": 6,
-            "next": 8
+            "next": 8,
+            "tags": [
+                1
+            ]
         },
         {
             "start_center": {
@@ -89,10 +92,7 @@
             },
             "length": 80,
             "dir": "up",
-            "prev": 7,
-            "tags": [
-                1
-            ]
+            "prev": 7
         },
         {
             "start_center": {

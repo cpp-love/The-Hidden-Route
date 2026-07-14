@@ -2,8 +2,8 @@
  * @file game_states.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-6
- * @date 2026-07-12
+ * @version 0.1.0-7
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -97,9 +97,7 @@ namespace mainhelper {
         m_is_paused = false;
     }
     bool main_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
-    void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {
-        spdlog::debug(sf::Vector2f(m_global_gui->getView().getSize()));
-    }
+    void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
     void main_menu::draw() noexcept {}
     void main_menu::connect_dispatcher() noexcept {}
     void main_menu::disconnect_dispatcher() noexcept {}
@@ -107,7 +105,6 @@ namespace mainhelper {
     // level_graph_screen
     level_graph_screen::level_graph_screen() noexcept {
         // adapted from main_helper::game_screen::game_screen
-        connect_dispatcher();
         nlohmann::json json;
         std::ifstream  fin(thr::get_existing_full_path("assets/json/level_graph.json")
                                .value() /*实在不行就抛异常爆炸*/);
@@ -128,9 +125,14 @@ namespace mainhelper {
         }
         m_global_gui->remove(m_global_gui->get("level_graph_screen_exit_button"));
         disconnect_dispatcher();
+        nlohmann::json json = thr::ecs::level_graph_serialization_system::serialize_to_json(m_registry);
+        std::ofstream  fout(thr::get_existing_full_path("assets/json/level_graph.json")
+                                .value() /*实在不行就抛异常爆炸*/);
+        fout << json;
     }
 
     void level_graph_screen::init() noexcept {
+        connect_dispatcher();
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
         exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
@@ -182,14 +184,30 @@ namespace mainhelper {
             m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name),
             *m_window, m_registry.ctx().get<thr::ecs::start_level>().entity, [&](entt::entity entity) {
                 const auto &node = m_registry.get<thr::ecs::level_node>(entity);
-                spdlog::info("进入关卡 {}", node.name);
-                THR_ASSERT_MSG(!node.locked, "节点不应未解锁");
+                spdlog::info("进入关卡 {}。", node.name);
+                THR_ASSERT_MSG(!node.locked, "节点不应未解锁。");
+                m_current_level_entity = entity;
                 m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                     std::make_unique<game_screen>(node.name));
             });
     }
-    void level_graph_screen::connect_dispatcher() noexcept {}
-    void level_graph_screen::disconnect_dispatcher() noexcept {}
+    void level_graph_screen::on_level_finished([[maybe_unused]] level_finished_event event) noexcept {
+        const auto &node = m_registry.get<thr::ecs::level_node>(m_current_level_entity);
+        THR_ASSERT_MSG(!node.locked, "节点不应未解锁。");
+        spdlog::info("关卡 {} 完成。", node.name);
+        for (entt::entity entity : node.relative_entities) {
+            auto &next_node = m_registry.get<thr::ecs::level_node>(entity);
+            next_node.locked = false;
+        }
+    }
+    void level_graph_screen::connect_dispatcher() noexcept {
+        m_outside_dispather->sink<level_finished_event>()
+            .connect<&level_graph_screen::on_level_finished>(this);
+    }
+    void level_graph_screen::disconnect_dispatcher() noexcept {
+        m_outside_dispather->sink<level_finished_event>()
+            .disconnect<&level_graph_screen::on_level_finished>(this);
+    }
 
     // game_screen
     game_screen::game_screen(std::string_view level_name) noexcept
@@ -259,6 +277,7 @@ namespace mainhelper {
             using namespace std::chrono_literals;
             if (thr::ecs::clock::now() - *m_winned_time >= 3s) {
                 m_outside_dispather->enqueue(thr::ecs::game_state_pop_event{});
+                m_outside_dispather->enqueue(level_finished_event{});
             }
             return;
         }

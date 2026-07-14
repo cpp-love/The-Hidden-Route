@@ -2,6 +2,16 @@
 
 # game_state_manager.hpp 版本历史
 
+## \[0.1.0-4] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 为修复 bug 修改内部成员。
+
+### Fixed(bug 修复)
+
+1. 修复了通过事件触发添加关卡时添加的关卡在 `thr::ecs::game_state_base::init` 虚函数中向事件触发器（`entt::dispatcher`）中添加回调时会产生 UB 的问题。
+
 ## \[0.1.0-3] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

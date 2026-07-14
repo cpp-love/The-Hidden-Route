@@ -1,0 +1,61 @@
+# 1. 通用规则：让 Git 自动检测文本并规范为 LF 入库
+* text=auto
+
+# =============================================
+# 2. C/C++ 源文件：强制 LF
+# （防止 GCC/Clang 编译时出现 "CRLF" 警告，保证跨平台编译一致）
+*.c   text eol=lf
+*.cc  text eol=lf
+*.cpp text eol=lf
+*.cxx text eol=lf
+*.h   text eol=lf
+*.hh  text eol=lf
+*.hpp text eol=lf
+*.hxx text eol=lf
+*.inl text eol=lf
+*.ipp text eol=lf
+
+# =============================================
+# 3. 构建与脚本文件：强制 LF
+# （Linux 服务器编译必须用 LF，否则会报 /bin/bash^M: bad interpreter）
+CMakeLists.txt text eol=lf
+*.cmake        text eol=lf
+Makefile       text eol=lf
+*.make         text eol=lf
+*.sh           text eol=lf
+*.bash         text eol=lf
+
+# =============================================
+# 4. Visual Studio 相关（Windows 专属）
+# 解决方案(.sln)必须用 CRLF，否则 VS 打开会弹警告或报错
+*.sln          text eol=crlf
+# VS 项目配置文件推荐 LF（如果不确定，和 sln 保持一致用 crlf 也行，但 lf 现代 VS 也支持）
+*.vcxproj      text eol=lf
+*.filters      text eol=lf
+*.props        text eol=lf
+*.targets      text eol=lf
+
+# =============================================
+# 5. 编译生成的二进制文件 / 库文件：禁止任何转换
+*.exe          binary
+*.dll          binary
+*.lib          binary
+*.a            binary
+*.so           binary
+*.dylib        binary
+*.o            binary
+*.obj          binary
+*.out          binary
+*.pdb          binary
+
+# =============================================
+# 6. 资源文件与压缩包：禁止任何转换
+*.png          binary
+*.jpg          binary
+*.jpeg         binary
+*.bmp          binary
+*.ico          binary
+*.zip          binary
+*.tar          binary
+*.gz           binary
+*.7z           binary

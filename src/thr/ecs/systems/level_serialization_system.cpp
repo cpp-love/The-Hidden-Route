@@ -2,8 +2,8 @@
  * @file level_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
- * @version 0.1.0-4
- * @date 2026-07-12
+ * @version 0.1.0-5
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -12,8 +12,10 @@
 #include "thr/ecs/systems/level_serialization_system.hpp"
 #include "thr/base/file.hpp"
 #include "thr/base/sfml_helper.hpp"
+#include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
+#include <SFML/Graphics/Text.hpp>
 #include <entt/entity/registry.hpp>
 #include <filesystem>
 #include <nlohmann/json.hpp>
@@ -161,6 +163,25 @@ namespace thr::ecs {
             .start_segment_entity = segment_entities.at(level_info_json.at("start_segment_entity")),
             .end_segment_entity = segment_entities.at(level_info_json.at("end_segment_entity"))};
         registry.ctx().emplace<struct level_info>(level_info);
+
+        const auto  &start_seg = registry.get<segment>(level_info.start_segment_entity);
+        entt::entity start_entity = registry.create();
+        sf::Text     start_text{configs::singleton().get_sfml_font(), "start", 10};
+        auto         start_bound = start_text.getLocalBounds();
+        start_text.setOrigin(start_bound.getCenter());
+        start_text.setPosition(start_seg.start_center
+                               + direction_to_vector2f(start_seg.dir, segment::width()));
+        start_text.setLineAlignment(sf::Text::LineAlignment::Center);
+        registry.emplace<sf::Text>(start_entity, start_text);
+
+        const auto  &end_seg = registry.get<segment>(level_info.end_segment_entity);
+        entt::entity end_entity = registry.create();
+        sf::Text     end_text{configs::singleton().get_sfml_font(), "end", 10};
+        auto         end_bound = end_text.getLocalBounds();
+        end_text.setOrigin(end_bound.getCenter());
+        end_text.setPosition(end_seg.start_center + direction_to_vector2f(end_seg.dir, end_seg.length));
+        end_text.setLineAlignment(sf::Text::LineAlignment::Center);
+        registry.emplace<sf::Text>(end_entity, end_text);
     }
 
 } // namespace thr::ecs

@@ -2,6 +2,14 @@
 
 # game_states.hpp 版本历史
 
+## \[0.1.0-6] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 配合 [main/game_states.cpp](../../main/game_states.cpp) 添加关卡解锁流程，
+   1. 添加关卡完成的事件组件类 `mainhelper::level_finished_event`，
+   2. 为 `mainhelper::level_graph_screen` 添加回调方法 `on_level_finished` 和数据成员 `m_current_level_entity`。
+
 ## \[0.1.0-5] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

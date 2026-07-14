@@ -2,8 +2,8 @@
  * @file game_state_manager.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏状态管理系统。
- * @version 0.1.0-3
- * @date 2026-07-12
+ * @version 0.1.0-4
+ * @date 2026-07-14
  * 
  * @copyright cpp-love
  * 
@@ -31,11 +31,13 @@ namespace thr::ecs {
     /// @brief 游戏状态管理系统。
     class game_state_manager {
       private:
-        std::vector<game_state_base::ptr> m_states;     ///< 状态栈。
-        entt::dispatcher                  m_dispatcher; ///< 调度器。
+        std::vector<game_state_base::ptr> m_states;         ///< 状态栈。
+        std::vector<game_state_base::ptr> m_pending_states; ///< 等待初始化的状态。
+        entt::dispatcher                  m_dispatcher;     ///< 调度器。
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
-        sf::RenderWindow                 &m_window; ///< 渲染窗口引用。
-        tgui::Gui                         m_gui;    ///< GUI 对象。
+        sf::RenderWindow                 &m_window;                ///< 渲染窗口引用。
+        tgui::Gui                         m_gui;                   ///< GUI 对象。
+        bool                              m_is_dispatching{false}; ///< 当前是否正在处理调度器事件。
 
       public:
         static const tgui::String game_screen_panel_name; ///< 有游戏界面大小的 UI 面板组件名称。
@@ -75,6 +77,8 @@ namespace thr::ecs {
         void draw() noexcept;
 
       private:
+        /// @brief 处理延迟压入的状态。
+        void process_pending_states() noexcept;
         /**
          * @brief 响应压入状态的函数。
          * @param [in] event 压入状态。

@@ -38,10 +38,7 @@
             },
             "length": 80,
             "dir": "up",
-            "prev": 2,
-            "tags": [
-                0
-            ]
+            "prev": 2
         },
         {
             "start_center": {

@@ -76,6 +76,8 @@ namespace thr::ecs::lua_bindings {
 
             sf::Text     sf_text{configs::singleton().get_sfml_font(),
                                  sf::String::fromUtf8(text.begin(), text.end()), character_size};
+            auto         bound = sf_text.getLocalBounds();
+            sf_text.setOrigin(bound.getCenter());
             sf_text.setPosition(position);
             sf_text.setLineAlignment(sf::Text::LineAlignment::Center);
             m_registry.get().emplace<sf::Text>(entity, sf_text);

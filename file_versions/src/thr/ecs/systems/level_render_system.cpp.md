@@ -2,6 +2,12 @@
 
 # level_render_system.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将文字和精灵调整至在最后渲染。
+
 ## \[0.1.0-3] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
