@@ -2,6 +2,12 @@
 
 # game_state_manager.cpp 版本历史
 
+## \[0.1.0-6] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Fixed(bug 修复)
+
+1. 修复了 TGUI 会吞按键，导致 Crtl+Z 无法撤销，Escape 无法退出的问题。
+
 ## \[0.1.0-5] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Fixed(bug 修复)

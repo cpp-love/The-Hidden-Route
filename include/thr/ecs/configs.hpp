@@ -89,7 +89,7 @@ namespace thr::ecs {
       private:
         /**
          * @brief 构建一个 configs 对象。
-         * @param [in] font_path 字体路径。
+         * @param [in] the_font_path 字体路径。
          * @details 为遵循单例模式，将此函数设为私有，以防意外创建多余对象。
          */
         explicit configs(std::filesystem::path the_font_path) : font_path(std::move(the_font_path)) {}

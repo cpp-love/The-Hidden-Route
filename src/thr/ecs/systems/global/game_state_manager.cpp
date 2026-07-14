@@ -2,7 +2,7 @@
  * @file game_state_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了游戏状态系统。
- * @version 0.1.0-5
+ * @version 0.1.0-6
  * @date 2026-07-14
  * 
  * @copyright cpp-love
@@ -19,6 +19,7 @@
 #include <TGUI/Rect.hpp>
 #include <TGUI/RelFloatRect.hpp>
 #include <TGUI/String.hpp>
+#include <TGUI/Widget.hpp>
 #include <TGUI/Widgets/Panel.hpp>
 #include <entt/entity/entity.hpp>
 #include <memory>
@@ -35,6 +36,7 @@ namespace thr::ecs {
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
         m_gui.setFont(thr::ecs::configs::singleton().get_tgui_font());
         m_gui.setTextSize(14u);
+        m_gui.setKeyboardNavigationEnabled(true);
         tgui::Panel::Ptr game_screen_panel = tgui::Panel::create();
         game_screen_panel->getRenderer()->setBackgroundColor(tgui::Color::Transparent);
         m_gui.add(game_screen_panel, game_screen_panel_name);
