@@ -40,14 +40,15 @@ if(THR_BUILD_BASE_TESTS)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
 
 	# 构建程序
-
-	build_test_executable(
+	set(build_list
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_assert_msg.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_floating_point_compare.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_sfml_helper.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_overload.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_observable.cpp
 	)
+	build_test_executable("${build_list}")
+	unset(build_list)
 
 	# 添加测试支持
 	add_test(NAME RunTestBase3 COMMAND test_floating_point_compare)
@@ -77,13 +78,15 @@ if(THR_BUILD_ECS_TESTS)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
 
 	# 构建程序
-	build_test_executable(
+	set(build_list
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_scene_system.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_serialization_system.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_render_system.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_render_system.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_serialization_system.cpp
 	)
+	build_test_executable("${build_list}")
+	unset(build_list)
 
 	# 添加测试支持
 	add_test(NAME RunTestEcs2 COMMAND test_scene_system)
