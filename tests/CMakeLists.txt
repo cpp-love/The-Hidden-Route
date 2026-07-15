@@ -12,69 +12,41 @@ else()
 	option(THR_BUILD_ECS_TESTS "Build the tests in the tests/ecs directory" OFF)
 endif()
 
+function(build_test_executable sources)
+	foreach(source IN LISTS sources)
+		# 构建程序
+
+		cmake_path(GET source STEM target_name)
+		list(APPEND target_names ${target_name})
+		# 设置链接文件
+		add_executable(${target_name} ${source})
+		# 链接第三方库
+		target_link_libraries(${target_name}
+			PUBLIC
+				thr_compiler_flags
+				thr
+		)
+	endforeach()
+
+	# 添加安装支持
+	install(
+		TARGETS ${target_names}
+		DESTINATION bin/tests
+	)
+endfunction()
+
 if(THR_BUILD_BASE_TESTS)
 	# 设置输出目录
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
 
 	# 构建程序
 
-	# 设置链接文件
-	add_executable(test_assert_msg
+	build_test_executable(
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_assert_msg.cpp
-	)
-	add_executable(test_floating_point_compare
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_floating_point_compare.cpp
-	)
-	add_executable(test_sfml_helper
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_sfml_helper.cpp
-	)
-	add_executable(test_overload
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_overload.cpp
-	)
-	add_executable(test_observable
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/base/test_observable.cpp
-	)
-
-	# 链接第三方库
-	target_link_libraries(test_assert_msg
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	target_link_libraries(test_floating_point_compare
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	target_link_libraries(test_sfml_helper
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	target_link_libraries(test_overload
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	target_link_libraries(test_observable
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	# 添加安装支持
-	install(
-		TARGETS
-			test_assert_msg
-			test_floating_point_compare
-			test_sfml_helper
-			test_overload
-			test_observable
-		DESTINATION bin/tests
 	)
 
 	# 添加测试支持
@@ -105,62 +77,13 @@ if(THR_BUILD_ECS_TESTS)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests)
 
 	# 构建程序
-
-	# 设置链接文件
-	add_executable(test_scene_system
+	build_test_executable(
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_scene_system.cpp
-	)
-	add_executable(test_level_serialization_system
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_serialization_system.cpp
-	)
-	add_executable(test_level_render_system
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_render_system.cpp
-	)
-	add_executable(test_level_graph_render_system
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_render_system.cpp
-	)
-	add_executable(test_level_graph_serialization_system
 		${CMAKE_CURRENT_SOURCE_DIR}/thr/ecs/systems/test_level_graph_serialization_system.cpp
 	)
-
-	# 链接第三方库
-	target_link_libraries(test_scene_system
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-	target_link_libraries(test_level_serialization_system
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-	target_link_libraries(test_level_render_system
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-	target_link_libraries(test_level_graph_render_system
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-	target_link_libraries(test_level_graph_serialization_system
-		PUBLIC
-			thr_compiler_flags
-			thr
-	)
-
-	# 添加安装支持
-	install(
-		TARGETS
-			test_scene_system
-			test_level_serialization_system
-			test_level_render_system
-			test_level_graph_render_system
-			test_level_graph_serialization_system
-		DESTINATION bin/tests
-	)
-	install(FILES maze.json DESTINATION bin/tests)
 
 	# 添加测试支持
 	add_test(NAME RunTestEcs2 COMMAND test_scene_system)
