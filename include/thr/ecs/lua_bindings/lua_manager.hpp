@@ -51,11 +51,10 @@ namespace thr::ecs::lua_bindings {
          * @param [in] path Lua 脚本路径。
          * @return std::optional<std::string> 可能的错误。
          */
-        std::optional<std::string> load_and_run_script_file(const std::filesystem::path &path) {
-            auto result = m_lua.script_file(path.generic_string(), &sol::script_pass_on_error);
+        std::optional<std::string> load_and_run_script_file(const std::filesystem::path &path) noexcept {
+            auto result = m_lua.safe_script_file(path.generic_string());
             if (!result.valid()) {
-                sol::error err = result;
-                return err.what();
+                return result.get<sol::error>().what();
             }
             return std::nullopt;
         }
@@ -68,13 +67,13 @@ namespace thr::ecs::lua_bindings {
          * @return std::optional<std::string> 可能的错误。
          */
         template <typename... Args>
-        std::optional<std::string> call_function(std::string_view function_name, Args &&...args) {
+        std::optional<std::string> call_function(std::string_view function_name,
+                                                 Args &&...args) noexcept {
             sol::protected_function function = m_lua[function_name];
             if (function.valid()) {
                 sol::protected_function_result result = function(std::forward<Args>(args)...);
                 if (!result.valid()) {
-                    sol::error err = result;
-                    return err.what();
+                    return result.get<sol::error>().what();
                 }
             }
             return std::nullopt;

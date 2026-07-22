@@ -4,6 +4,10 @@
 
 ## \[0.1.0-8] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
+### Added(新增)
+
+1. 进一步添加对 Lua 脚本的支持。
+
 ### Changed(修改)
 
 1. 简化了 `mainhelper::game_screen` 的更新玩家流程。

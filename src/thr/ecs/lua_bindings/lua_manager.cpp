@@ -2,8 +2,8 @@
  * @file lua_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了与 Lua 沟通的管理类。
- * @version 0.1.0-1
- * @date 2026-07-09
+ * @version 0.1.0-2
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -28,26 +28,40 @@ namespace thr::ecs::lua_bindings {
                              sol::lib::string);
 
         // 辅助函数。
-        auto concat = [tostring = m_lua["tostring"].get<sol::function>()](sol::variadic_args args) {
-            std::string msg;
+        auto generate_message = [tostring =
+                                     m_lua["tostring"].get<sol::function>()](sol::variadic_args args) {
+            std::string msg = "[from Lua] ";
+            bool        is_first = true;
             for (const auto &var : args) {
-                if (!msg.empty()) {
+                if (!is_first) {
                     msg += '\t';
                 }
                 msg += tostring(var);
+                is_first = false;
             }
             return msg;
         };
 
         // 注册一系列仿 spdlog 式的输出函数。
         sol::table logger = m_lua.create_table("Logger");
-        logger.set_function("trace", [concat](sol::variadic_args args) { spdlog::trace(concat(args)); });
-        logger.set_function("debug", [concat](sol::variadic_args args) { spdlog::debug(concat(args)); });
-        logger.set_function("info", [concat](sol::variadic_args args) { spdlog::info(concat(args)); });
-        logger.set_function("warn", [concat](sol::variadic_args args) { spdlog::warn(concat(args)); });
-        logger.set_function("error", [concat](sol::variadic_args args) { spdlog::error(concat(args)); });
-        logger.set_function("critical",
-                            [concat](sol::variadic_args args) { spdlog::critical(concat(args)); });
+        logger.set_function("trace", [generate_message](sol::variadic_args args) {
+            spdlog::trace(generate_message(args));
+        });
+        logger.set_function("debug", [generate_message](sol::variadic_args args) {
+            spdlog::debug(generate_message(args));
+        });
+        logger.set_function("info", [generate_message](sol::variadic_args args) {
+            spdlog::info(generate_message(args));
+        });
+        logger.set_function("warn", [generate_message](sol::variadic_args args) {
+            spdlog::warn(generate_message(args));
+        });
+        logger.set_function("error", [generate_message](sol::variadic_args args) {
+            spdlog::error(generate_message(args));
+        });
+        logger.set_function("critical", [generate_message](sol::variadic_args args) {
+            spdlog::critical(generate_message(args));
+        });
 
         // 注册 Vector2f 到 Lua。
         m_lua.new_usertype<sf::Vector2f>(

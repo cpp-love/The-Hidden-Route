@@ -25,6 +25,7 @@
 #include <memory>
 #include <ranges>
 #include <spdlog/spdlog.h>
+#include <utility>
 
 namespace thr::ecs {
 
@@ -51,11 +52,7 @@ namespace thr::ecs {
         while (!m_pending_states.empty()) {
             auto state = std::move(m_pending_states.back());
             m_pending_states.pop_back();
-            state->bind(m_dispatcher, m_window, m_gui);
-            if (!m_states.empty()) {
-                m_states.back()->on_pause();
-            }
-            m_states.push_back(std::move(state));
+            push_state(std::move(state));
         }
     }
 
@@ -109,14 +106,18 @@ namespace thr::ecs {
                 // 窗口更扁，黑边在左右。
                 viewport.size.x = old_view_ratio / window_ratio;
                 viewport.position.x = (1 - viewport.size.x) / 2;
-                game_screen_panel->setPosition({viewport.position.x * resized->size.x, 0});
-                game_screen_panel->setSize({viewport.size.x * resized->size.x, resized->size.y});
+                game_screen_panel->setPosition(
+                    {viewport.position.x * static_cast<float>(resized->size.x), 0});
+                game_screen_panel->setSize(
+                    {viewport.size.x * static_cast<float>(resized->size.x), resized->size.y});
             } else {
                 // 窗口更瘦高，黑边在上下。
                 viewport.size.y = window_ratio / old_view_ratio;
                 viewport.position.y = (1 - viewport.size.y) / 2;
-                game_screen_panel->setPosition({0, viewport.position.y * resized->size.y});
-                game_screen_panel->setSize({resized->size.x, viewport.size.y * resized->size.y});
+                game_screen_panel->setPosition(
+                    {0, viewport.position.y * static_cast<float>(resized->size.y)});
+                game_screen_panel->setSize(
+                    {resized->size.x, viewport.size.y * static_cast<float>(resized->size.y)});
             }
 
             // 创建并应用新的视口。
@@ -155,8 +156,8 @@ namespace thr::ecs {
         process_pending_states();
     }
     void game_state_manager::draw() noexcept {
-        /// @todo 添加更好的方式
-        // 后面覆盖前面，所以前面先绘制
+        /// @todo 添加更好的方式。
+        // 后面覆盖前面，所以前面先绘制。
         std::ranges::subrange last_unblocked_range{[&] {
                                                        for (auto it = m_states.rbegin();
                                                             it != m_states.rend(); ++it) {

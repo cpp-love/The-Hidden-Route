@@ -2,8 +2,8 @@
  * @file game_states.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了一些具体的游戏状态。
- * @version 0.1.0-6
- * @date 2026-07-14
+ * @version 0.1.0-7
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -95,11 +95,12 @@ namespace mainhelper {
 
       private:
         /// @brief 连接调度器。
-        void           connect_dispatcher() noexcept;
+        void                                connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
-        void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false; ///< 是否暂停。
-        entt::registry m_registry;          ///< 注册表。
+        void                                disconnect_dispatcher() noexcept;
+        bool                                m_is_paused = false; ///< 是否暂停。
+        entt::registry                      m_registry;          ///< 注册表。
+        thr::ecs::lua_bindings::lua_manager m_lua_manager;       ///< Lua 管理器。
     };
 
     /// @brief 关卡图界面状态类。
@@ -145,6 +146,7 @@ namespace mainhelper {
         bool           m_is_paused = false;                ///< 是否暂停。
         entt::entity   m_current_level_entity{entt::null}; ///< 当前在玩的关卡对应的实体。
         entt::registry m_registry;                         ///< 注册表。
+        thr::ecs::lua_bindings::lua_manager m_lua_manager; ///< Lua 管理器。
     };
 
     /// @brief 游戏界面状态类。

@@ -70,7 +70,14 @@ namespace mainhelper {
     void settings_menu::disconnect_dispatcher() noexcept {}
 
     // main_menu
-    main_menu::main_menu() noexcept { connect_dispatcher(); }
+    main_menu::main_menu() noexcept : m_lua_manager(m_registry) {
+        connect_dispatcher();
+        auto script_path = thr::get_existing_full_path("assets/lua_scripts/main_menu.lua").value();
+        if (std::optional error = m_lua_manager.load_and_run_script_file(script_path)) {
+            spdlog::warn("Failed to load and run script file {}: {}", script_path.generic_string(),
+                         *error);
+        }
+    }
     main_menu::~main_menu() noexcept {
         tgui::Button::Ptr start_button = m_global_gui->get<tgui::Button>("start_button");
         m_global_gui->remove(start_button);
@@ -98,18 +105,28 @@ namespace mainhelper {
     }
     bool main_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
     void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
-    void main_menu::draw() noexcept {}
+    void main_menu::draw() noexcept {
+        // draw texts
+        auto texts = m_registry.view<sf::Text>();
+        for (const auto &[entity, text] : texts.each()) { m_window->draw(text); }
+    }
     void main_menu::connect_dispatcher() noexcept {}
     void main_menu::disconnect_dispatcher() noexcept {}
 
     // level_graph_screen
-    level_graph_screen::level_graph_screen() noexcept {
+    level_graph_screen::level_graph_screen() noexcept : m_lua_manager(m_registry) {
         // adapted from main_helper::game_screen::game_screen
         nlohmann::json json;
         std::ifstream  fin(thr::get_existing_full_path("assets/json/level_graph.json")
                                .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_graph_serialization_system::deserialize_from_json(m_registry, json);
+        auto script_path =
+            thr::get_existing_full_path("assets/lua_scripts/level_graph_screen.lua").value();
+        if (std::optional error = m_lua_manager.load_and_run_script_file(script_path)) {
+            spdlog::warn("Failed to load and run script file {}: {}", script_path.generic_string(),
+                         *error);
+        }
     }
     level_graph_screen::~level_graph_screen() noexcept {
         // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
@@ -190,6 +207,9 @@ namespace mainhelper {
                 m_outside_dispather->enqueue<thr::ecs::game_state_push_event>(
                     std::make_unique<game_screen>(node.name));
             });
+        // draw texts
+        auto texts = m_registry.view<sf::Text>();
+        for (const auto &[entity, text] : texts.each()) { m_window->draw(text); }
     }
     void level_graph_screen::on_level_finished([[maybe_unused]] level_finished_event event) noexcept {
         const auto &node = m_registry.get<thr::ecs::level_node>(m_current_level_entity);
