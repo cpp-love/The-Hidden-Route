@@ -33,8 +33,6 @@
 class test_state : public thr::ecs::game_state_base {
   public:
     test_state() noexcept {
-        thr::ecs::segment::connect_listener(m_registry);
-        thr::ecs::node::connect_listener(m_registry);
         std::print("请输入新关卡的 json 文件：");
         (void)std::fflush(stdout);
         std::filesystem::path path;
@@ -100,7 +98,7 @@ int                    main() {
     SetConsoleCP(CP_UTF8);
 #endif // _WIN32
 
-    sf::RenderWindow             window(sf::VideoMode(video_mode), "test maze serialization system");
+    sf::RenderWindow             window(sf::VideoMode(video_mode), "test level serialization system");
     thr::ecs::game_state_manager manager(window);
     manager.push_state(std::make_unique<test_state>());
 

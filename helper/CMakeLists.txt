@@ -11,14 +11,22 @@ if(THR_BUILD_HELPER)
 	add_executable(generate_file_version
 		${CMAKE_CURRENT_SOURCE_DIR}/generate_file_version.cpp
 	)
+	add_executable(generate_level
+		${CMAKE_CURRENT_SOURCE_DIR}/generate_level.cpp
+	)
 
 	# 链接第三方库
 	target_link_libraries(generate_file_version
 		PUBLIC thr_compiler_flags
 	)
+	target_link_libraries(generate_level
+		PUBLIC
+			thr_compiler_flags
+			thr
+	)
 
 	# 添加安装支持
-	install(TARGETS generate_file_version DESTINATION bin/helper)
+	install(TARGETS generate_file_version generate_level DESTINATION bin/helper)
 	install(
 		PROGRAMS
 			generate_code_issues.py

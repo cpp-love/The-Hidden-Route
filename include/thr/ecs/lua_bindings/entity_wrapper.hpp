@@ -50,7 +50,7 @@ namespace thr::ecs::lua_bindings {
 
         /**
          * @brief 获取注册表。
-         * @return entt::entity 注册表。
+         * @return std::reference_wrapper<entt::registry> 注册表。
          * @warning 此函数不应暴露给 Lua！
          */
         [[nodiscard]] std::reference_wrapper<entt::registry> get_registry() const noexcept {

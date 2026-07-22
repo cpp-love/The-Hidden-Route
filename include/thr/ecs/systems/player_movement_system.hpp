@@ -1,9 +1,9 @@
 /**
  * @file player_movement_system.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
- * @brief 声明了玩家移动系统。
- * @version 0.1.0-1
- * @date 2026-05-30
+ * @brief 定义了玩家移动系统。
+ * @version 0.1.0-2
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -21,6 +21,7 @@ namespace thr::ecs {
     /// @brief 玩家移动系统。
     class player_movement_system {
       public:
+        static constexpr float move_epsilon = 5.f; //< 移动的容错间隔。
         /**
          * @brief 更新玩家。
          * @param [in] registry 注册表。
@@ -30,6 +31,16 @@ namespace thr::ecs {
          */
         static void update(entt::registry &registry, entt::entity player_entity, float delta_length,
                            direction dir) noexcept;
+        /**
+         * @brief 更新玩家。
+         * @param [in] registry 注册表。
+         * @param [in] player_entity 玩家实体。
+         * @param [in] delta_length 更新距离。
+         * @param [in] cdir 玩家行走方向（综合方向）。
+         */
+        static void update(entt::registry &registry, entt::entity player_entity, float delta_length,
+                           combined_direction cdir) noexcept;
+
         /**
          * @brief 撤销上一次操作。
          * @param [in] registry 注册表。

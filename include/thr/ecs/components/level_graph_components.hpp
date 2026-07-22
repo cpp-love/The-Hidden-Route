@@ -27,12 +27,12 @@ namespace thr::ecs {
         std::vector<entt::entity> relative_entities; ///< 邻接的节点所属的实体。
         sf::Vector2f              position;          ///< 节点在关卡图中的位置。
         std::string               name;              ///< 节点名称。
-        bool                      locked{};          ///< 节点是否锁住。
+        bool                      locked{true};      ///< 节点是否锁住。
     };
 
     /// @brief 起始关卡。
     struct start_level {
-        entt::entity entity{}; ///< 起始关卡对应的实体。
+        entt::entity entity{entt::null}; ///< 起始关卡对应的实体。
     };
 
 } // namespace thr::ecs

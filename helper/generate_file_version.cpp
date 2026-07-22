@@ -90,9 +90,8 @@ bool generate_one_file(const std::filesystem::path &workspace_folder, const std:
     file_name_replaced.replace(file_name_replaced.find('.'), 1, "_");
     const auto file_ext = file.extension(); //< 文件扩展名。
 
-    if ((file_ext != ".cpp" && file_ext != ".hpp" && file_ext != ".c" && file_ext != ".h"
-         && file_ext != ".cc" && file_ext != ".hh" && file_ext != ".cxx" && file_ext != ".hxx"
-         && file_ext != ".py")) {
+    if (file_ext != ".cpp" && file_ext != ".hpp" && file_ext != ".c" && file_ext != ".h"
+        && file_ext != ".cc" && file_ext != ".hh" && file_ext != ".cxx" && file_ext != ".hxx") {
         // 避免生成无关文件。
         return true;
     }

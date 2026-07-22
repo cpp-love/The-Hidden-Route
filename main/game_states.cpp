@@ -2,8 +2,8 @@
  * @file game_states.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了一些具体的游戏状态。
- * @version 0.1.0-7
- * @date 2026-07-14
+ * @version 0.1.0-8
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -271,7 +271,7 @@ namespace mainhelper {
         return false;
     }
     void game_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
-        constexpr float velocity_per_millisecond = 0.2f;
+        constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
 
         if (m_winned_time.has_value()) {
             using namespace std::chrono_literals;
@@ -283,41 +283,28 @@ namespace mainhelper {
         }
 
         if (m_window->hasFocus()) {
-            float delta_length = velocity_per_millisecond * delta_time.count();
-            // NOLINTNEXTLINE(readability-identifier-length)
-            bool  up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
-                       || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up);
-            bool  down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)
-                         || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down);
-            bool  left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)
-                         || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left);
-            bool  right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
-                          || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right);
+            const float                  move_length = velocity_per_millisecond * delta_time.count();
 
-            bool  updated = false;
-            if (up) {
-                if (!down) {
-                    thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
-                                                             thr::ecs::direction::up);
-                    updated = true;
-                }
-            } else if (down) {
-                thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
-                                                         thr::ecs::direction::down);
-                updated = true;
+            thr::ecs::combined_direction cdir = thr::ecs::combined_direction::none; //< 移动方向。
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
+                || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+                cdir |= thr::ecs::combined_direction::up;
             }
-            if (left) {
-                if (!right) {
-                    thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
-                                                             thr::ecs::direction::left);
-                    updated = true;
-                }
-            } else if (right) {
-                thr::ecs::player_movement_system::update(m_registry, m_player_entity, delta_length,
-                                                         thr::ecs::direction::right);
-                updated = true;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)
+                || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                cdir |= thr::ecs::combined_direction::down;
             }
-            if (updated) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)
+                || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+                cdir |= thr::ecs::combined_direction::left;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
+                || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+                cdir |= thr::ecs::combined_direction::right;
+            }
+
+            if (cdir != thr::ecs::combined_direction::none) {
+                thr::ecs::player_movement_system::update(m_registry, m_player_entity, move_length, cdir);
                 // 若走过有特殊标签的实体，触发 Lua 脚本。
                 if (m_lua_manager.has_value()) {
                     for (const auto &[entity, on_ground] :

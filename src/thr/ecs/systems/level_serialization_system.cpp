@@ -2,8 +2,8 @@
  * @file level_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
- * @version 0.1.0-5
- * @date 2026-07-14
+ * @version 0.1.0-6
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -47,15 +47,15 @@ namespace thr::ecs {
         segments.reserve(list.size());
         std::map<entt::entity, std::size_t> list_map;
         for (auto [idx, entity] : list | std::views::enumerate) { list_map.try_emplace(entity, idx); }
+        auto transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
+            auto iter = list_map.find(entity);
+            if (iter == list_map.end()) {
+                return {};
+            }
+            return iter->second;
+        };
         for (entt::entity entity : list) {
             const auto &seg = registry.get<segment>(entity);
-            auto        transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
-                auto iter = list_map.find(entity);
-                if (iter == list_map.end()) {
-                    return {};
-                }
-                return iter->second;
-            };
             segments.push_back({{"prev", seg.prev.and_then(transform_entity)},
                                 {"next", seg.next.and_then(transform_entity)},
                                 {"start_center", seg.start_center},
@@ -82,8 +82,9 @@ namespace thr::ecs {
 
         // serialize level_info
         const auto &level_info = registry.ctx().get<thr::ecs::level_info>();
-        json["level_info"] = {{"start_segment_entity", level_info.start_segment_entity},
-                              {"end_segment_entity", level_info.end_segment_entity}};
+        json["level_info"] = {
+            {"start_segment_entity", transform_entity(level_info.start_segment_entity)},
+            {"end_segment_entity", transform_entity(level_info.end_segment_entity)}};
 
         return json;
     }

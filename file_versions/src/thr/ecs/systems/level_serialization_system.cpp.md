@@ -2,17 +2,23 @@
 
 # level_serialization_system.cpp 版本历史
 
+## \[0.1.0-6] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Fixed(bug 修复)
+
+1. 修复了序列化时直接向 `level_info` 中存储实体 id 的错误做法。
+
 ## \[0.1.0-5] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 
-1. 为起点和终点添加 `start` 和 `end` 文本实体。
+1. 在反序列化时为起点和终点添加 `start` 和 `end` 文本实体。
 
 ## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 
-1. 同步 [`level.schema.json`](../../../../../schema/level-v0.1.0-2.schema.json) 的新增内容。
+1. 同步 `level.schema.json` 的新增内容。
 
 ### Changed(修改)
 
@@ -33,7 +39,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 同步 [`level.schema.json`](../../../../../schema/level-v0.1.0-2.schema.json) 的修改。
+1. **BREKING(不向下兼容):** 同步 `level.schema.json` 的修改。
 
 ### Fixed(bug 修复)
 

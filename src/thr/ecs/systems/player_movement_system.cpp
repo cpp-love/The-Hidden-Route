@@ -2,8 +2,8 @@
  * @file player_movement_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了玩家移动系统。
- * @version 0.1.0-3
- * @date 2026-07-01
+ * @version 0.1.0-4
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -94,7 +94,6 @@ namespace thr::ecs {
             }
         } else {
             // 地下模式。
-            constexpr float epsilon = 5.f; //< 容错间隔。
             THR_ASSERT_MSG(under_ground != nullptr, "实体错误地同时没有 `thr::ecs::player_on_ground` 和 "
                                                     "`thr::ecs::player_under_ground` 组件。");
             sf::Vector2f             prev_position = under_ground->position;
@@ -120,8 +119,9 @@ namespace thr::ecs {
                     sf::Vector2f  end = rect.position + rect.size;
                     auto [minx, maxx] = std::minmax(start.x, end.x);
                     auto [miny, maxy] = std::minmax(start.y, end.y);
-                    return sf::FloatRect{{minx - epsilon, miny - epsilon},
-                                         {maxx + (2 * epsilon) - minx, maxy + (2 * epsilon) - miny}};
+                    return sf::FloatRect{
+                        {minx - move_epsilon, miny - move_epsilon},
+                        {maxx + (2 * move_epsilon) - minx, maxy + (2 * move_epsilon) - miny}};
                 }();
                 // 检测前面的两点。
                 sf::Vector2f to_front =
@@ -162,24 +162,24 @@ namespace thr::ecs {
                     sf::Vector2f size;
                     switch (dir) {
                         case direction::right:
-                            position += {epsilon, (node::side_length / 2) + epsilon};
-                            size -=
-                                {node::side_length + (2 * epsilon), node::side_length + (2 * epsilon)};
+                            position += {move_epsilon, (node::side_length / 2) + move_epsilon};
+                            size -= {node::side_length + (2 * move_epsilon),
+                                     node::side_length + (2 * move_epsilon)};
                             break;
                         case direction::left:
-                            position -= {epsilon, (node::side_length / 2) + epsilon};
-                            size +=
-                                {node::side_length + (2 * epsilon), node::side_length + (2 * epsilon)};
+                            position -= {move_epsilon, (node::side_length / 2) + move_epsilon};
+                            size += {node::side_length + (2 * move_epsilon),
+                                     node::side_length + (2 * move_epsilon)};
                             break;
                         case direction::down:
-                            position += {(node::side_length / 2) + epsilon, epsilon};
-                            size -=
-                                {node::side_length + (2 * epsilon), node::side_length + (2 * epsilon)};
+                            position += {(node::side_length / 2) + move_epsilon, move_epsilon};
+                            size -= {node::side_length + (2 * move_epsilon),
+                                     node::side_length + (2 * move_epsilon)};
                             break;
                         case direction::up:
-                            position -= {(node::side_length / 2) + epsilon, epsilon};
-                            size +=
-                                {node::side_length + (2 * epsilon), node::side_length + (2 * epsilon)};
+                            position -= {(node::side_length / 2) + move_epsilon, move_epsilon};
+                            size += {node::side_length + (2 * move_epsilon),
+                                     node::side_length + (2 * move_epsilon)};
                             break;
                     }
                     return {position, size};
@@ -194,6 +194,23 @@ namespace thr::ecs {
             }
             registry.replace<player_under_ground>(player_entity, prev_position, prev_dir);
         }
+    }
+
+    void player_movement_system::update(entt::registry &registry, entt::entity player_entity,
+                                        float delta_length, combined_direction cdir) noexcept {
+        if (cdir == combined_direction::none) {
+            return;
+        }
+        if (is_orthogonal_directions(cdir)) {
+            update(registry, player_entity, delta_length, *combined_direction_to_direction(cdir));
+            return;
+        }
+
+        // is_diagonal_directions(cdir)
+        update(registry, player_entity, delta_length / 2,
+               *combined_direction_to_direction(get_horizontal_component(cdir)));
+        update(registry, player_entity, delta_length / 2,
+               *combined_direction_to_direction(get_vertical_component(cdir)));
     }
 
     /// @todo 添加恢复操作，并解决同时按下两个相邻方向键会产生大量记录导致撤回困难的问题。

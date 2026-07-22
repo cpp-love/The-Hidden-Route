@@ -39,6 +39,8 @@
  * 
  * \subpage generate_file_version_cpp
  * 
+ * \subpage generate_level_cpp
+ * 
  * \subpage level_components_hpp
  * 
  * \subpage level_graph_components_hpp

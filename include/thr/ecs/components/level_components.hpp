@@ -20,8 +20,8 @@ namespace thr::ecs {
 
     /// @brief 关卡的基本信息。
     struct level_info {
-        entt::entity start_segment_entity; ///< 起始段落对应的实体。
-        entt::entity end_segment_entity;   ///< 结束段落对应的实体。
+        entt::entity start_segment_entity{entt::null}; ///< 起始段落对应的实体。
+        entt::entity end_segment_entity{entt::null};   ///< 结束段落对应的实体。
     };
 
     /// @brief 关卡对应的脚本。

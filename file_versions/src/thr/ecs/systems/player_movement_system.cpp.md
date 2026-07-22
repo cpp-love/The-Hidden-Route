@@ -2,6 +2,12 @@
 
 # player_movement_system.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 实现函数 `thr::ecs::player_movement_system::update` 对综合方向的重载。
+
 ## \[0.1.0-3] - 2026-07-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Fixed(bug 修复)

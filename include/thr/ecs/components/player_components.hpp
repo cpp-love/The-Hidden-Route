@@ -38,7 +38,7 @@ namespace thr::ecs {
          */
         static float     side_length() { return configs::singleton().player_on_ground_side_length; }
 
-        entt::entity     segment_entity; ///< 玩家所在线段所属的实体。
+        entt::entity     segment_entity{entt::null}; ///< 玩家所在线段所属的实体。
     };
 
     /// @brief 在地面下的玩家。
@@ -54,8 +54,8 @@ namespace thr::ecs {
          */
         static float     side_length() { return configs::singleton().player_under_ground_side_length; }
 
-        sf::Vector2f     position;         ///< 玩家所在位置。
-        std::optional<direction> prev_dir; ///< 玩家上一次走的方向。
+        sf::Vector2f     position;           ///< 玩家所在位置。
+        std::optional<direction> prev_dir{}; ///< 玩家上一次走的方向。
 
         /**
          * @brief 在构造 @ref player_under_ground 时调用的函数，用于设置其所属场景。

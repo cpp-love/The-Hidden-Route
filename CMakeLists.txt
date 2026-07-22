@@ -29,7 +29,7 @@ configure_file(${PROJECT_SOURCE_DIR}/Doxyfile.in ${PROJECT_SOURCE_DIR}/Doxyfile)
 add_library(thr_compiler_flags INTERFACE)
 
 # 添加编译器版本
-target_compile_features(thr_compiler_flags INTERFACE cxx_std_23)
+target_compile_features(thr_compiler_flags INTERFACE cxx_std_26)
 
 # 添加编译器警告标志
 set(gcc_like_cxx $<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>)

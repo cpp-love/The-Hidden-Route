@@ -2,6 +2,16 @@
 
 # maze_components.hpp 版本历史
 
+## \[0.1.0-4] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 为类 `thr::ecs::segment` 添加方法 `get_end_center`。
+
+### Fixed(bug 修复)
+
+1. 修复 `thr::ecs::line_strips::draw` 绘制的圆形没有渲染颜色的问题。
+
 ## \[0.1.0-3] - 2026-06-19 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

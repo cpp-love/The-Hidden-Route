@@ -2,8 +2,8 @@
  * @file maze_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了迷宫组件。
- * @version 0.1.0-3
- * @date 2026-06-19
+ * @version 0.1.0-4
+ * @date 2026-07-22
  * 
  * @copyright cpp-love
  * 
@@ -52,6 +52,14 @@ namespace thr::ecs {
         float                       length = 0.f;          ///< 路径长度。
         float                       walked_precent = 0.f;  ///< 被走过的百分比。(范围：0~1)
         direction                   dir = direction::left; ///< 从起始位置到终止位置的方向。
+
+        /**
+         * @brief 获取路径终止位置中心。
+         * @return sf::Vector2f 路径终止位置中心。
+         */
+        [[nodiscard]] sf::Vector2f  get_end_center() const noexcept {
+            return start_center + direction_to_vector2f(dir, length);
+        }
 
         /**
          * @brief 获取包围范围。
@@ -184,9 +192,9 @@ namespace thr::ecs {
 
     /// @brief 路径中的“死胡同”。
     struct node {
-        constexpr static float side_length = 20.f; ///< “死胡同”的边长。
-        sf::Vector2f           position;           ///< 中心位置。
-        entt::entity           segment_entity{};   ///< 指向的节点位置。
+        constexpr static float side_length = 20.f;         ///< “死胡同”的边长。
+        sf::Vector2f           position;                   ///< 中心位置。
+        entt::entity           segment_entity{entt::null}; ///< 指向的节点位置。
 
         /**
          * @brief 在构造 @ref node 时调用的函数，用于设置其所属场景。
@@ -300,6 +308,7 @@ namespace thr::ecs {
                 for (const sf::Vector2f &point : strips) {
                     sf::CircleShape circle{width / 2};
                     circle.setPosition(point - sf::Vector2f{width / 2, width / 2});
+                    circle.setFillColor(color);
                     target.draw(circle, states);
                 }
             }

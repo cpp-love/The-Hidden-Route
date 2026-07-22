@@ -2,6 +2,12 @@
 
 # game_states.cpp 版本历史
 
+## \[0.1.0-8] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 简化了 `mainhelper::game_screen` 的更新玩家流程。
+
 ## \[0.1.0-7] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

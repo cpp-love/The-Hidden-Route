@@ -142,9 +142,9 @@ namespace mainhelper {
         void           connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
         void           disconnect_dispatcher() noexcept;
-        bool           m_is_paused = false;      ///< 是否暂停。
-        entt::entity   m_current_level_entity{}; ///< 当前在玩的关卡对应的实体。
-        entt::registry m_registry;               ///< 注册表。
+        bool           m_is_paused = false;                ///< 是否暂停。
+        entt::entity   m_current_level_entity{entt::null}; ///< 当前在玩的关卡对应的实体。
+        entt::registry m_registry;                         ///< 注册表。
     };
 
     /// @brief 游戏界面状态类。
@@ -185,11 +185,11 @@ namespace mainhelper {
         void                                               connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
         void                                               disconnect_dispatcher() noexcept;
-        bool                                               m_is_paused = false; ///< 是否暂停。
-        std::optional<thr::ecs::clock::time_point>         m_winned_time;       ///< 胜利时间。
-        std::optional<thr::ecs::lua_bindings::lua_manager> m_lua_manager;       ///< Lua 管理器。
-        entt::registry                                     m_registry;          ///< 注册表。
-        entt::entity                                       m_player_entity;     ///< 玩家实体。
+        bool                                               m_is_paused = false;         ///< 是否暂停。
+        std::optional<thr::ecs::clock::time_point>         m_winned_time;               ///< 胜利时间。
+        std::optional<thr::ecs::lua_bindings::lua_manager> m_lua_manager;               ///< Lua 管理器。
+        entt::registry                                     m_registry;                  ///< 注册表。
+        entt::entity                                       m_player_entity{entt::null}; ///< 玩家实体。
     };
 
     /// @brief 暂停界面状态类。
