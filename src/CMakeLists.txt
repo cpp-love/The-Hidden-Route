@@ -13,8 +13,17 @@ if(LUA_VERSION VERSION_GREATER_EQUAL 5.5)
 	message(FATAL_ERROR "Lua version ${LUA_VERSION} is too high; need < 5.5")
 endif()
 
-CPMAddPackage("gh:skypjack/sol2@3.3.0")
-CPMAddPackage("gh:skypjack/entt@3.15.0")
+CPMAddPackage("gh:skypjack/entt@3.16.0")
+CPMAddPackage(
+	NAME
+	sol2
+	GITHUB_REPOSITORY
+	ThePhD/sol2
+	VERSION
+	3.3.0
+	GIT_TAG
+	develop
+)
 CPMAddPackage(
 	NAME
 	nlohmann_json
@@ -22,6 +31,8 @@ CPMAddPackage(
 	nlohmann/json
 	VERSION
 	3.12.0
+	GIT_TAG
+	develop
 )
 CPMAddPackage(
 	NAME
@@ -39,7 +50,9 @@ CPMAddPackage(
 	GITHUB_REPOSITORY
 	SFML/SFML
 	VERSION
-	3.0.1
+	3.1.0
+	GIT_TAG
+	3.1.0
 	FIND_PACKAGE_ARGUMENTS
 	"COMPONENTS System Window Graphics"
 )
