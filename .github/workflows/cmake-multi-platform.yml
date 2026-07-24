@@ -13,7 +13,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  filter:
+    name: Filter out commits that don't need to build the project
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.filter.outputs.any_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Filter paths
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            any_changed:
+              - '.github/workflows/cmake-multi-platform.yml'
+              - 'helper/**'
+              - 'include/**'
+              - 'main/**'
+              - 'src/**'
+              - 'tests/**'
+              - 'CMakeLists.txt'
+              - 'CMakePresets.json'
+
   build:
+    needs: filter
+    if: needs.filter.outputs.any_changed == 'true'
+
+    name: Build and test projects
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
 
@@ -47,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -103,7 +130,7 @@ jobs:
             libflac-dev
 
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt') }}
@@ -111,7 +138,7 @@ jobs:
             ${{ runner.os }}-ccache-
 
       - name: Cache FetchContent dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.strings.outputs.build-output-dir }}/_deps
           key: ${{ runner.os }}-fetchcontent-${{ hashFiles('CMakeLists.txt') }}
