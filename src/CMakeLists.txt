@@ -8,90 +8,51 @@ file(GLOB_RECURSE SRC_FILES *.cpp)
 add_library(thr ${SRC_FILES})
 
 # 查找第三方库
-include(FetchContent)
-
-FetchContent_Declare(
-	EnTT
-	GIT_REPOSITORY
-	https://github.com/skypjack/entt.git
-	GIT_TAG
-	origin/main
-	FIND_PACKAGE_ARGS
-	3.15.0
-	QUIET
-)
-FetchContent_MakeAvailable(EnTT)
-
-FetchContent_Declare(
-	spdlog
-	GIT_REPOSITORY
-	https://github.com/gabime/spdlog.git
-	GIT_TAG
-	origin/v1.x
-	FIND_PACKAGE_ARGS
-	1.15.3
-	QUIET
-)
-set(SPDLOG_USE_STD_FORMAT ON)
-FetchContent_MakeAvailable(spdlog)
-
-FetchContent_Declare(
-	SFML
-	GIT_REPOSITORY
-	https://github.com/SFML/SFML.git
-	GIT_TAG
-	origin/master
-	FIND_PACKAGE_ARGS
-	3.0.1
-	COMPONENTS
-	Graphics
-	Window
-	System
-	QUIET
-)
-FetchContent_MakeAvailable(SFML)
-
-FetchContent_Declare(
-	TGUI
-	GIT_REPOSITORY
-	https://github.com/texus/tgui.git
-	GIT_TAG
-	origin/1.x
-	FIND_PACKAGE_ARGS
-	1.10.0
-	QUIET
-)
-set(TGUI_BACKEND SFML_GRAPHICS)
-FetchContent_MakeAvailable(TGUI)
-
-FetchContent_Declare(
-	nlohmann_json
-	GIT_REPOSITORY
-	https://github.com/nlohmann/json.git
-	GIT_TAG
-	origin/develop
-	FIND_PACKAGE_ARGS
-	3.12.0
-	QUIET
-)
-FetchContent_MakeAvailable(nlohmann_json)
-
 find_package(Lua 5.1 REQUIRED)
 if(LUA_VERSION VERSION_GREATER_EQUAL 5.5)
 	message(FATAL_ERROR "Lua version ${LUA_VERSION} is too high; need < 5.5")
 endif()
 
-FetchContent_Declare(
-	sol2
-	GIT_REPOSITORY
-	https://github.com/ThePhD/sol2
-	GIT_TAG
-	origin/develop
-	FIND_PACKAGE_ARGS
-	3.3.0
-	QUIET
+CPMAddPackage("gh:skypjack/sol2@3.3.0")
+CPMAddPackage("gh:skypjack/entt@3.15.0")
+CPMAddPackage(
+	NAME
+	nlohmann_json
+	GITHUB_REPOSITORY
+	nlohmann/json
+	VERSION
+	3.12.0
 )
-FetchContent_MakeAvailable(sol2)
+CPMAddPackage(
+	NAME
+	spdlog
+	GITHUB_REPOSITORY
+	gabime/spdlog
+	VERSION
+	1.15.3
+	OPTIONS
+	"SPDLOG_USE_STD_FORMAT ON"
+)
+CPMAddPackage(
+	NAME
+	SFML
+	GITHUB_REPOSITORY
+	SFML/SFML
+	VERSION
+	3.0.1
+	FIND_PACKAGE_ARGUMENTS
+	"COMPONENTS System Window Graphics"
+)
+CPMAddPackage(
+	NAME
+	TGUI
+	GITHUB_REPOSITORY
+	texus/TGUI
+	VERSION
+	1.10.0
+	OPTIONS
+	"TGUI_BACKEND SFML_GRAPHICS"
+)
 
 # 为 Lua 手动创建目标
 if(Lua_FOUND AND NOT TARGET Lua::Lua)

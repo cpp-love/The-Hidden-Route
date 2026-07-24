@@ -5,6 +5,10 @@ project(The-Hidden-Route
 	LANGUAGES CXX
 )
 
+# 引入 CPM.cmake 脚本
+set(CPM_USE_LOCAL_PACKAGES ON)
+include("cmake/CPM.cmake")
+
 # 取消编译器扩展
 set(CMAKE_CXX_EXTENSIONS OFF "Disable C++ compiler extensions")
 
