@@ -2,13 +2,15 @@
 
 # *The Hidden Route*
 
-**WARNING! This English document might be later than [the Chinese one](./README.zh.md)!**
-This is just because the author's English is not very good.
+[English](https://github.com/cpp-love/The-Hidden-Route#The-Hidden-Route) [简体中文](./README.zh.md#隐秘之路)
 
 ## Description
 
 Mazes, but the hidden route is defined by you.
 
+**Note: The whole project is still in the early development stage, and the game isn't ready to be played yet.**
+
+<!-- Following contents need to move to CHANGELOG.md
 #### Implemented contents
 
 1. [x] have implemented [some basic systems](./include/thr/ecs/systems)
@@ -16,3 +18,4 @@ Mazes, but the hidden route is defined by you.
 3. [x] have implemented [some miscellaneous](./include/thr/base/)
 4. [x] have implemented [the basic user movement](./include/thr/ecs/systems/player_movement_system.hpp)
 5. [x] have implemented the basic graphic user interface
+-->
