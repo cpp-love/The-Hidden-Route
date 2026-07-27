@@ -19,7 +19,7 @@ function Entity:destroy() end
 ---@return boolean # 添加是否成功。
 function Entity:add_tag(tag_id) end
 
----从实体移除标签。
+---从实体删除标签。
 ---@param self Entity 实体类。
 ---@param tag_id integer 标签编号。
 ---@return boolean # 移除是否成功。
@@ -30,3 +30,8 @@ function Entity:remove_tag(tag_id) end
 ---@param tag_id integer 标签编号。
 ---@return boolean # 是否拥有。
 function Entity:query_tag(tag_id) end
+
+---创建实体的进程序列。
+---@param self Entity 实体类。
+---@return ProcessSequence # 实体的进程序列。
+function Entity:create_process_sequence() end

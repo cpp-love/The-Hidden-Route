@@ -35,7 +35,7 @@ namespace thr::ecs::lua_bindings {
 
       public:
         /**
-         * @brief 构建一个 game api 对象。
+         * @brief 构造 game api 对象。
          * @param [in] registry 注册表。
          */
         explicit game_api(std::reference_wrapper<entt::registry> registry) noexcept
@@ -45,10 +45,10 @@ namespace thr::ecs::lua_bindings {
          * @brief 创建一个实体（包装器）。
          * @return entity_wrapper 新建的实体包装器。
          */
-        [[nodiscard]] entity_wrapper create_entity() { return {m_registry.get().create(), m_registry}; }
+        [[nodiscard]] entity_wrapper create_entity() { return {m_registry, m_registry.get().create()}; }
 
         /**
-         * @brief 查询带标签的实体。
+         * @brief 查询所有拥有指定标签的实体。
          * @param [in] tag_id 标签编号。
          * @return std::vector<entity_wrapper> 带标签的实体列表。
          */
@@ -57,7 +57,7 @@ namespace thr::ecs::lua_bindings {
             std::vector<entity_wrapper> vector;
             for (const auto &[entity, tag] : view.each()) {
                 if (tag.tag_ids.contains(tag_id)) {
-                    vector.emplace_back(entity, m_registry);
+                    vector.emplace_back(m_registry, entity);
                 }
             }
             return vector;
@@ -82,7 +82,7 @@ namespace thr::ecs::lua_bindings {
             sf_text.setLineAlignment(sf::Text::LineAlignment::Center);
             m_registry.get().emplace<sf::Text>(entity, sf_text);
 
-            return {entity, m_registry};
+            return {m_registry, entity};
         }
     };
 

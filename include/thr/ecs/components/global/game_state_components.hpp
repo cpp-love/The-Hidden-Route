@@ -29,7 +29,7 @@ namespace thr::ecs {
       public:
         using ptr = std::unique_ptr<game_state_base>;
 
-        /// @brief 构建一个 game_state_base 对象。
+        /// @brief 构造 game_state_base 对象。
         game_state_base() noexcept = default;
         /// @brief 删除复制构造函数。
         game_state_base(const game_state_base &rhs) noexcept = delete;

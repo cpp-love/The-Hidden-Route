@@ -153,7 +153,7 @@ namespace mainhelper {
     class game_screen : public thr::ecs::game_state_base {
       public:
         /**
-         * @brief 构建一个 game_screen 对象。
+         * @brief 构造 game_screen 对象。
          * @param [in] level_name 关卡名称。
          */
         explicit game_screen(std::string_view level_name) noexcept;

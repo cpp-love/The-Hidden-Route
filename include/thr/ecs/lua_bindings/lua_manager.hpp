@@ -12,15 +12,11 @@
 #ifndef THR_ECS_LUA_BINDINGS_LUA_MANAGER_HPP
 #define THR_ECS_LUA_BINDINGS_LUA_MANAGER_HPP
 
-#include "thr/ecs/systems/level_serialization_system.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>
 #include <entt/entity/fwd.hpp>
 #include <filesystem>
-#include <format>
-#include <fstream>
 #include <functional>
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <sol/error.hpp>
@@ -39,7 +35,7 @@ namespace thr::ecs::lua_bindings {
 
       public:
         /**
-         * @brief 构建一个 lua manager 对象。
+         * @brief 构造 lua manager 对象。
          * @param [in] registry 注册表。
          */
         explicit lua_manager(std::reference_wrapper<entt::registry> registry) : m_registry(registry) {

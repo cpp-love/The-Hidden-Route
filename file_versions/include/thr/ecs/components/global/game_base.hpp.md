@@ -2,6 +2,13 @@
 
 # game_base.hpp 版本历史
 
+## \[0.1.0-4] - 2026-07-27 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 定义了自己的 `scheduler` 和 `process` 别名。
+2. 添加字面量 `_ms_f` 对于 `long long` 类型的支持，让使用更方便。
+
 ## \[0.1.0-3] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

@@ -12,6 +12,7 @@
 #ifndef THR_ECS_SYSTEMS_HPP
 #define THR_ECS_SYSTEMS_HPP
 
+#include "thr/ecs/systems/animation_system.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include "thr/ecs/systems/level_graph_render_system.hpp"

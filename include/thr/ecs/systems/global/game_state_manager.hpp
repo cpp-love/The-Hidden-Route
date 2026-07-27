@@ -43,7 +43,7 @@ namespace thr::ecs {
         static const tgui::String game_screen_panel_name; ///< 有游戏界面大小的 UI 面板组件名称。
 
         /**
-         * @brief 构建一个 game state manager 对象。
+         * @brief 构造 game state manager 对象。
          * @param [in] window 渲染窗口。
          */
         explicit game_state_manager(sf::RenderWindow &window) noexcept;

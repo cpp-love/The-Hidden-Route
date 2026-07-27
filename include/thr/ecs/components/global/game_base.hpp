@@ -2,8 +2,8 @@
  * @file game_base.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了游戏 ECS 系统的基础组件。
- * @version 0.1.0-3
- * @date 2026-07-22
+ * @version 0.1.0-4
+ * @date 2026-07-27
  * 
  * @copyright cpp-love
  * 
@@ -18,9 +18,9 @@
 #include <SFML/System/Vector2.hpp>
 #include <bit>
 #include <chrono>
+#include <entt/process/fwd.hpp>
 #include <ratio>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -322,8 +322,11 @@ namespace thr {
                     | std::to_underlying(combined_direction::down)));
         }
 
-        using clock = std::chrono::steady_clock;                         ///< 时钟类型
-        using milliseconds_f = std::chrono::duration<float, std::milli>; ///< 时间间隔类型，以毫秒为单位
+        using clock = std::chrono::steady_clock; ///< 时钟类型。
+        using milliseconds_f =
+            std::chrono::duration<float, std::milli>;            ///< 时间间隔类型，以毫秒为单位。
+        using process = entt::basic_process<milliseconds_f>;     ///< 进程类型。
+        using scheduler = entt::basic_scheduler<milliseconds_f>; ///< 进程安排器类型。
 
     } // namespace ecs
 
@@ -332,11 +335,21 @@ namespace thr {
         inline namespace game_base_literals {
 
             /**
-             * @brief 创建一个以毫秒为单位的时间间隔
-             * @param [in] milliseconds 毫秒数
-             * @return ecs::milliseconds_f 时间间隔
+             * @brief 创建一个以毫秒为单位的时间间隔。
+             * @param [in] milliseconds 毫秒数。
+             * @return ecs::milliseconds_f 时间间隔。
              */
             [[nodiscard]] constexpr ecs::milliseconds_f operator""_ms_f(long double milliseconds) {
+                return ecs::milliseconds_f{static_cast<float>(milliseconds)};
+            }
+
+            /**
+             * @brief 创建一个以毫秒为单位的时间间隔。
+             * @param [in] milliseconds 毫秒数。
+             * @return ecs::milliseconds_f 时间间隔。
+             */
+            [[nodiscard]] constexpr ecs::milliseconds_f
+            operator""_ms_f(unsigned long long milliseconds) {
                 return ecs::milliseconds_f{static_cast<float>(milliseconds)};
             }
 

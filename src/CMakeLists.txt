@@ -13,7 +13,7 @@ if(LUA_VERSION VERSION_GREATER_EQUAL 5.5)
 	message(FATAL_ERROR "Lua version ${LUA_VERSION} is too high; need < 5.5")
 endif()
 
-CPMAddPackage("gh:skypjack/entt@3.16.0")
+CPMAddPackage("gh:skypjack/entt@4.0.0")
 CPMAddPackage(
 	NAME
 	sol2

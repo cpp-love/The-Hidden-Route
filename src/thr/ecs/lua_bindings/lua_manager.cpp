@@ -2,8 +2,8 @@
  * @file lua_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了与 Lua 沟通的管理类。
- * @version 0.1.0-2
- * @date 2026-07-22
+ * @version 0.1.0-3
+ * @date 2026-07-27
  * 
  * @copyright cpp-love
  * 
@@ -13,8 +13,10 @@
 #include "thr/base/sfml_helper.hpp"
 #include "thr/ecs/lua_bindings/entity_wrapper.hpp"
 #include "thr/ecs/lua_bindings/game_api.hpp"
+#include "thr/ecs/lua_bindings/process_sequence.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <sol/forward.hpp>
+#include <sol/raii.hpp>
 #include <sol/sol.hpp>
 #include <sol/types.hpp>
 #include <spdlog/common.h>
@@ -42,7 +44,7 @@ namespace thr::ecs::lua_bindings {
             return msg;
         };
 
-        // 注册一系列仿 spdlog 式的输出函数。
+        // 注册一系列仿 spdlog 式又使用 Lua print 函数的接口的输出函数。
         sol::table logger = m_lua.create_table("Logger");
         logger.set_function("trace", [generate_message](sol::variadic_args args) {
             spdlog::trace(generate_message(args));
@@ -63,7 +65,7 @@ namespace thr::ecs::lua_bindings {
             spdlog::critical(generate_message(args));
         });
 
-        // 注册 Vector2f 到 Lua。
+        // 注册 sf::Vector2f 到 Lua。
         m_lua.new_usertype<sf::Vector2f>(
             "Vector2", sol::constructors<sf::Vector2f(), sf::Vector2f(float, float)>(),
 
@@ -89,7 +91,18 @@ namespace thr::ecs::lua_bindings {
             sol::meta_function::to_string,
             [](const sf::Vector2f &lhs) { return std::format("{}", lhs); });
 
-        // 注册 Entity 包装器到 Lua。
+        // 注册实体的进程序列到 Lua。
+        m_lua.new_usertype<process_sequence>("ProcessSequence", sol::no_constructor,
+
+                                             "text_fade_in", &process_sequence::text_fade_in,
+                                             "text_fade_out", &process_sequence::text_fade_out,
+                                             "destroy_entity", &process_sequence::destroy_entity,
+
+                                             "wait", &process_sequence::wait
+
+        );
+
+        // 注册实体包装器到 Lua。
         m_lua.new_usertype<entity_wrapper>(
             "Entity", sol::no_constructor,
 
@@ -103,10 +116,12 @@ namespace thr::ecs::lua_bindings {
 
             "query_tag", &entity_wrapper::query_tag,
 
+            "create_process_sequence", &entity_wrapper::create_process_sequence,
+
             sol::meta_function::equal_to,
             [](const entity_wrapper &lhs, const entity_wrapper &rhs) { return lhs == rhs; });
 
-        // 注册 Game API 到 Lua。
+        // 注册 game API 到 Lua。
         m_lua.new_usertype<game_api>(
             "Game", sol::no_constructor,
 

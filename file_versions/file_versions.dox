@@ -1,6 +1,8 @@
 /*!
  * \page file_versions 文件版本历史
  * 
+ * \subpage animation_system_hpp
+ * 
  * \subpage assert_msg_hpp
  * 
  * \subpage base_hpp
@@ -80,6 +82,8 @@
  * \subpage player_movement_system_cpp
  * 
  * \subpage player_movement_system_hpp
+ * 
+ * \subpage process_sequence_hpp
  * 
  * \subpage scene_components_hpp
  * 

@@ -104,7 +104,12 @@ namespace mainhelper {
         m_is_paused = false;
     }
     bool main_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
-    void main_menu::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
+    void main_menu::update(thr::ecs::milliseconds_f delta_time) noexcept {
+        auto *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
+        if (scheduler != nullptr) {
+            scheduler->update(delta_time);
+        }
+    }
     void main_menu::draw() noexcept {
         // draw texts
         auto texts = m_registry.view<sf::Text>();
@@ -194,7 +199,12 @@ namespace mainhelper {
         }
         return false;
     }
-    void level_graph_screen::update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept {}
+    void level_graph_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
+        auto *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
+        if (scheduler != nullptr) {
+            scheduler->update(delta_time);
+        }
+    }
     void level_graph_screen::draw() noexcept {
         thr::ecs::level_graph_render_system::draw(
             m_registry,
@@ -293,6 +303,11 @@ namespace mainhelper {
     void game_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
         constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
 
+        auto           *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
+        if (scheduler != nullptr) {
+            scheduler->update(delta_time);
+        }
+
         if (m_winned_time.has_value()) {
             using namespace std::chrono_literals;
             if (thr::ecs::clock::now() - *m_winned_time >= 3s) {
@@ -335,8 +350,8 @@ namespace mainhelper {
                             // 走过的实体有特殊标签。
                             if (std::optional error = m_lua_manager->call_function(
                                     "on_special_segment_walked",
-                                    thr::ecs::lua_bindings::entity_wrapper{on_ground.segment_entity,
-                                                                           m_registry})) {
+                                    thr::ecs::lua_bindings::entity_wrapper{m_registry,
+                                                                           on_ground.segment_entity})) {
                                 spdlog::warn(
                                     "Failed to call to lua function on_special_segment_walked: {}",
                                     *error);

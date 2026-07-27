@@ -32,21 +32,21 @@ namespace thr {
         std::vector<observer_callback> m_observers; ///< 观察者列表
       public:
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] value 被观察者
          * @param [in] observers 观察者列表
          */
         observable(const T &value, const std::vector<observer_callback> &observers)
             : m_value(value), m_observers(observers) {}
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] value 被观察者
          * @param [in] observers 观察者列表
          */
         observable(T value, const std::vector<observer_callback> &observers)
             : m_value(std::move(value)), m_observers(observers) {}
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] value 被观察者
          * @param [in] observers 观察者列表
          */
@@ -54,7 +54,7 @@ namespace thr {
             std::is_nothrow_move_constructible_v<T>)
             : m_value(std::move(value)), m_observers(std::move(observers)) {}
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] value 被观察者
          * @param [in] observers 观察者列表
          */
@@ -62,12 +62,12 @@ namespace thr {
             std::is_nothrow_copy_constructible_v<T>)
             : m_value(value), m_observers(std::move(observers)) {}
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] rhs 另一个对象
          */
         observable(const observable &rhs) = default;
         /**
-         * @brief 构建一个 observable 对象
+         * @brief 构造 observable 对象
          * @param [in] rhs 另一个对象
          */
         observable(observable &&rhs) = default;

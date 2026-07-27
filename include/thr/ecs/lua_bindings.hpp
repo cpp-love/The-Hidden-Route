@@ -15,6 +15,8 @@
 #include "thr/ecs/lua_bindings/entity_wrapper.hpp"
 #include "thr/ecs/lua_bindings/game_api.hpp"
 #include "thr/ecs/lua_bindings/lua_manager.hpp"
+#include "thr/ecs/lua_bindings/process_sequence.hpp"
+
 
 /// @brief 与 Lua 沟通有关内容的命名空间。
 namespace thr::ecs::lua_bindings {}

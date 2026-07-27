@@ -268,10 +268,10 @@ namespace thr::ecs {
         float                                  width = default_width;    ///< 线段宽度。
         sf::Color                              color = sf::Color::White; ///< 线段颜色。
 
-        /// @brief 构建一个 line_strips 对象。
+        /// @brief 构造 line_strips 对象。
         line_strips() = default;
         /**
-         * @brief 构建一个 line_strips 对象。
+         * @brief 构造 line_strips 对象。
          * @param [in] vertexs 连续的折线。
          * @param [in] width 线段宽度。
          * @param [in] color 线段颜色。
@@ -280,7 +280,7 @@ namespace thr::ecs {
                              sf::Color color = sf::Color::White)
             : vertexs(std::move(vertexs)), width(width), color(color) {}
         /**
-         * @brief 构建一个 line_strips 对象。
+         * @brief 构造 line_strips 对象。
          * @param [in] vertexs 连续的折线。
          * @param [in] color 线段颜色。
          */
