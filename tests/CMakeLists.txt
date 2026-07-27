@@ -17,7 +17,6 @@ function(build_test_executable sources)
 		# 构建程序
 
 		cmake_path(GET source STEM target_name)
-		list(APPEND target_names ${target_name})
 		# 设置链接文件
 		add_executable(${target_name} ${source})
 		# 链接第三方库
@@ -26,13 +25,22 @@ function(build_test_executable sources)
 				thr_compiler_flags
 				thr
 		)
-	endforeach()
+		# 添加安装支持
+		install(
+			TARGETS ${target_name}
+			RUNTIME DESTINATION bin/tests COMPONENT Tests
+		)
 
-	# 添加安装支持
-	install(
-		TARGETS ${target_names}
-		DESTINATION bin/tests
-	)
+		install(CODE "
+			include(BundleUtilities)
+			include(InstallRequiredSystemLibraries)
+
+    	    fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/tests/${target_name}.exe\" \"\" \"\")
+			"
+			COMPONENT
+			Tests
+		)
+	endforeach()
 endfunction()
 
 if(THR_BUILD_BASE_TESTS)

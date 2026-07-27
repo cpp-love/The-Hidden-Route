@@ -93,4 +93,4 @@ target_link_libraries(thr
 )
 
 # 添加安装支持
-install(TARGETS thr DESTINATION lib)
+install(TARGETS thr RUNTIME DESTINATION lib COMPONENT Library)

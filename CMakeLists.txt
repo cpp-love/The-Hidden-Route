@@ -80,3 +80,17 @@ add_subdirectory(src)
 add_subdirectory(main)
 add_subdirectory(tests)
 add_subdirectory(helper)
+
+# 设置打包格式
+set(CPACK_GENERATOR "ZIP")
+
+# 包含 CPack 模块
+include(CPack)
+
+# 设置包信息
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
+set(CPACK_PACKAGE_FILE_NAME
+	"${PROJECT_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}"
+)

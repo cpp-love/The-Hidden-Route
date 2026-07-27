@@ -26,14 +26,32 @@ if(THR_BUILD_HELPER)
 	)
 
 	# 添加安装支持
-	install(TARGETS generate_file_version generate_level DESTINATION bin/helper)
+	install(
+		TARGETS
+			generate_file_version
+			generate_level
+		RUNTIME DESTINATION bin/helper COMPONENT Helper
+	)
+
+	install(CODE "
+		include(BundleUtilities)
+		include(InstallRequiredSystemLibraries)
+
+		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_file_version.exe\" \"\" \"\")
+		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_level.exe\" \"\" \"\")
+		"
+		COMPONENT
+		Helper
+	)
+
 	install(
 		PROGRAMS
 			generate_code_issues.py
 			generate_test_expressions_data.py
 			helper_base.py
 			move_source_file.py
-		DESTINATION bin
+		DESTINATION bin/helper
+		COMPONENT Helper
 	)
 
 	# 添加测试支持

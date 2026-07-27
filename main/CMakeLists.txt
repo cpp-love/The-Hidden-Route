@@ -20,4 +20,20 @@ target_link_libraries(The-Hidden-Route
 )
 
 # 添加安装支持
-install(TARGETS The-Hidden-Route DESTINATION bin)
+install(TARGETS The-Hidden-Route RUNTIME DESTINATION bin COMPONENT Runtime)
+
+install(
+	DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+	DESTINATION bin
+	COMPONENT Runtime
+)
+
+install(CODE "
+	include(BundleUtilities)
+	include(InstallRequiredSystemLibraries)
+
+	fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/The-Hidden-Route.exe\" \"\" \"\")
+	"
+	COMPONENT
+	Runtime
+)
