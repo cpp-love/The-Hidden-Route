@@ -1,9 +1,9 @@
----关卡加载时的脚本。
+---关卡开始时的脚本。
 function on_level_started()
-    game:add_text("W/A/S/D 或 上下左右 移动，\nCrtl+Z 撤回。", Vector2.new(580, 500))
-    game:add_text("历经全部，到达终点，方可结束。", Vector2.new(625, 400))
+    game:add_text("W/A/S/D 或 上下左右 移动\nCrtl+Z 撤回", Vector2.new(400, 500), 35)
+    game:add_text("历经全部，有始有终，方可结束", Vector2.new(400, 400), 35)
 
-    Logger.info("The function `on_level_started` is done.")
+    Logger.info("function on_level_started in level1.lua is done.")
 end
 
 ---玩家走到特殊线段上时的脚本。
@@ -18,11 +18,11 @@ function on_special_segment_walked(entity)
                 :destroy_entity()
         end
 
-        text_entity = game:add_text("“断路亦是通路，\n平面也似立体。”", Vector2.new(240, 260), 20)
+        text_entity = game:add_text("“断路亦是通路，\n平面也似立体。”", Vector2.new(160, 260), 20)
         text_entity:create_process_sequence()
             :text_fade_in(200)
 
-        Logger.info("The tag 0 is triggered.")
+        Logger.info("Tag 0 in level1 is triggered.")
     end
 
     if not triggered_tag_1 and entity:query_tag(1) then
@@ -34,10 +34,10 @@ function on_special_segment_walked(entity)
                 :destroy_entity()
         end
 
-        text_entity = game:add_text("“或许，应该转个弯？”", Vector2.new(500, 20), 20)
+        text_entity = game:add_text("“或许，应该转个弯？”", Vector2.new(420, 20), 20)
         text_entity:create_process_sequence()
             :text_fade_in(200)
 
-        Logger.info("The tag 1 is triggered.")
+        Logger.info("Tag 1 in level1 is triggered.")
     end
 end

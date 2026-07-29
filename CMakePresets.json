@@ -22,7 +22,7 @@
                 },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
-                    "value": "DEBUG"
+                    "value": "Debug"
                 },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
@@ -54,7 +54,7 @@
                 },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
-                    "value": "DEBUG"
+                    "value": "Debug"
                 },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
@@ -67,8 +67,8 @@
             }
         },
         {
-            "name": "BuildOnly",
-            "description": "构建主XX程序",
+            "name": "BuildDebug",
+            "description": "构建主程序（调试版）",
             "hidden": false,
             "generator": "Ninja",
             "cacheVariables": {
@@ -82,7 +82,7 @@
                 },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
-                    "value": "DEBUG"
+                    "value": "Debug"
                 },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
@@ -106,13 +106,45 @@
                 },
                 "CMAKE_BUILD_TYPE": {
                     "type": "STR",
-                    "value": "DEBUG"
+                    "value": "Debug"
                 },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
                     "value": "ON"
                 },
                 "THR_BUILD_HELPER": {
+                    "type": "BOOL",
+                    "value": "ON"
+                }
+            }
+        },
+        {
+            "name": "BuildRelease",
+            "description": "构建主程序（发行版）",
+            "hidden": false,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_CXX_COMPILER_LAUNCHER": {
+                    "type": "STR",
+                    "value": "ccache"
+                },
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STR",
+                    "value": "Release"
+                },
+                "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "CPACK_COMPONENTS_ALL": {
+                    "type": "STR",
+                    "value": "Runtime"
+                },
+                "CPACK_ARCHIVE_COMPONENT_INSTALL": {
                     "type": "BOOL",
                     "value": "ON"
                 }

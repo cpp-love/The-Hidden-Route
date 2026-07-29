@@ -3,7 +3,7 @@
         "end_segment_entity": 0,
         "start_segment_entity": 92
     },
-    "level_script": null,
+    "level_script": "special_level.lua",
     "line_strips": {
         "vertexs": [
             [

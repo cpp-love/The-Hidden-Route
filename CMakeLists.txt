@@ -82,6 +82,7 @@ add_subdirectory(tests)
 add_subdirectory(helper)
 
 # 设置打包格式
+set(CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION ON)
 set(CPACK_GENERATOR "ZIP")
 
 # 包含 CPack 模块

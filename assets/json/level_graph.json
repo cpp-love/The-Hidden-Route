@@ -1,5 +1,5 @@
 {
-    "$schema": "../../schema/level_graph-v0.1.0-2.schema.json",
+    "$schema": "../../schema/level_graph-v0.1.0-3.schema.json",
     "level_nodes": [
         {
             "relative_entities": [
@@ -14,13 +14,33 @@
         },
         {
             "relative_entities": [
-                0
+                2,
+                3
             ],
+            "position": {
+                "x": 380,
+                "y": 300
+            },
+            "name": "level2",
+            "locked": true
+        },
+        {
+            "relative_entities": [],
+            "position": {
+                "x": 580,
+                "y": 400
+            },
+            "name": "special_level",
+            "locked": true,
+            "hidden": true
+        },
+        {
+            "relative_entities": [],
             "position": {
                 "x": 580,
                 "y": 300
             },
-            "name": "level2",
+            "name": "level3",
             "locked": true
         }
     ],

@@ -10,7 +10,7 @@
 
 ## 模块 base
 
-1. [ ] feat(base): `Unwraped<std::optional/expected>` & `AsThrow<std::optional/expected>`
+1. [ ] feat(base): `Unwraped<std::optional/expected>` & `AsThrow<std::optional/expected>`。
 
 ## 模块 ecs
 
@@ -20,7 +20,8 @@
 
 ## 其他
 
-1. [ ] docs(all): 完善并规范文档
+1. [ ] docs: 完善并规范文档
+2. [ ] style: 取消不应出现的 `noexept` 说明符。
 
 # 进行中
 

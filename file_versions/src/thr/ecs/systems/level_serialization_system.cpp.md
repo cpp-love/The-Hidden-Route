@@ -2,6 +2,12 @@
 
 # level_serialization_system.cpp 版本历史
 
+## \[0.1.0-7] - 2026-07-29 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Fixed(bug 修复)
+
+1. 修复了起始和终点的文字不以指定位置为中心的问题。
+
 ## \[0.1.0-6] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Fixed(bug 修复)

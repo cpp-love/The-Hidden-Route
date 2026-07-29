@@ -7,6 +7,12 @@
 ### Added(新增)
 
 1. 配合 [main/game_states.cpp](../../main/game_states.cpp) 进一步添加对 Lua 脚本的支持，为类 `mainhelper::main_menu` 和 `mainhelper::level_graph_screen` 添加数据成员 `m_lua_manager`。
+2. 为 `mainhelper::level_finished_event` 添加两个成员，以更好的支持关卡解锁逻辑。
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将所有 `thr::ecs::lua_bindings::lua_manager` 成员改为直接使用 `sol::state`。
+2. **BREKING(不向下兼容):** 将 `mainhelper::game_screen::m_winned_time` 成员改为 `mainhelper::game_screen::m_remaining_time_after_winning`，使得不需要使用 `thr::ecs::clock::now()` 函数。
 
 ## \[0.1.0-6] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

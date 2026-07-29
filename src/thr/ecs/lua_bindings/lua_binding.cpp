@@ -1,37 +1,34 @@
 /**
- * @file lua_manager.cpp
+ * @file lua_binding.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
- * @brief 实现了与 Lua 沟通的管理类。
- * @version 0.1.0-3
- * @date 2026-07-27
+ * @brief 实现了绑定 C++ 相关内容到 Lua 脚本的函数。
+ * @version 0.1.0-1
+ * @date 2026-07-29
  * 
  * @copyright cpp-love
  * 
  */
 
-#include "thr/ecs/lua_bindings/lua_manager.hpp"
+#include "thr/ecs/lua_bindings/lua_binding.hpp"
 #include "thr/base/sfml_helper.hpp"
 #include "thr/ecs/lua_bindings/entity_wrapper.hpp"
 #include "thr/ecs/lua_bindings/game_api.hpp"
 #include "thr/ecs/lua_bindings/process_sequence.hpp"
 #include <SFML/System/Vector2.hpp>
-#include <sol/forward.hpp>
-#include <sol/raii.hpp>
+#include <entt/entity/registry.hpp>
 #include <sol/sol.hpp>
-#include <sol/types.hpp>
-#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 
 namespace thr::ecs::lua_bindings {
 
-    void lua_manager::init() {
+    void bind_to_lua(sol::state &lua, entt::registry &registry) {
         // 默认初始化。
-        m_lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::table, sol::lib::math,
-                             sol::lib::string);
+        lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::table, sol::lib::math,
+                           sol::lib::string);
 
         // 辅助函数。
         auto generate_message = [tostring =
-                                     m_lua["tostring"].get<sol::function>()](sol::variadic_args args) {
+                                     lua["tostring"].get<sol::function>()](sol::variadic_args args) {
             std::string msg = "[from Lua] ";
             bool        is_first = true;
             for (const auto &var : args) {
@@ -45,7 +42,7 @@ namespace thr::ecs::lua_bindings {
         };
 
         // 注册一系列仿 spdlog 式又使用 Lua print 函数的接口的输出函数。
-        sol::table logger = m_lua.create_table("Logger");
+        sol::table logger = lua.create_table("Logger");
         logger.set_function("trace", [generate_message](sol::variadic_args args) {
             spdlog::trace(generate_message(args));
         });
@@ -66,7 +63,7 @@ namespace thr::ecs::lua_bindings {
         });
 
         // 注册 sf::Vector2f 到 Lua。
-        m_lua.new_usertype<sf::Vector2f>(
+        lua.new_usertype<sf::Vector2f>(
             "Vector2", sol::constructors<sf::Vector2f(), sf::Vector2f(float, float)>(),
 
             "x", &sf::Vector2f::x, "y", &sf::Vector2f::y,
@@ -92,18 +89,18 @@ namespace thr::ecs::lua_bindings {
             [](const sf::Vector2f &lhs) { return std::format("{}", lhs); });
 
         // 注册实体的进程序列到 Lua。
-        m_lua.new_usertype<process_sequence>("ProcessSequence", sol::no_constructor,
+        lua.new_usertype<process_sequence>("ProcessSequence", sol::no_constructor,
 
-                                             "text_fade_in", &process_sequence::text_fade_in,
-                                             "text_fade_out", &process_sequence::text_fade_out,
-                                             "destroy_entity", &process_sequence::destroy_entity,
+                                           "text_fade_in", &process_sequence::text_fade_in,
+                                           "text_fade_out", &process_sequence::text_fade_out,
+                                           "destroy_entity", &process_sequence::destroy_entity,
 
-                                             "wait", &process_sequence::wait
+                                           "wait", &process_sequence::wait
 
         );
 
         // 注册实体包装器到 Lua。
-        m_lua.new_usertype<entity_wrapper>(
+        lua.new_usertype<entity_wrapper>(
             "Entity", sol::no_constructor,
 
             "valid", &entity_wrapper::valid,
@@ -116,13 +113,15 @@ namespace thr::ecs::lua_bindings {
 
             "query_tag", &entity_wrapper::query_tag,
 
+            "get_tags", &entity_wrapper::get_tags,
+
             "create_process_sequence", &entity_wrapper::create_process_sequence,
 
             sol::meta_function::equal_to,
             [](const entity_wrapper &lhs, const entity_wrapper &rhs) { return lhs == rhs; });
 
         // 注册 game API 到 Lua。
-        m_lua.new_usertype<game_api>(
+        lua.new_usertype<game_api>(
             "Game", sol::no_constructor,
 
             "create_entity", &game_api::create_entity,
@@ -138,7 +137,7 @@ namespace thr::ecs::lua_bindings {
                           }));
 
         // 将一个 `game` 全局变量放入 Lua，供脚本直接使用。
-        m_lua["game"] = game_api(m_registry);
+        lua["game"] = game_api(registry);
     }
 
 } // namespace thr::ecs::lua_bindings

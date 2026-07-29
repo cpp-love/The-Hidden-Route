@@ -2,6 +2,12 @@
 
 # lua_manager.cpp 版本历史
 
+## \[0.1.0-4] - 2026-07-29 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Removed(移除)
+
+1. 移除**整个文件**，相关内容迁移至 `src/thr/ecs/lua_bindings/lua_binding.cpp` 中。
+
 ## \[0.1.0-3] - 2026-07-27 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

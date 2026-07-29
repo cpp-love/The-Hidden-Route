@@ -2,6 +2,12 @@
 
 # level_graph_components.hpp 版本历史
 
+## \[0.1.0-3] - 2026-07-28 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加 `thr::ecs::level_node::hidden` 数据成员，表示关卡节点的是否隐藏（仅对锁住时有效）。
+
 ## \[0.1.0-2] - 2026-07-07 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

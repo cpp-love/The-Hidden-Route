@@ -13,18 +13,20 @@ else()
 endif()
 
 function(build_test_executable sources)
+	# 构建程序
 	foreach(source IN LISTS sources)
-		# 构建程序
-
 		cmake_path(GET source STEM target_name)
+
 		# 设置链接文件
 		add_executable(${target_name} ${source})
+
 		# 链接第三方库
 		target_link_libraries(${target_name}
 			PUBLIC
 				thr_compiler_flags
 				thr
 		)
+
 		# 添加安装支持
 		install(
 			TARGETS ${target_name}

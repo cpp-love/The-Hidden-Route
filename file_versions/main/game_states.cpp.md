@@ -7,10 +7,12 @@
 ### Added(新增)
 
 1. 进一步添加对 Lua 脚本的支持。
+2. 丰富了关卡。
 
 ### Changed(修改)
 
 1. 简化了 `mainhelper::game_screen` 的更新玩家流程。
+1. 简化了 `mainhelper::game_screen` 的胜利后的流程。
 
 ## \[0.1.0-7] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

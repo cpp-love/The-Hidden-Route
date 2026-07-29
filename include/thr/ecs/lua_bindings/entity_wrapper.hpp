@@ -2,8 +2,8 @@
  * @file entity_wrapper.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了实体包装器。
- * @version 0.1.0-2
- * @date 2026-07-27
+ * @version 0.1.0-3
+ * @date 2026-07-29
  * 
  * @copyright cpp-love
  * 
@@ -18,6 +18,7 @@
 #include <entt/entity/entity.hpp>
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
+#include <vector>
 
 namespace thr::ecs::lua_bindings {
 
@@ -114,6 +115,21 @@ namespace thr::ecs::lua_bindings {
                 return false;
             }
             return cur_tag->tag_ids.contains(tag_id);
+        }
+
+        /**
+         * @brief 获取实体的所有标签。
+         * @return std::vector<int> 所有标签。
+         */
+        [[nodiscard]] std::vector<int> get_tags() const {
+            if (!valid()) {
+                return {};
+            }
+            auto *cur_tag = m_handle.try_get<tag>();
+            if (cur_tag == nullptr) {
+                return {};
+            }
+            return cur_tag->tag_ids | std::ranges::to<std::vector>();
         }
 
         /**

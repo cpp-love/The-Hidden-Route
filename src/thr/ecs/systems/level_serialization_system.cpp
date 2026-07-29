@@ -2,8 +2,8 @@
  * @file level_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
- * @version 0.1.0-6
- * @date 2026-07-22
+ * @version 0.1.0-7
+ * @date 2026-07-29
  * 
  * @copyright cpp-love
  * 
@@ -165,23 +165,24 @@ namespace thr::ecs {
             .end_segment_entity = segment_entities.at(level_info_json.at("end_segment_entity"))};
         registry.ctx().emplace<struct level_info>(level_info);
 
-        const auto  &start_seg = registry.get<segment>(level_info.start_segment_entity);
-        entt::entity start_entity = registry.create();
-        sf::Text     start_text{configs::singleton().get_sfml_font(), "start", 10};
-        auto         start_bound = start_text.getLocalBounds();
+        const auto                &start_seg = registry.get<segment>(level_info.start_segment_entity);
+        entt::entity               start_entity = registry.create();
+        constexpr std::string_view start_string = "始";
+        sf::Text start_text{configs::singleton().get_sfml_font(),
+                            sf::String::fromUtf8(start_string.begin(), start_string.end()), 10};
+        auto     start_bound = start_text.getLocalBounds();
         start_text.setOrigin(start_bound.getCenter());
-        start_text.setPosition(start_seg.start_center
-                               + direction_to_vector2f(start_seg.dir, segment::width()));
-        start_text.setLineAlignment(sf::Text::LineAlignment::Center);
+        start_text.setPosition(start_seg.start_center);
         registry.emplace<sf::Text>(start_entity, start_text);
 
-        const auto  &end_seg = registry.get<segment>(level_info.end_segment_entity);
-        entt::entity end_entity = registry.create();
-        sf::Text     end_text{configs::singleton().get_sfml_font(), "end", 10};
-        auto         end_bound = end_text.getLocalBounds();
+        const auto                &end_seg = registry.get<segment>(level_info.end_segment_entity);
+        entt::entity               end_entity = registry.create();
+        constexpr std::string_view end_string = "终";
+        sf::Text end_text{configs::singleton().get_sfml_font(),
+                          sf::String::fromUtf8(end_string.begin(), end_string.end()), 10};
+        auto     end_bound = end_text.getLocalBounds();
         end_text.setOrigin(end_bound.getCenter());
-        end_text.setPosition(end_seg.start_center + direction_to_vector2f(end_seg.dir, end_seg.length));
-        end_text.setLineAlignment(sf::Text::LineAlignment::Center);
+        end_text.setPosition(end_seg.get_end_center());
         registry.emplace<sf::Text>(end_entity, end_text);
     }
 

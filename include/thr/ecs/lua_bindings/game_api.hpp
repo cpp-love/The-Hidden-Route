@@ -2,8 +2,8 @@
  * @file game_api.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义 `thr::ecs::lua_bindings::game_api` 类，集中声明为 Lua 提供的游戏 API。
- * @version 0.1.0-1
- * @date 2026-07-08
+ * @version 0.1.0-2
+ * @date 2026-07-29
  * 
  * @copyright cpp-love
  * 
@@ -76,11 +76,11 @@ namespace thr::ecs::lua_bindings {
 
             sf::Text     sf_text{configs::singleton().get_sfml_font(),
                                  sf::String::fromUtf8(text.begin(), text.end()), character_size};
-            auto         bound = sf_text.getLocalBounds();
+            sf_text.setLineAlignment(sf::Text::LineAlignment::Center);
+            auto bound = sf_text.getLocalBounds();
             sf_text.setOrigin(bound.getCenter());
             sf_text.setPosition(position);
-            sf_text.setLineAlignment(sf::Text::LineAlignment::Center);
-            m_registry.get().emplace<sf::Text>(entity, sf_text);
+            m_registry.get().emplace<sf::Text>(entity, std::move(sf_text));
 
             return {m_registry, entity};
         }

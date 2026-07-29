@@ -63,6 +63,10 @@
  * 
  * \subpage level_serialization_system_hpp
  * 
+ * \subpage lua_binding_cpp
+ * 
+ * \subpage lua_binding_hpp
+ * 
  * \subpage lua_bindings_hpp
  * 
  * \subpage lua_manager_cpp

@@ -14,15 +14,19 @@
 
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/game_state_components.hpp"
-#include "thr/ecs/lua_bindings/lua_manager.hpp"
 #include <entt/entity/entity.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
+#include <sol/state.hpp>
+#include <vector>
 
 namespace mainhelper {
 
     /// @brief 关卡完成的事件组件。
-    struct level_finished_event {};
+    struct level_finished_event {
+        bool should_unlock_relative_levels{true}; ///< 是否应该解锁相邻的关卡，默认不包含隐藏关卡。
+        std::vector<std::string> extra_levels;    ///< 额外解锁的关卡。
+    };
 
     /// @brief 设置状态类。
     class settings_menu : public thr::ecs::game_state_base {
@@ -95,12 +99,12 @@ namespace mainhelper {
 
       private:
         /// @brief 连接调度器。
-        void                                connect_dispatcher() noexcept;
+        void           connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
-        void                                disconnect_dispatcher() noexcept;
-        bool                                m_is_paused = false; ///< 是否暂停。
-        entt::registry                      m_registry;          ///< 注册表。
-        thr::ecs::lua_bindings::lua_manager m_lua_manager;       ///< Lua 管理器。
+        void           disconnect_dispatcher() noexcept;
+        bool           m_is_paused = false; ///< 是否暂停。
+        entt::registry m_registry;          ///< 注册表。
+        sol::state     m_lua;               ///< Lua 状态。
     };
 
     /// @brief 关卡图界面状态类。
@@ -138,7 +142,7 @@ namespace mainhelper {
          * @brief 响应关卡完成的函数。
          * @param [in] event 事件组件。
          */
-        void           on_level_finished(level_finished_event event) noexcept;
+        void           on_level_finished(const level_finished_event &event) noexcept;
         /// @brief 连接调度器。
         void           connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
@@ -146,7 +150,7 @@ namespace mainhelper {
         bool           m_is_paused = false;                ///< 是否暂停。
         entt::entity   m_current_level_entity{entt::null}; ///< 当前在玩的关卡对应的实体。
         entt::registry m_registry;                         ///< 注册表。
-        thr::ecs::lua_bindings::lua_manager m_lua_manager; ///< Lua 管理器。
+        sol::state     m_lua;                              ///< Lua 状态。
     };
 
     /// @brief 游戏界面状态类。
@@ -184,14 +188,15 @@ namespace mainhelper {
 
       private:
         /// @brief 连接调度器。
-        void                                               connect_dispatcher() noexcept;
+        void connect_dispatcher() noexcept;
         /// @brief 断开连接调度器。
-        void                                               disconnect_dispatcher() noexcept;
-        bool                                               m_is_paused = false;         ///< 是否暂停。
-        std::optional<thr::ecs::clock::time_point>         m_winned_time;               ///< 胜利时间。
-        std::optional<thr::ecs::lua_bindings::lua_manager> m_lua_manager;               ///< Lua 管理器。
-        entt::registry                                     m_registry;                  ///< 注册表。
-        entt::entity                                       m_player_entity{entt::null}; ///< 玩家实体。
+        void disconnect_dispatcher() noexcept;
+        bool m_is_paused = false; ///< 是否暂停。
+        std::optional<thr::ecs::milliseconds_f>
+                                  m_remaining_time_after_winning; ///< 胜利后等待的剩余时间。
+        std::optional<sol::state> m_lua;                          ///< Lua 状态。
+        entt::registry            m_registry;                     ///< 注册表。
+        entt::entity              m_player_entity{entt::null};    ///< 玩家实体。
     };
 
     /// @brief 暂停界面状态类。

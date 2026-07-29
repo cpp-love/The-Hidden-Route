@@ -2,8 +2,8 @@
  * @file level_graph_render_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了渲染关卡图的系统。
- * @version 0.1.0-4
- * @date 2026-07-12
+ * @version 0.1.0-5
+ * @date 2026-07-28
  * 
  * @copyright cpp-love
  * 
@@ -117,16 +117,18 @@ namespace thr::ecs {
                 static_cast<float>(configs::singleton().game_screen_size.y) * button_scale / 2};
 
             // 向下遍历。
-            for (entt::entity next : node.relative_entities) {
-                THR_ASSERT_MSG(registry.valid(next), "下一个实体(id: {})不合法",
-                               entt::to_integral(next));
-                const auto &next_node = registry.get<level_node>(next);
-                if (!node.locked) {
-                    // 重复画没有关系，因为无效果。
-                    draw_edge(target, node.position + half_button_real_size,
-                              next_node.position + half_button_real_size, sf::Color::White);
+            if (!node.locked) {
+                for (entt::entity next : node.relative_entities) {
+                    THR_ASSERT_MSG(registry.valid(next), "下一个实体(id: {})不合法",
+                                   entt::to_integral(next));
+                    const auto &next_node = registry.get<level_node>(next);
+                    if (!next_node.hidden || !next_node.locked) {
+                        // 重复画没有关系，因为无效果。
+                        draw_edge(target, node.position + half_button_real_size,
+                                  next_node.position + half_button_real_size, sf::Color::White);
+                        self(next);
+                    }
                 }
-                self(next);
             }
         };
 

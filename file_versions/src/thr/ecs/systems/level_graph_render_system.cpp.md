@@ -2,6 +2,16 @@
 
 # level_graph_render_system.cpp 版本历史
 
+## \[0.1.0-5] - 2026-07-29 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加了对隐藏关卡的特殊显示支持。
+
+### Fixed(bug 修复)
+
+1. 修复了会绘制所有可遍历到的关卡的按钮的问题。
+
 ## \[0.1.0-4] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)

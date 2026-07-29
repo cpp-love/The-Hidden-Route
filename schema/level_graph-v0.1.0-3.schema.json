@@ -34,6 +34,11 @@
                         "title": "节点是否锁住",
                         "type": "boolean",
                         "default": true
+                    },
+                    "hidden": {
+                        "title": "节点是否隐藏（仅对锁住时有效）",
+                        "type": "boolean",
+                        "default": false
                     }
                 },
                 "required": [

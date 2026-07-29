@@ -31,6 +31,11 @@ function Entity:remove_tag(tag_id) end
 ---@return boolean # 是否拥有。
 function Entity:query_tag(tag_id) end
 
+---获取实体的所有标签。
+---@param self Entity 实体类。
+---@return integer[] # 所有标签。
+function Entity:get_tags() end
+
 ---创建实体的进程序列。
 ---@param self Entity 实体类。
 ---@return ProcessSequence # 实体的进程序列。

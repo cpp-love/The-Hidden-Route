@@ -2,8 +2,8 @@
  * @file level_graph_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了序列化关卡图的系统。
- * @version 0.1.0-2
- * @date 2026-07-07
+ * @version 0.1.0-3
+ * @date 2026-07-28
  * 
  * @copyright cpp-love
  * 
@@ -44,7 +44,8 @@ namespace thr::ecs {
                                            | std::ranges::to<std::vector>()},
                  {"position", node.position},
                  {"name", node.name},
-                 {"locked", node.locked}});
+                 {"locked", node.locked},
+                 {"hidden", node.hidden}});
         }
         json["level_nodes"] = nodes;
         json["start_level"] = transform_entity(registry.ctx().get<start_level>().entity);
@@ -62,7 +63,8 @@ namespace thr::ecs {
                 entity,
                 node_json.value("relative_entities", std::vector<std::size_t>())
                     | std::views::transform(transform_index) | std::ranges::to<std::vector>(),
-                node_json.at("position"), node_json.at("name"), node_json.value("locked", true));
+                node_json.at("position"), node_json.at("name"), node_json.value("locked", true),
+                node_json.value("hidden", false));
         }
 
         registry.ctx().emplace<start_level>(transform_index(json.at("start_level")));

@@ -2,8 +2,8 @@
  * @file level_graph_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了一些关卡图的组件。
- * @version 0.1.0-2
- * @date 2026-07-07
+ * @version 0.1.0-3
+ * @date 2026-07-28
  * 
  * @copyright cpp-love
  * 
@@ -28,6 +28,7 @@ namespace thr::ecs {
         sf::Vector2f              position;          ///< 节点在关卡图中的位置。
         std::string               name;              ///< 节点名称。
         bool                      locked{true};      ///< 节点是否锁住。
+        bool                      hidden{false};     ///< 节点是否隐藏（仅对锁住时有效）。
     };
 
     /// @brief 起始关卡。
