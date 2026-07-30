@@ -20,13 +20,13 @@ AllowAllParametersOfDeclarationOnNextLine: false # 不允许所有声明参数�
 AlwaysBreakTemplateDeclarations: Yes # 模板声明换行
 AlignAfterOpenBracket: Align # 对齐模板参数
 
-AllowShortEnumsOnASingleLine: true # 允许短枚举在只一行内定义
-AllowShortBlocksOnASingleLine: Always # 允许短块在只一行内定义
-AllowShortCaseLabelsOnASingleLine: true # 允许短case标签在只一行内定义
+AllowShortEnumsOnASingleLine: false # 不允许短枚举在只一行内定义
+AllowShortBlocksOnASingleLine: Empty # 不允许短块在只一行内定义
+AllowShortCaseLabelsOnASingleLine: true # 允许短 case 标签在只一行内定义
 AllowShortFunctionsOnASingleLine: All # 允许短函数在只一行内定义
-AllowShortLambdasOnASingleLine: All # 允许短lambda函数在只一行内定义
-AllowShortLoopsOnASingleLine: true # 允许短循环在只一行内定义
-AllowShortIfStatementsOnASingleLine: Never # 不允许短if语句在只一行内定义
+AllowShortLambdasOnASingleLine: All # 允许短 lambda 函数在只一行内定义
+AllowShortLoopsOnASingleLine: false # 不允许短循环在只一行内定义
+AllowShortIfStatementsOnASingleLine: Never # 不允许短 if 语句在只一行内定义
 
 CommentPragmas: '^\\\\(brief|param|return|file)' # 匹配 Doxygen 标签
 ReflowComments: Never # 禁止重新换行注释

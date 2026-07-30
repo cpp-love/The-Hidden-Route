@@ -43,7 +43,7 @@ namespace thr::ecs {
         /// @brief 删除移动赋值运算符重载。
         game_state_base &operator=(game_state_base &&rhs) noexcept = delete;
         /// @brief 虚析构函数。
-        virtual ~game_state_base() noexcept = default;
+        virtual ~game_state_base() = default;
 
         /**
          * @brief 绑定一些对象。
@@ -52,31 +52,31 @@ namespace thr::ecs {
          * @param [in] global_gui GUI 对象。
          */
         void bind(entt::dispatcher &outside_dispatcher, sf::RenderWindow &window,
-                  tgui::Gui &global_gui) noexcept {
+                  tgui::Gui &global_gui) {
             m_outside_dispather = &outside_dispatcher;
             m_window = &window;
             m_global_gui = &global_gui;
             init();
         }
 
-        /// @brief 将此游戏状态暂停。
-        virtual void               on_pause() noexcept = 0;
-        /// @brief 将此游戏状态从暂停中恢复。
-        virtual void               on_resume() noexcept = 0;
+        /// @brief 将此游戏状态暂停。（默认无效果）
+        virtual void               on_pause() {}
+        /// @brief 将此游戏状态从暂停中恢复。（默认无效果）
+        virtual void               on_resume() {}
         /**
          * @brief 处理事件。
          * @param [in] event 事件。
          * @return true 事件已处理。
          * @return false 事件未处理。
          */
-        virtual bool               handle_event(const sf::Event &event) noexcept = 0;
+        virtual bool               handle_event(const sf::Event &event) = 0;
         /**
          * @brief 更新游戏状态。
          * @param [in] delta_time 时间间隔。
          */
-        virtual void               update(milliseconds_f delta_time) noexcept = 0;
+        virtual void               update(milliseconds_f delta_time) = 0;
         /// @brief 绘制当前状态。
-        virtual void               draw() noexcept = 0;
+        virtual void               draw() = 0;
         /**
          * @brief 判断是否要阻隔绘制、更新、事件往下传递。
          * @return true 要阻隔。
@@ -92,7 +92,7 @@ namespace thr::ecs {
          * @details 此函数将会在 @ref bind 函数执行时被调用，用于二次初始化有关外部对象的部分。
          * @warning 请勿在构造函数内初始化有关外部对象的部分，因为此时外部对象均未赋值完成，会导致 UB。
          */
-        virtual void      init() noexcept {}
+        virtual void      init() {}
 
         // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
         entt::dispatcher *m_outside_dispather{}; ///< 调度器指针。

@@ -32,7 +32,7 @@
 
 class test_state : public thr::ecs::game_state_base {
   public:
-    test_state() noexcept {
+    test_state() {
         std::print("请输入新关卡的 json 文件：");
         (void)std::fflush(stdout);
         std::filesystem::path path;
@@ -49,9 +49,7 @@ class test_state : public thr::ecs::game_state_base {
         std::println("json: {}", nlohmann::to_string(json));
         std::println("converted json: {}", nlohmann::to_string(json2));
     }
-    void on_pause() noexcept override {}
-    void on_resume() noexcept override {}
-    bool handle_event([[maybe_unused]] const sf::Event &event) noexcept override {
+    bool handle_event([[maybe_unused]] const sf::Event &event) override {
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>();
             key_pressed != nullptr && key_pressed->code == sf::Keyboard::Key::R) {
             std::print("请输入新关卡的 json 文件：");
@@ -82,7 +80,7 @@ class test_state : public thr::ecs::game_state_base {
     /// @copydoc game_state_base::update
     void update([[maybe_unused]] thr::ecs::milliseconds_f delta_time) noexcept override {}
     /// @copydoc game_state_base::draw
-    void draw() noexcept override { thr::ecs::level_render_system::draw(m_registry, *m_window); }
+    void draw() override { thr::ecs::level_render_system::draw(m_registry, *m_window); }
 
   private:
     entt::registry m_registry; ///< 注册表
@@ -105,7 +103,9 @@ int                    main() {
     auto prev = thr::ecs::clock::now();
     while (window.isOpen()) {
         // handle event
-        while (const std::optional event = window.pollEvent()) { manager.handle_event(*event); }
+        while (const std::optional event = window.pollEvent()) {
+            manager.handle_event(*event);
+        }
 
         // update
         auto cur = thr::ecs::clock::now();

@@ -27,7 +27,7 @@
 namespace thr::ecs {
 
     void level_render_system::draw(const entt::registry &registry, sf::RenderTarget &render,
-                                   const sf::RenderStates &states) noexcept {
+                                   const sf::RenderStates &states) {
         using namespace sf::Literals;
         // draw segments
         auto              list = registry.view<segment>();
@@ -80,11 +80,15 @@ namespace thr::ecs {
 
         // draw texts
         auto texts = registry.view<sf::Text>();
-        for (const auto &[entity, text] : texts.each()) { render.draw(text, states); }
+        for (const auto &[entity, text] : texts.each()) {
+            render.draw(text, states);
+        }
 
         // draw sprites
         auto sprites = registry.view<sf::Sprite>();
-        for (const auto &[entity, sprite] : sprites.each()) { render.draw(sprite, states); }
+        for (const auto &[entity, sprite] : sprites.each()) {
+            render.draw(sprite, states);
+        }
     }
 
 } // namespace thr::ecs

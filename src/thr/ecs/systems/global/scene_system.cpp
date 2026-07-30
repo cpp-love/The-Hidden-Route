@@ -11,7 +11,6 @@
 
 #include "thr/ecs/systems/global/scene_system.hpp"
 #include "thr/base/assert_msg.hpp"
-#include "thr/base/config.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include <entt/entity/registry.hpp>
 #include <spdlog/common.h>
@@ -53,13 +52,16 @@ namespace thr::ecs {
 
     } // namespace
 
-    bool scene_system::insert_scene(entt::registry &registry, scene_identifier_type scene_id) noexcept {
+    bool scene_system::insert_scene(entt::registry &registry, scene_identifier_type scene_id) {
         return get_or_create_scene_children(registry, scene_id).second;
     }
-    bool scene_system::erase_scene(entt::registry &registry, scene_identifier_type scene_id) noexcept {
-        auto &scenes_childrens = get_or_create_scenes(registry);
-        auto  scene_it = scenes_childrens.find(scene_id);
-        if (scene_it == scenes_childrens.end()) {
+    bool scene_system::erase_scene(entt::registry &registry, scene_identifier_type scene_id) {
+        if (!registry.ctx().contains<game_scenes>()) {
+            return false;
+        }
+        auto &scene_childrens = registry.ctx().get<game_scenes>().m_scenes_childrens;
+        auto  scene_it = scene_childrens.find(scene_id);
+        if (scene_it == scene_childrens.end()) {
             return false;
         }
         spdlog::debug("删除场景：标识符为 {}", scene_id);
@@ -70,10 +72,10 @@ namespace thr::ecs {
             }
         }
         // 删除场景。
-        scenes_childrens.erase(scene_it);
+        scene_childrens.erase(scene_it);
         return true;
     }
-    void scene_system::clear_scenes(entt::registry &registry) noexcept {
+    void scene_system::clear_scenes(entt::registry &registry) {
         if (!registry.ctx().contains<game_scenes>()) {
             return;
         }
@@ -85,11 +87,11 @@ namespace thr::ecs {
         registry.clear<father_scenes>();
     }
     [[nodiscard]] const std::map<scene_identifier_type, std::set<entt::entity>> &
-    scene_system::get_scenes(entt::registry &registry) noexcept {
+    scene_system::get_scenes(entt::registry &registry) {
         return get_or_create_scenes(registry);
     }
     bool scene_system::insert_to_scene(entt::registry &registry, scene_identifier_type scene_id,
-                                       entt::entity child_entity) noexcept {
+                                       entt::entity child_entity) {
         auto                 &children = get_or_create_scene_children(registry, scene_id).first;
         bool                  is_inserted = children.insert(child_entity).second;
         [[maybe_unused]] bool is_inserted2 =
@@ -98,7 +100,7 @@ namespace thr::ecs {
         return is_inserted;
     }
     bool scene_system::erase_from_scene(entt::registry &registry, scene_identifier_type scene_id,
-                                        entt::entity child_entity) noexcept {
+                                        entt::entity child_entity) {
         auto &children = get_or_create_scene_children(registry, scene_id).first;
         bool  is_erased = children.erase(child_entity) == 1;
         if (auto *fathers = registry.try_get<father_scenes>(child_entity)) {
@@ -106,8 +108,7 @@ namespace thr::ecs {
         }
         return is_erased;
     }
-    void scene_system::erase_from_all_scenes(entt::registry &registry,
-                                             entt::entity    child_entity) noexcept {
+    void scene_system::erase_from_all_scenes(entt::registry &registry, entt::entity child_entity) {
         auto *fathers = registry.try_get<father_scenes>(child_entity);
         if (fathers == nullptr) {
             return;
@@ -120,12 +121,12 @@ namespace thr::ecs {
         fathers->m_fathers.clear();
     }
     [[nodiscard]] const std::set<entt::entity> &
-    scene_system::get_scene_children(entt::registry &registry, scene_identifier_type scene_id) noexcept {
+    scene_system::get_scene_children(entt::registry &registry, scene_identifier_type scene_id) {
         return get_or_create_scene_children(registry, scene_id).first;
     }
 
     [[nodiscard]] const std::set<scene_identifier_type> &
-    scene_system::get_father_scenes(entt::registry &registry, entt::entity child_entity) noexcept {
+    scene_system::get_father_scenes(entt::registry &registry, entt::entity child_entity) {
         return registry.get_or_emplace<father_scenes>(child_entity).m_fathers;
     }
 

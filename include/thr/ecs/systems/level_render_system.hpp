@@ -29,7 +29,7 @@ namespace thr::ecs {
          * @param [in] states 渲染状态。
          */
         static void draw(const entt::registry &registry, sf::RenderTarget &render,
-                         const sf::RenderStates &states = sf::RenderStates::Default) noexcept;
+                         const sf::RenderStates &states = sf::RenderStates::Default);
     };
 
 }; // namespace thr::ecs

@@ -35,8 +35,8 @@
 namespace mainhelper {
 
     // settings_menu
-    settings_menu::settings_menu() noexcept { connect_dispatcher(); }
-    settings_menu::~settings_menu() noexcept { disconnect_dispatcher(); }
+    settings_menu::settings_menu() { connect_dispatcher(); }
+    settings_menu::~settings_menu() { disconnect_dispatcher(); }
 
     void settings_menu::init() noexcept {}
     void settings_menu::on_pause() noexcept { m_is_paused = true; }
@@ -48,7 +48,7 @@ namespace mainhelper {
     void settings_menu::disconnect_dispatcher() noexcept {}
 
     // main_menu
-    main_menu::main_menu() noexcept {
+    main_menu::main_menu() {
         connect_dispatcher();
         thr::ecs::lua_bindings::bind_to_lua(m_lua, m_registry);
         auto script_path = thr::get_existing_full_path("assets/lua_scripts/main_menu.lua").value();
@@ -57,13 +57,13 @@ namespace mainhelper {
                          result.get<sol::error>().what());
         }
     }
-    main_menu::~main_menu() noexcept {
+    main_menu::~main_menu() {
         tgui::Button::Ptr start_button = m_global_gui->get<tgui::Button>("start_button");
         m_global_gui->remove(start_button);
         disconnect_dispatcher();
     }
 
-    void main_menu::init() noexcept {
+    void main_menu::init() {
         tgui::Button::Ptr start_button = tgui::Button::create("点击进入游戏");
         start_button->setPosition({"(&.size - size) / 2", "(&.size - size) / 2"});
         start_button->setSize({"10%", "10%"});
@@ -74,31 +74,33 @@ namespace mainhelper {
         start_button->getRenderer()->setRoundedBorderRadius(10.f);
         m_global_gui->add(start_button, "start_button");
     }
-    void main_menu::on_pause() noexcept {
+    void main_menu::on_pause() {
         m_global_gui->get("start_button")->setVisible(false);
         m_is_paused = true;
     }
-    void main_menu::on_resume() noexcept {
+    void main_menu::on_resume() {
         m_global_gui->get("start_button")->setVisible(true);
         m_is_paused = false;
     }
     bool main_menu::handle_event([[maybe_unused]] const sf::Event &event) noexcept { return false; }
-    void main_menu::update(thr::ecs::milliseconds_f delta_time) noexcept {
+    void main_menu::update(thr::ecs::milliseconds_f delta_time) {
         auto *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
         if (scheduler != nullptr) {
             scheduler->update(delta_time);
         }
     }
-    void main_menu::draw() noexcept {
+    void main_menu::draw() {
         // draw texts
         auto texts = m_registry.view<sf::Text>();
-        for (const auto &[entity, text] : texts.each()) { m_window->draw(text); }
+        for (const auto &[entity, text] : texts.each()) {
+            m_window->draw(text);
+        }
     }
     void main_menu::connect_dispatcher() noexcept {}
     void main_menu::disconnect_dispatcher() noexcept {}
 
     // level_graph_screen
-    level_graph_screen::level_graph_screen() noexcept {
+    level_graph_screen::level_graph_screen() {
         thr::ecs::lua_bindings::bind_to_lua(m_lua, m_registry);
         // adapted from main_helper::game_screen::game_screen
         nlohmann::json json;
@@ -113,7 +115,7 @@ namespace mainhelper {
                          result.get<sol::error>().what());
         }
     }
-    level_graph_screen::~level_graph_screen() noexcept {
+    level_graph_screen::~level_graph_screen() {
         // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
         // 清空按钮。
         tgui::Panel::Ptr panel =
@@ -133,7 +135,7 @@ namespace mainhelper {
         fout << json;
     }
 
-    void level_graph_screen::init() noexcept {
+    void level_graph_screen::init() {
         connect_dispatcher();
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
         exit_button->setSize({"5%", "5%"});
@@ -141,7 +143,7 @@ namespace mainhelper {
         exit_button->getRenderer()->setRoundedBorderRadius(10.f);
         m_global_gui->add(exit_button, "level_graph_screen_exit_button");
     }
-    void level_graph_screen::on_pause() noexcept {
+    void level_graph_screen::on_pause() {
         auto widgets =
             m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
                 ->getWidgets();
@@ -154,7 +156,7 @@ namespace mainhelper {
         m_global_gui->get("level_graph_screen_exit_button")->setVisible(false);
         m_is_paused = true;
     }
-    void level_graph_screen::on_resume() noexcept {
+    void level_graph_screen::on_resume() {
         auto widgets =
             m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
                 ->getWidgets();
@@ -167,7 +169,7 @@ namespace mainhelper {
         m_global_gui->get("level_graph_screen_exit_button")->setVisible(true);
         m_is_paused = false;
     }
-    bool level_graph_screen::handle_event(const sf::Event &event) noexcept {
+    bool level_graph_screen::handle_event(const sf::Event &event) {
         if (m_is_paused) {
             return false;
         }
@@ -179,13 +181,13 @@ namespace mainhelper {
         }
         return false;
     }
-    void level_graph_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
+    void level_graph_screen::update(thr::ecs::milliseconds_f delta_time) {
         auto *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
         if (scheduler != nullptr) {
             scheduler->update(delta_time);
         }
     }
-    void level_graph_screen::draw() noexcept {
+    void level_graph_screen::draw() {
         thr::ecs::level_graph_render_system::draw(
             m_registry,
             m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name),
@@ -199,9 +201,11 @@ namespace mainhelper {
             });
         // draw texts
         auto texts = m_registry.view<sf::Text>();
-        for (const auto &[entity, text] : texts.each()) { m_window->draw(text); }
+        for (const auto &[entity, text] : texts.each()) {
+            m_window->draw(text);
+        }
     }
-    void level_graph_screen::on_level_finished(const level_finished_event &event) noexcept {
+    void level_graph_screen::on_level_finished(const level_finished_event &event) {
         const auto &node = m_registry.get<thr::ecs::level_node>(m_current_level_entity);
         THR_ASSERT_MSG(!node.locked, "节点不应未解锁。");
         spdlog::info("关卡 {} 完成。", node.name);
@@ -213,18 +217,17 @@ namespace mainhelper {
             }
         }
     }
-    void level_graph_screen::connect_dispatcher() noexcept {
+    void level_graph_screen::connect_dispatcher() {
         m_outside_dispather->sink<level_finished_event>()
             .connect<&level_graph_screen::on_level_finished>(this);
     }
-    void level_graph_screen::disconnect_dispatcher() noexcept {
+    void level_graph_screen::disconnect_dispatcher() {
         m_outside_dispather->sink<level_finished_event>()
             .disconnect<&level_graph_screen::on_level_finished>(this);
     }
 
     // game_screen
-    game_screen::game_screen(std::string_view level_name) noexcept
-        : m_player_entity(m_registry.create()) {
+    game_screen::game_screen(std::string_view level_name) : m_player_entity(m_registry.create()) {
         connect_dispatcher();
         nlohmann::json json;
         // adapted from thr::ecs::configs::singleton
@@ -251,13 +254,13 @@ namespace mainhelper {
             }
         }
     }
-    game_screen::~game_screen() noexcept {
+    game_screen::~game_screen() {
         tgui::Button::Ptr exit_button = m_global_gui->get<tgui::Button>("exit_button");
         m_global_gui->remove(exit_button);
         disconnect_dispatcher();
     }
 
-    void game_screen::init() noexcept {
+    void game_screen::init() {
         tgui::Button::Ptr exit_button = tgui::Button::create("退出/Esc");
         exit_button->setSize({"5%", "5%"});
         exit_button->onPress([&] { m_outside_dispather->enqueue<thr::ecs::game_state_pop_event>(); });
@@ -266,7 +269,7 @@ namespace mainhelper {
     }
     void game_screen::on_pause() noexcept { m_is_paused = true; }
     void game_screen::on_resume() noexcept { m_is_paused = false; }
-    bool game_screen::handle_event(const sf::Event &event) noexcept {
+    bool game_screen::handle_event(const sf::Event &event) {
         if (m_is_paused) {
             return false;
         }
@@ -283,7 +286,7 @@ namespace mainhelper {
         }
         return false;
     }
-    void game_screen::update(thr::ecs::milliseconds_f delta_time) noexcept {
+    void game_screen::update(thr::ecs::milliseconds_f delta_time) {
         constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
 
         // update scheduler
@@ -399,7 +402,7 @@ namespace mainhelper {
 
         m_outside_dispather->enqueue(event);
     }
-    void game_screen::draw() noexcept {
+    void game_screen::draw() {
         thr::ecs::level_render_system::draw(m_registry, *m_window);
 
         if (m_remaining_time_after_winning.has_value()) {
@@ -418,20 +421,20 @@ namespace mainhelper {
             m_window->draw(text);
         }
     }
-    void game_screen::connect_dispatcher() noexcept {
+    void game_screen::connect_dispatcher() {
         thr::ecs::segment::connect_listener(m_registry);
         thr::ecs::node::connect_listener(m_registry);
         thr::ecs::player_under_ground::connect_listener(m_registry);
     }
-    void game_screen::disconnect_dispatcher() noexcept {
+    void game_screen::disconnect_dispatcher() {
         thr::ecs::segment::disconnect_listener(m_registry);
         thr::ecs::node::disconnect_listener(m_registry);
         thr::ecs::player_under_ground::disconnect_listener(m_registry);
     }
 
     // pause_menu
-    pause_menu::pause_menu() noexcept { connect_dispatcher(); }
-    pause_menu::~pause_menu() noexcept { disconnect_dispatcher(); }
+    pause_menu::pause_menu() { connect_dispatcher(); }
+    pause_menu::~pause_menu() { disconnect_dispatcher(); }
 
     void pause_menu::init() noexcept {}
     void pause_menu::on_pause() noexcept { m_is_paused = true; }

@@ -40,8 +40,7 @@ namespace thr::ecs {
          * @param [in] on_click 点击节点时触发的回调。
          */
         static void draw(const entt::registry &registry, tgui::Container::Ptr container,
-                         sf::RenderTarget &target, entt::entity entity,
-                         node_callback on_click = {}) noexcept;
+                         sf::RenderTarget &target, entt::entity entity, node_callback on_click = {});
     };
 
 } // namespace thr::ecs

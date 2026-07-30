@@ -13,15 +13,15 @@
 #include <filesystem>
 #include <vector>
 
-#ifdef _WIN32
+#ifdef _WIN32 // Windows
 #include <windows.h>
 
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) // Mac OS
 #include <cstdint>
 #include <mach-o/dyld.h>
 #include <system_error>
 
-#elif defined(__linux__)
+#elif defined(__linux__) // Linux
 #include <cerrno>
 #include <cstddef>
 #include <unistd.h>
@@ -31,80 +31,96 @@ namespace thr {
 
     std::optional<std::filesystem::path> get_executable_path() noexcept {
         constexpr int max_attempts = 10; //< 最大尝试次数。
-#ifdef _WIN32
-        std::vector<wchar_t> buffer(MAX_PATH);
-        for (int i = 0; i < max_attempts; ++i) {
-            DWORD len = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-            if (len == 0) {
-                return std::nullopt; // 调用失败
+        try {
+#ifdef _WIN32 // Windows
+            std::vector<wchar_t> buffer(MAX_PATH);
+            for (int i = 0; i < max_attempts; ++i) {
+                DWORD len =
+                    GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+                if (len == 0) {
+                    return std::nullopt; // 调用失败。
+                }
+                if (len < buffer.size()) {
+                    return std::filesystem::path(buffer.data());
+                }
+                // 缓冲区不足，扩容重试。
+                buffer.resize(buffer.size() * 2);
             }
-            if (len < buffer.size()) {
+#elif defined(__APPLE__) // Mac OS
+            std::uint32_t     size = 1024; //< 文件大小。
+            std::vector<char> buffer(size);
+            for (int i = 0; i < max_attempts; ++i) {
+                int result = _NSGetExecutablePath(buffer.data(), &size);
+                if (result == 0) {
+                    std::error_code       ec;
+                    std::filesystem::path real_path = std::filesystem::canonical(buffer.data(), ec);
+                    if (!ec) {
+                        return real_path;
+                    }
+                    // 解析失败时，回退到原始路径。
+                    return std::filesystem::path(buffer.data());
+                }
+                // 返回 -1 表示缓冲区不足，size 已被设置为所需大小。
+                buffer.resize(size);
+            }
+#elif defined(__linux__) // Linux
+            std::size_t       size = 1024; //< 文件大小。
+            std::vector<char> buffer(size);
+            for (int i = 0; i < max_attempts; ++i) {
+                ssize_t len = readlink("/proc/self/exe", buffer.data(), size - 1);
+                if (len == -1) {
+                    if (errno == ENAMETOOLONG) {
+                        size *= 2;
+                        buffer.resize(size);
+                        continue;
+                    }
+                    return std::nullopt; // 其他错误。
+                }
+                buffer[len] = '\0';
                 return std::filesystem::path(buffer.data());
             }
-            // 缓冲区不足，扩容重试
-            buffer.resize(buffer.size() * 2);
-        }
-#elif defined(__APPLE__)
-        std::uint32_t     size = 1024; //< 文件大小。
-        std::vector<char> buffer(size);
-        for (int i = 0; i < max_attempts; ++i) {
-            int result = _NSGetExecutablePath(buffer.data(), &size);
-            if (result == 0) {
-                std::error_code       ec;
-                std::filesystem::path real_path = std::filesystem::canonical(buffer.data(), ec);
-                if (!ec) {
-                    return real_path;
-                }
-                // 解析失败时，回退到原始路径
-                return std::filesystem::path(buffer.data());
-            }
-            // 返回 -1 表示缓冲区不足，size 已被设置为所需大小
-            buffer.resize(size);
-        }
-#else // Linux / 其他类 Unix
-        std::size_t       size = 1024; //< 文件大小。
-        std::vector<char> buffer(size);
-        for (int i = 0; i < max_attempts; ++i) {
-            ssize_t len = readlink("/proc/self/exe", buffer.data(), size - 1);
-            if (len == -1) {
-                if (errno == ENAMETOOLONG) {
-                    size *= 2;
-                    buffer.resize(size);
-                    continue;
-                }
-                return std::nullopt; // 其他错误
-            }
-            buffer[len] = '\0';
-            return std::filesystem::path(buffer.data());
-        }
+#else
+#error "Unsupported platform (only Windows, Linux, and Mac OS are supported)"
 #endif
+        } catch (...) { // NOLINT(bugprone-empty-catch)
+            // 出错，与下面一起返回 `std::nullopt`。
+        }
         return std::nullopt;
     }
 
     std::optional<std::filesystem::path> get_executable_directory() noexcept {
-        auto path = get_executable_path();
-        return path.transform([](const std::filesystem::path &path) { return path.parent_path(); });
+        try {
+            auto path = get_executable_path();
+            return path.transform([](const std::filesystem::path &path) { return path.parent_path(); });
+        } catch (...) {
+            return std::nullopt;
+        }
     }
 
     std::optional<std::filesystem::path>
     get_existing_full_path(const std::filesystem::path &path) noexcept {
-        return get_executable_directory()
-            .and_then([&](std::filesystem::path folder_path) -> std::optional<std::filesystem::path> {
-                // 先尝试相对于可执行文件父文件夹。
-                folder_path /= path;
-                if (std::filesystem::exists(folder_path)) {
-                    return folder_path;
-                }
-                return std::nullopt;
-            })
-            .or_else([&] -> std::optional<std::filesystem::path> {
-                // 再尝试相对于工作目录。
-                std::filesystem::path full_path = std::filesystem::current_path() / path;
-                if (std::filesystem::exists(full_path)) {
-                    return full_path;
-                }
-                return std::nullopt;
-            });
+        try {
+            return get_executable_directory()
+                .and_then(
+                    [&](std::filesystem::path folder_path) -> std::optional<std::filesystem::path> {
+                        // 先尝试相对于可执行文件父文件夹。
+                        folder_path /= path;
+                        if (std::filesystem::exists(folder_path)) {
+                            return folder_path;
+                        }
+                        return std::nullopt;
+                    })
+                .or_else([&] -> std::optional<std::filesystem::path> {
+                    // 再尝试相对于工作目录。
+                    std::filesystem::path full_path = std::filesystem::current_path() / path;
+                    if (std::filesystem::exists(full_path)) {
+                        return full_path;
+                    }
+                    return std::nullopt;
+                });
+        } catch (...) {
+            return std::nullopt;
+        }
     }
 
 } // namespace thr

@@ -23,77 +23,93 @@
 #include <stacktrace>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 /// @cond INTERNAL
-/// @brief 一些内部实现，用户不应访问
+/// @brief 一些内部实现，用户不应访问。
 namespace thr::details {
 
     /**
-     * @brief 获取堆栈信息（默认为当前）
-     * @param [in] stack_trace 堆栈对象，默认为当前堆栈
-     * @return std::string 堆栈信息
+     * @brief 获取堆栈信息。（默认为当前的）
+     * @param [in] stack_trace 堆栈对象，默认为当前堆栈。
+     * @return std::string 堆栈信息。
      */
     [[nodiscard]] inline std::string
-    get_stack_trace_message(const std::stacktrace &stack_trace = std::stacktrace::current()) noexcept {
-        try {
-            std::string str;
-            for (const auto &[index, entry] : stack_trace | std::views::enumerate) {
-                std::format_to(std::back_inserter(str), "frame #{}: {}:{} in function: {}\n", index,
-                               entry.source_file(), entry.source_line(), entry.description());
-            }
-            return str;
-        } catch (std::exception &exception) {
-            return "Due to the following exception, we lost stack trace message.\n"
-                   + std::string(exception.what());
-        } catch (...) { return "Due to the unknown exception, we lost stack trace message.\n"; }
+    get_stack_trace_message(const std::stacktrace &stack_trace = std::stacktrace::current()) {
+        std::string str;
+        for (const auto &[index, entry] : stack_trace | std::views::enumerate) {
+            std::format_to(std::back_inserter(str), "frame #{}: {}:{} in function: {}\n", index,
+                           entry.source_file(), entry.source_line(), entry.description());
+        }
+        return str;
     }
 
     /**
-     * @brief 断言失败处理函数
-     * @param [in] expr 断言表达式
-     * @param [in] loc 断言位置
-     * @param [in] message 断言失败时输出的消息（默认为 `std::nullopt`)
-     * @param [in] stack_trace 堆栈信息（默认为当前堆栈）
+     * @brief 断言失败处理函数。
+     * @param [in] expr 断言表达式。
+     * @param [in] loc 断言位置。
+     * @param [in] message 断言失败时输出的消息。（默认为 `std::nullopt`)
+     * @param [in] stack_trace 堆栈信息。（默认为当前堆栈）
      */
     [[noreturn]] inline void
     assert_fail(std::string_view expr, const std::source_location &loc,
                 std::optional<std::string> message = std::nullopt,
                 const std::stacktrace     &stack_trace = std::stacktrace::current()) noexcept {
-        std::string stack_trace_message = get_stack_trace_message(stack_trace);
-        // 输出信息
-        if (message != std::nullopt) {
-            spdlog::critical("Assertion failed at {}:{}:{} (in function :{}):\n"
-                             ">> Expression: {}\n"
-                             ">> Message: {}\n"
-                             "Stack trace:\n"
-                             "{}",
-                             loc.file_name(), loc.line(), loc.column(), loc.function_name(), expr,
-                             *message, stack_trace_message);
-        } else {
-            spdlog::critical("Assertion failed at {}:{}:{} (in function :{}):\n"
-                             ">> Expression: {}\n"
-                             "Stack trace:\n"
-                             "{}",
-                             loc.file_name(), loc.line(), loc.column(), loc.function_name(), expr,
-                             stack_trace_message);
+
+        try {
+            // 尝试完整记录日志。
+
+            // 获取堆栈信息。
+            std::string stack_trace_message;
+            try {
+                stack_trace_message = get_stack_trace_message(stack_trace);
+            } catch (...) {
+                stack_trace_message = "Due to an exception, we lost stack trace message.";
+            }
+
+            // 输出信息。
+            if (message.has_value()) {
+                spdlog::critical("Assertion failed at {}:{}:{} (in function :{}):\n"
+                                 ">> Expression: {}\n"
+                                 ">> Message: {}\n"
+                                 "Stack trace:\n"
+                                 "{}",
+                                 loc.file_name(), loc.line(), loc.column(), loc.function_name(), expr,
+                                 *message, stack_trace_message);
+            } else {
+                spdlog::critical("Assertion failed at {}:{}:{} (in function :{}):\n"
+                                 ">> Expression: {}\n"
+                                 "Stack trace:\n"
+                                 "{}",
+                                 loc.file_name(), loc.line(), loc.column(), loc.function_name(), expr,
+                                 stack_trace_message);
+            }
+
+            // 及时刷新。
+            spdlog::default_logger()->flush();
+        } catch (...) {
+            // 尝试简单日志。
+            try {
+                spdlog::critical("Assertion failed, and error logging threw an exception.\n");
+                spdlog::default_logger()->flush();
+            } catch (...) { // NOLINT(bugprone-empty-catch)
+                // 静默退出。
+            }
         }
 
-        // 及时刷新
-        spdlog::default_logger()->flush();
-
-        // 终止程序
-        std::abort();
+        // 终止程序。
+        std::terminate();
     }
 
     /**
-     * @brief 断言检查函数
-     * @tparam Args 格式化字符串参数类型
-     * @param [in] condition 条件
-     * @param [in] expr 断言表达式
-     * @param [in] loc 断言位置
-     * @param [in] fmt 格式化字符串
-     * @param [in] args 格式化字符串参数
+     * @brief 断言检查函数。
+     * @tparam Args 格式化字符串参数类型。
+     * @param [in] condition 条件。
+     * @param [in] expr 断言表达式。
+     * @param [in] loc 断言位置。
+     * @param [in] fmt 格式化字符串。
+     * @param [in] args 格式化字符串参数。
      */
     template <typename... Args>
     constexpr void assert_check(bool condition, std::string_view expr, const std::source_location &loc,
@@ -101,33 +117,38 @@ namespace thr::details {
         if (condition) {
             return;
         }
+
         if (std::is_constant_evaluated()) {
             std::unreachable();
         } else {
             try {
+                // 尝试完整信息。
                 assert_fail(expr, loc, std::format(fmt, std::forward<Args>(args)...));
-            } catch (std::exception &exception) {
-                assert_fail(expr, loc,
-                            "Due to the following exception, we lost assertion message.\n"
-                                + std::string(exception.what()));
             } catch (...) {
-                assert_fail(expr, loc, "Due to the unknown exception, we lost assertion message.\n");
+                try {
+                    // 尝试简短信息。
+                    assert_fail(expr, loc, "Due to an exception, we lost assertion message.\n");
+                } catch (...) {
+                    // 静默报错。
+                    assert_fail(expr, loc);
+                }
             }
         }
     }
 
     /**
-     * @brief 断言检查函数
-     * @param [in] condition 条件
-     * @param [in] expr 断言表达式
-     * @param [in] loc 断言位置
-     * @param [in] message 运行时消息（如果有）
+     * @brief 断言检查函数。
+     * @param [in] condition 条件。
+     * @param [in] expr 断言表达式。
+     * @param [in] loc 断言位置。
+     * @param [in] message 运行时消息。（如果有）
      */
     constexpr void assert_check(bool condition, std::string_view expr, const std::source_location &loc,
                                 std::optional<std::string> message = std::nullopt) noexcept {
         if (condition) {
             return;
         }
+
         if (std::is_constant_evaluated()) {
             std::unreachable();
         } else {
@@ -164,11 +185,12 @@ namespace thr::details {
         template <typename U>
             requires std::constructible_from<T, U> && (!is_basic_format_string<T>::value)
         constexpr with_source_location(
-            U &&val, std::source_location location = std::source_location::current()) noexcept
+            U &&val, std::source_location location =
+                         std::source_location::current()) noexcept(std::is_nothrow_constructible_v<T, U>)
             : value(std::forward<U>(val)), loc(location) {}
 
         /**
-         * @brief 构造一个包含 `T` 类型的对象（对 `T` 是 `std::basic_format_string` 模板类的实例化这种情况的特化）。
+         * @brief 构造一个包含 `T` 类型的对象。（对 `T` 是 `std::basic_format_string` 模板类的实例化这种情况的特化）
          * @tparam U 传入的值的类型。
          * @param [in] val 传入的值。
          * @param [in] location 源码位置（可忽略，默认为调用的位置）。
@@ -177,7 +199,8 @@ namespace thr::details {
         template <typename U>
             requires std::constructible_from<T, U> && is_basic_format_string<T>::value
         consteval with_source_location(
-            U &&val, std::source_location location = std::source_location::current()) noexcept
+            U &&val, std::source_location location =
+                         std::source_location::current()) noexcept(std::is_nothrow_constructible_v<T, U>)
             : value(std::forward<U>(val)), loc(location) {}
         // NOLINTEND(hicpp-explicit-conversions)
     };
@@ -188,13 +211,13 @@ namespace thr::details {
 namespace thr {
 
     /**
-     * @brief 带消息的 `std::unreachable`（执行到正常情况无法到达的位置时的处理函数）
-     * @param [in] message 若执行到不该执行的的此处时输出的消息（默认为空，即 `std::nullopt`)
+     * @brief 带消息的 `std::unreachable`。（执行到正常情况无法到达的位置时的处理函数）
+     * @param [in] message 若执行到不该执行的的此处时输出的消息。（默认为空，即 `std::nullopt`)
      * @details
      * - 当在编译期求值时，宏调用 `std::unreachable()`，**不输出消息**；
      *   当在运行期求值时：
-     *   当定义宏 `NDEBUG` 时，函数只调用 `std::unreachable()`，**不输出消息**，若到达 **会导致UB**；
-     *   未定义宏 `NDEBUG` 时，会输出消息，行为定义（调用 `std::abort()` 终止函数）
+     *   当定义宏 `NDEBUG` 时，函数只调用 `std::unreachable()`，**不输出消息**，若到达**会导致UB**；
+     *   未定义宏 `NDEBUG` 时，会输出消息，行为定义。（调用 `std::terminate()` 终止函数）
      * - 输出格式：
      * ```plain
      * Control reached an unreachable place at <file>:<line>:<column> (in function :<function>):
@@ -203,7 +226,7 @@ namespace thr {
      * frame #0 : <description> in line <line> in file <file>
      * ...
      * ```
-     * @warning 此函数会调用 `std::abort()` / `std::unreachable()`，不会返回，请确认调用处是否无法到达
+     * @warning 此函数会调用 `std::terminate()` / `std::unreachable()`，不会返回，请确认调用处是否无法到达。
      */
     [[noreturn]] constexpr void
     unreachable([[maybe_unused]] details::with_source_location<std::optional<std::string>> message =
@@ -214,42 +237,63 @@ namespace thr {
 #ifdef NDEBUG
             std::unreachable();
 #else
-            std::string stack_trace_message = details::get_stack_trace_message();
-            // 输出信息
-            if (message.value.has_value()) {
-                spdlog::critical("Control reached an unreachable place at {}:{}:{} (in function :{}):\n"
-                                 ">> Message: {}\n"
-                                 "Stack trace:\n"
-                                 "{}",
-                                 message.loc.file_name(), message.loc.line(), message.loc.column(),
-                                 message.loc.function_name(), *message.value, stack_trace_message);
-            } else {
-                spdlog::critical("Control reached an unreachable place at {}:{}:{} (in function :{}):\n"
-                                 "Stack trace:\n"
-                                 "{}",
-                                 message.loc.file_name(), message.loc.line(), message.loc.column(),
-                                 message.loc.function_name(), stack_trace_message);
+            try {
+                // 尝试完整记录日志。
+
+                // 获取堆栈信息。
+                std::string stack_trace_message;
+                try {
+                    stack_trace_message = details::get_stack_trace_message();
+                } catch (...) {
+                    stack_trace_message = "Due to an exception, we lost stack trace message.";
+                }
+
+                // 输出信息。
+                if (message.value.has_value()) {
+                    spdlog::critical(
+                        "Control reached an unreachable place at {}:{}:{} (in function :{}):\n"
+                        ">> Message: {}\n"
+                        "Stack trace:\n"
+                        "{}",
+                        message.loc.file_name(), message.loc.line(), message.loc.column(),
+                        message.loc.function_name(), *message.value, stack_trace_message);
+                } else {
+                    spdlog::critical(
+                        "Control reached an unreachable place at {}:{}:{} (in function :{}):\n"
+                        "Stack trace:\n"
+                        "{}",
+                        message.loc.file_name(), message.loc.line(), message.loc.column(),
+                        message.loc.function_name(), stack_trace_message);
+                }
+
+                // 及时刷新。
+                spdlog::default_logger()->flush();
+            } catch (...) {
+                // 尝试简单日志。
+                try {
+                    spdlog::critical("Assertion failed, and error logging threw an exception.\n");
+                    spdlog::default_logger()->flush();
+                } catch (...) { // NOLINT(bugprone-empty-catch)
+                    // 静默退出。
+                }
             }
 
-            // 及时刷新
-            spdlog::default_logger()->flush();
-
-            // 终止程序
-            std::abort();
+            // 终止程序。
+            std::terminate();
 #endif // NDEBUG
         }
     }
 
     /**
-     * @brief 带消息的 `std::unreachable`（执行到正常情况无法到达的位置时的处理函数）
-     * @tparam Args 格式化字符串参数类型
-     * @param [in] fmt 格式化字符串
-     * @param [in] args 格式化字符串参数
+     * @brief 带消息的 `std::unreachable`。（执行到正常情况无法到达的位置时的处理函数）
+     * @tparam Args 格式化字符串参数类型。
+     * @param [in] fmt 格式化字符串。
+     * @param [in] args 格式化字符串参数。
      * @details
      * - 当在编译期求值时，宏调用 `std::unreachable()`，**不输出消息**；
      *   当在运行期求值时：
      *   当定义宏 `NDEBUG` 时，函数只调用 `std::unreachable()`，**不输出消息**，若到达 **会导致UB**；
-     *   未定义宏 `NDEBUG` 时，会输出消息，行为定义（调用 `std::abort()` 终止函数）
+     *   未定义宏 `NDEBUG` 时，会输出消息，行为定义。（调用 `std::terminate()` 终止函数）
      * - 输出格式：
      * ```plain
      * Control reached an unreachable place at <file>:<line>:<column> (in function :<function>):
@@ -258,7 +302,7 @@ namespace thr {
      * frame #0 : <description> in line <line> in file <file>
      * ...
      * ```
-     * @warning 此函数会调用 `std::abort()` / `std::unreachable()`，不会返回，请确认调用处是否无法到达
+     * @warning 此函数会调用 `std::terminate()` / `std::unreachable()`，不会返回，请确认调用处是否无法到达。
      */
     template <typename... Args>
     [[noreturn]] constexpr void
@@ -270,20 +314,33 @@ namespace thr {
 #ifdef NDEBUG
             std::unreachable();
 #else
-            unreachable(details::with_source_location<std::optional<std::string>>{
-                std::format(fmt.value, std::forward<Args>(args)...), fmt.loc});
+            try {
+                // 尝试完整信息。
+                unreachable(details::with_source_location<std::optional<std::string>>{
+                    std::format(fmt.value, std::forward<Args>(args)...), fmt.loc});
+            } catch (...) {
+                try {
+                    // 尝试简短信息。
+                    unreachable(details::with_source_location<std::optional<std::string>>{
+                        "Due to an exception, we lost unreachable message.\n", fmt.loc});
+                } catch (...) {
+                    // 静默报错。
+                    unreachable(details::with_source_location<std::optional<std::string>>{std::nullopt,
+                                                                                          fmt.loc});
+                }
+            }
 #endif // NDEBUG
         }
     }
 } // namespace thr
 
 /**
- * @brief 带消息的 `assert`（断言）
- * @param [in] expr 断言表达式（需要可以隐式转化为 `bool` 类型或本来就是 `bool` 类型）
- * @param [in] ... 可选的断言失败时输出的消息，支持格式化
+ * @brief 带消息的 `assert`（断言）。
+ * @param [in] expr 断言表达式。（需要可以隐式转化为 `bool` 类型或本来就是 `bool` 类型）
+ * @param [in] ... 可选的断言失败时输出的消息，支持格式化。
  * @details
- * - 与标准库的 `assert` 行为相同，当定义宏 `NDEBUG` 时不启用，未定义宏 `NDEBUG` 时才启用
- * - 格式化与标准库的 `std::format` 格式化相同
+ * - 与标准库的 `assert` 行为相同，当定义宏 `NDEBUG` 时不启用，未定义宏 `NDEBUG` 时才启用。
+ * - 格式化使用标准库的 `std::format` 格式化。
  * - 输出格式：
  * ```plain
  * Assertion failed at <file>:<line>:<column> (in function :<function>):

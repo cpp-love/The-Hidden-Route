@@ -44,7 +44,7 @@ namespace thr {
          * @param [in] dir 方向。
          * @return std::string_view 名字。
          */
-        constexpr std::string_view direction_to_name(direction dir) {
+        constexpr std::string_view direction_to_name(direction dir) noexcept {
             switch (dir) {
                 case direction::right: return "right";
                 case direction::down: return "down";
@@ -83,7 +83,7 @@ namespace thr {
          * @param [in] length 指定的长度。
          * @return sf::Vector2f 转换结果。
          */
-        constexpr sf::Vector2f direction_to_vector2f(direction dir, float length) {
+        constexpr sf::Vector2f direction_to_vector2f(direction dir, float length) noexcept {
             switch (dir) {
                 case direction::right: return {length, 0};
                 case direction::down: return {0, length};
@@ -98,7 +98,7 @@ namespace thr {
          * @param [in] dir 方向。
          * @return direction 相反方向。
          */
-        constexpr direction negate_direction(direction dir) {
+        constexpr direction negate_direction(direction dir) noexcept {
             THR_ASSERT_MSG(std::to_underlying(direction::right) <= std::to_underlying(dir)
                                && std::to_underlying(direction::up) >= std::to_underlying(dir),
                            "参数 dir（值为：{}）非法", std::to_underlying(dir));
@@ -112,7 +112,7 @@ namespace thr {
          * @param [in] dir 方向。
          * @return direction 顺时针旋转90°的方向。
          */
-        constexpr direction rotate_90_cw(direction dir) {
+        constexpr direction rotate_90_cw(direction dir) noexcept {
             THR_ASSERT_MSG(std::to_underlying(direction::right) <= std::to_underlying(dir)
                                && std::to_underlying(direction::up) >= std::to_underlying(dir),
                            "参数 dir（值为：{}）非法", std::to_underlying(dir));
@@ -128,7 +128,7 @@ namespace thr {
          * @param [in] dir 方向。
          * @return direction 逆时针旋转90°的方向。
          */
-        constexpr direction rotate_90_ccw(direction dir) {
+        constexpr direction rotate_90_ccw(direction dir) noexcept {
             THR_ASSERT_MSG(std::to_underlying(direction::right) <= std::to_underlying(dir)
                                && std::to_underlying(direction::up) >= std::to_underlying(dir),
                            "参数 dir（值为：{}）非法", std::to_underlying(dir));
@@ -145,7 +145,7 @@ namespace thr {
          * @return true 是水平方向。
          * @return false 不是水平方向。
          */
-        constexpr bool is_horizontal(direction dir) {
+        constexpr bool is_horizontal(direction dir) noexcept {
             THR_ASSERT_MSG(std::to_underlying(direction::right) <= std::to_underlying(dir)
                                && std::to_underlying(direction::up) >= std::to_underlying(dir),
                            "参数 dir（值为：{}）非法", std::to_underlying(dir));
@@ -159,7 +159,7 @@ namespace thr {
          * @return true 是垂直方向。
          * @return false 不是垂直方向。
          */
-        constexpr bool is_vertical(direction dir) {
+        constexpr bool is_vertical(direction dir) noexcept {
             THR_ASSERT_MSG(std::to_underlying(direction::right) <= std::to_underlying(dir)
                                && std::to_underlying(direction::up) >= std::to_underlying(dir),
                            "参数 dir（值为：{}）非法", std::to_underlying(dir));

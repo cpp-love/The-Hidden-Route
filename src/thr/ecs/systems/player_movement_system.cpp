@@ -27,7 +27,7 @@
 namespace thr::ecs {
 
     void player_movement_system::update(entt::registry &registry, entt::entity player_entity,
-                                        float delta_length, direction dir) noexcept {
+                                        float delta_length, direction dir) {
         auto       &turnings = registry.get<turning_history>(player_entity).turnings;
         const auto *on_ground = registry.try_get<player_on_ground>(player_entity);
         const auto *under_ground = registry.try_get<player_under_ground>(player_entity);
@@ -195,7 +195,7 @@ namespace thr::ecs {
     }
 
     void player_movement_system::update(entt::registry &registry, entt::entity player_entity,
-                                        float delta_length, combined_direction cdir) noexcept {
+                                        float delta_length, combined_direction cdir) {
         if (cdir == combined_direction::none) {
             return;
         }
@@ -212,7 +212,7 @@ namespace thr::ecs {
     }
 
     /// @todo 添加恢复操作，并解决同时按下两个相邻方向键会产生大量记录导致撤回困难的问题。
-    void player_movement_system::undo(entt::registry &registry, entt::entity player_entity) noexcept {
+    void player_movement_system::undo(entt::registry &registry, entt::entity player_entity) {
         auto &turnings = registry.get<turning_history>(player_entity).turnings;
         if (turnings.empty()) {
             return;

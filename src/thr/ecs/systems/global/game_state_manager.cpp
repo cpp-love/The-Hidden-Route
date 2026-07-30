@@ -31,7 +31,7 @@ namespace thr::ecs {
 
     const tgui::String game_state_manager::game_screen_panel_name{"game_screen_panel"};
 
-    game_state_manager::game_state_manager(sf::RenderWindow &window) noexcept
+    game_state_manager::game_state_manager(sf::RenderWindow &window)
         : m_window(window), m_gui(m_window) {
         m_dispatcher.sink<game_state_push_event>().connect<&game_state_manager::on_push_state>(this);
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
@@ -43,12 +43,12 @@ namespace thr::ecs {
         m_gui.add(game_screen_panel, game_screen_panel_name);
     }
 
-    game_state_manager::~game_state_manager() noexcept {
+    game_state_manager::~game_state_manager() {
         m_states.clear();
         m_dispatcher.clear();
     }
 
-    void game_state_manager::process_pending_states() noexcept {
+    void game_state_manager::process_pending_states() {
         while (!m_pending_states.empty()) {
             auto state = std::move(m_pending_states.back());
             m_pending_states.pop_back();
@@ -56,7 +56,7 @@ namespace thr::ecs {
         }
     }
 
-    void game_state_manager::push_state(game_state_base::ptr state) noexcept {
+    void game_state_manager::push_state(game_state_base::ptr state) {
         if (m_is_dispatching) {
             m_pending_states.push_back(std::move(state));
             return;
@@ -68,14 +68,14 @@ namespace thr::ecs {
         }
         m_states.push_back(std::move(state));
     }
-    void game_state_manager::pop_state() noexcept {
+    void game_state_manager::pop_state() {
         THR_ASSERT_MSG(!m_states.empty(), "用户错误地尝试对空的栈执行弹出操作");
         m_states.pop_back();
         if (!m_states.empty()) {
             m_states.back()->on_resume();
         }
     }
-    void game_state_manager::reset() noexcept {
+    void game_state_manager::reset() {
         m_states.clear();
         m_pending_states.clear();
         m_is_dispatching = false;
@@ -83,7 +83,7 @@ namespace thr::ecs {
         m_dispatcher.sink<game_state_push_event>().connect<&game_state_manager::on_push_state>(this);
         m_dispatcher.sink<game_state_pop_event>().connect<&game_state_manager::on_pop_state>(this);
     }
-    bool game_state_manager::handle_event(const sf::Event &event) noexcept {
+    bool game_state_manager::handle_event(const sf::Event &event) {
         if (event.is<sf::Event::Closed>()) {
             spdlog::info("Quit the window.");
             m_window.close();
@@ -142,7 +142,7 @@ namespace thr::ecs {
         }
         return false;
     }
-    void game_state_manager::update(milliseconds_f delta_time) noexcept {
+    void game_state_manager::update(milliseconds_f delta_time) {
         for (auto &state : m_states | std::views::reverse) {
             state->update(delta_time);
             if (state->should_block_passing_down()) {
@@ -155,7 +155,7 @@ namespace thr::ecs {
         m_is_dispatching = false;
         process_pending_states();
     }
-    void game_state_manager::draw() noexcept {
+    void game_state_manager::draw() {
         /// @todo 添加更好的方式。
         // 后面覆盖前面，所以前面先绘制。
         std::ranges::subrange last_unblocked_range{[&] {
@@ -168,15 +168,15 @@ namespace thr::ecs {
                                                        return m_states.begin();
                                                    }(),
                                                    m_states.end()};
-        for (auto &state : last_unblocked_range) { state->draw(); }
+        for (auto &state : last_unblocked_range) {
+            state->draw();
+        }
         m_gui.draw();
     }
 
-    void game_state_manager::on_push_state(game_state_push_event &event) noexcept {
+    void game_state_manager::on_push_state(game_state_push_event &event) {
         push_state(std::move(event.state));
     }
-    void game_state_manager::on_pop_state([[maybe_unused]] game_state_pop_event event) noexcept {
-        pop_state();
-    }
+    void game_state_manager::on_pop_state([[maybe_unused]] game_state_pop_event event) { pop_state(); }
 
 } // namespace thr::ecs

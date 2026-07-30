@@ -58,8 +58,7 @@ namespace thr {
          * @param [in] value 被观察者
          * @param [in] observers 观察者列表
          */
-        observable(const T &value, std::vector<observer_callback> observers) noexcept(
-            std::is_nothrow_copy_constructible_v<T>)
+        observable(const T &value, std::vector<observer_callback> observers)
             : m_value(value), m_observers(std::move(observers)) {}
         /**
          * @brief 构造 observable 对象
@@ -100,7 +99,7 @@ namespace thr {
          * @brief 设置被观察者值
          * @param [in] value 被观察者值
          */
-        void                   set_value(const T &value) const noexcept {
+        void                   set_value(const T &value) {
             m_value = value;
             notify_callback();
         }
@@ -108,7 +107,7 @@ namespace thr {
          * @brief 设置被观察者值
          * @param [in] value 被观察者值
          */
-        void set_value(T &&value) const noexcept {
+        void set_value(T &&value) {
             m_value = std::move(value);
             notify_callback();
         }

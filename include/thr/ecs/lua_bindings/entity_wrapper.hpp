@@ -67,7 +67,7 @@ namespace thr::ecs::lua_bindings {
          * @return true 实体合法。
          * @return false 实体不合法。
          */
-        [[nodiscard]] bool            valid() const { return m_handle.valid(); }
+        [[nodiscard]] bool            valid() const noexcept { return m_handle.valid(); }
 
         /// @brief 销毁该实体。
         void                          destroy() { m_handle.destroy(); }
@@ -152,7 +152,7 @@ namespace thr::ecs::lua_bindings {
      * @return true 两个实体包装器相等。
      * @return false 两个实体包装器不相等。
      */
-    inline bool operator==(const entity_wrapper &lhs, const entity_wrapper &rhs) {
+    inline bool operator==(const entity_wrapper &lhs, const entity_wrapper &rhs) noexcept {
         return lhs.get_handle() == rhs.get_handle();
     }
 

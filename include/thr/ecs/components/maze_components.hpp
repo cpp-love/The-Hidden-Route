@@ -65,7 +65,7 @@ namespace thr::ecs {
          * @brief 获取包围范围。
          * @return sf::FloatRect 包围范围。
          */
-        [[nodiscard]] sf::FloatRect get_bounds() const noexcept {
+        [[nodiscard]] sf::FloatRect get_bounds() const {
             sf::Vector2f position = start_center;
             sf::Vector2f size;
             switch (dir) {
@@ -93,7 +93,7 @@ namespace thr::ecs {
          * @brief 获取行走过的包围范围。
          * @return sf::FloatRect 行走过的包围范围。
          */
-        [[nodiscard]] sf::FloatRect get_walked_bounds() const noexcept {
+        [[nodiscard]] sf::FloatRect get_walked_bounds() const {
             sf::Vector2f position = start_center;
             sf::Vector2f size;
             switch (dir) {

@@ -46,49 +46,58 @@ namespace thr::ecs {
          * @brief 构造 game state manager 对象。
          * @param [in] window 渲染窗口。
          */
-        explicit game_state_manager(sf::RenderWindow &window) noexcept;
+        explicit game_state_manager(sf::RenderWindow &window);
+
+        /// @brief 删除复制构造函数。
+        game_state_manager(const game_state_manager &rhs) noexcept = delete;
+        /// @brief 删除移动构造函数。
+        game_state_manager(game_state_manager &&rhs) noexcept = delete;
+        /// @brief 删除复制赋值运算符。
+        game_state_manager &operator=(const game_state_manager &rhs) noexcept = delete;
+        /// @brief 删除移动赋值运算符。
+        game_state_manager &operator=(game_state_manager &&rhs) noexcept = delete;
 
         /// @brief 销毁 game state manager 对象。
-        ~game_state_manager() noexcept;
+        ~game_state_manager();
 
         /**
          * @brief 压入状态。
          * @param [in] state 游戏状态。
          * @note 在函数内部会给 `state` 绑定调度器，无需提前绑定。
          */
-        void push_state(game_state_base::ptr state) noexcept;
+        void push_state(game_state_base::ptr state);
         /// @brief 弹出状态。
-        void pop_state() noexcept;
+        void pop_state();
         /// @brief 重启对象。
-        void reset() noexcept;
+        void reset();
         /**
          * @brief 处理事件。
          * @param [in] event 事件。
          * @return true 事件已处理。
          * @return false 事件未处理。
          */
-        bool handle_event(const sf::Event &event) noexcept;
+        bool handle_event(const sf::Event &event);
         /**
          * @brief 更新游戏状态。
          * @param [in] delta_time 时间间隔。
          */
-        void update(milliseconds_f delta_time) noexcept;
+        void update(milliseconds_f delta_time);
         /// @brief 绘制当前状态。
-        void draw() noexcept;
+        void draw();
 
       private:
         /// @brief 处理延迟压入的状态。
-        void process_pending_states() noexcept;
+        void process_pending_states();
         /**
          * @brief 响应压入状态的函数。
          * @param [in] event 压入状态。
          */
-        void on_push_state(game_state_push_event &event) noexcept;
+        void on_push_state(game_state_push_event &event);
         /**
          * @brief 响应弹出状态的函数。
          * @param [in] event 弹出状态。
          */
-        void on_pop_state([[maybe_unused]] game_state_pop_event event) noexcept;
+        void on_pop_state([[maybe_unused]] game_state_pop_event event);
     };
 
 } // namespace thr::ecs

@@ -40,7 +40,7 @@ namespace thr::ecs {
                                          tgui::RelativeValue(button_scale)}; ///< 按钮大小。
 
         /*
-        void                   remove_existing_nodes(tgui::Gui &gui) noexcept {
+        void                   remove_existing_nodes(tgui::Gui &gui) {
             auto widgets = gui.getWidgets();
             for (const auto &widget : widgets) {
                 if (widget->getWidgetName().starts_with(
@@ -71,13 +71,13 @@ namespace thr::ecs {
 
     void level_graph_render_system::draw(const entt::registry &registry, tgui::Container::Ptr container,
                                          sf::RenderTarget &target, entt::entity entity,
-                                         node_callback on_click) noexcept {
+                                         node_callback on_click) {
         THR_ASSERT_MSG(registry.valid(entity), "起始实体无效。");
         // 不每次销毁并重建所有按钮，复用已有 widgets，减少频繁创建影响 UI。
 
         std::set<entt::entity> visited; //< 是否访问过。
 
-        auto                   visit = [&](this auto &self, entt::entity current) noexcept -> void {
+        auto                   visit = [&](this auto &self, entt::entity current) -> void {
             // 是否有效且未访问过。
             THR_ASSERT_MSG(registry.valid(current), "实体(id: {})不合法", entt::to_integral(current));
             if (!visited.insert(current).second) {

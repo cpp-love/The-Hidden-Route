@@ -30,7 +30,7 @@ namespace thr::ecs {
          * @param [in] dir 玩家行走方向。
          */
         static void update(entt::registry &registry, entt::entity player_entity, float delta_length,
-                           direction dir) noexcept;
+                           direction dir);
         /**
          * @brief 更新玩家。
          * @param [in] registry 注册表。
@@ -39,14 +39,14 @@ namespace thr::ecs {
          * @param [in] cdir 玩家行走方向（综合方向）。
          */
         static void update(entt::registry &registry, entt::entity player_entity, float delta_length,
-                           combined_direction cdir) noexcept;
+                           combined_direction cdir);
 
         /**
          * @brief 撤销上一次操作。
          * @param [in] registry 注册表。
          * @param [in] player_entity 玩家实体。
          */
-        static void undo(entt::registry &registry, entt::entity player_entity) noexcept;
+        static void undo(entt::registry &registry, entt::entity player_entity);
     };
 } // namespace thr::ecs
 

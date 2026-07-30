@@ -51,7 +51,7 @@ class generator_level : public thr::ecs::game_state_base {
     static constexpr sf::Vector2f start_position = {320.f, 240.f}; ///< 初始起始位置。
 
     /// @copydoc game_state_base::game_state_base()
-    generator_level() noexcept;
+    generator_level();
     /// @copydoc game_state_base::game_state_base(const game_state_base &rhs)
     generator_level(const generator_level &rhs) noexcept = delete;
     /// @copydoc game_state_base::game_state_base(game_state_base &&rhs)
@@ -61,21 +61,17 @@ class generator_level : public thr::ecs::game_state_base {
     /// @copydoc game_state_base::operator=(game_state_base &&rhs)
     generator_level &operator=(generator_level &&rhs) noexcept = delete;
     /// @copydoc game_state_base::~game_state_base
-    ~generator_level() noexcept override;
-    /// @copydoc game_state_base::on_pause
-    void on_pause() noexcept override {}
-    /// @copydoc game_state_base::on_resume
-    void on_resume() noexcept override {}
+    ~generator_level() override;
     /// @copydoc game_state_base::on_handle_event
-    bool handle_event(const sf::Event &event) noexcept override;
+    bool handle_event(const sf::Event &event) override;
     /// @copydoc game_state_base::update
-    void update(thr::ecs::milliseconds_f delta_time) noexcept override;
+    void update(thr::ecs::milliseconds_f delta_time) override;
     /// @copydoc game_state_base::draw
-    void draw() noexcept override;
+    void draw() override;
 
   protected:
     /// @copydoc game_state_base::init
-    void init() noexcept override;
+    void init() override;
 
   private:
     /**
@@ -83,15 +79,15 @@ class generator_level : public thr::ecs::game_state_base {
      * @param [in] dir 方向。
      * @param [in] position 位置。
      */
-    void                      move(thr::ecs::direction dir, sf::Vector2f position) noexcept;
+    void                      move(thr::ecs::direction dir, sf::Vector2f position);
     /// @brief 为注册表添加线段。
-    void                      add_line_strips() noexcept;
+    void                      add_line_strips();
     // /// @brief 撤销最后一个绘制点，同时删除对应的 `segment` 实体。
-    // void                        remove_last_point() noexcept;
+    // void                        remove_last_point();
     /// @brief 保存当前关卡数据到 JSON 文件。
-    void                      save_level() noexcept;
+    void                      save_level();
     /// @brief 重置生成器状态并重新创建玩家实体。
-    void                      reset_level() noexcept;
+    void                      reset_level();
 
     entt::entity              m_player_entity{entt::null}; ///< 玩家实体。
     entt::registry            m_registry;                  ///< 注册表。
@@ -100,7 +96,7 @@ class generator_level : public thr::ecs::game_state_base {
     bool                      m_started_painting{false};   ///< 是否开始铺路。
 };
 
-generator_level::generator_level() noexcept {
+generator_level::generator_level() {
     constexpr sf::Vector2f     hint_position = {12.f, 12.f}; //< 提示位置。
     constexpr unsigned int     hint_character_size = 16u;    //< 提示的字号大小。
     constexpr std::string_view hint_str{
@@ -123,11 +119,11 @@ generator_level::generator_level() noexcept {
     m_registry.emplace<sf::Text>(hint_entity, std::move(hint));
 }
 
-generator_level::~generator_level() noexcept = default;
+generator_level::~generator_level() = default;
 
-void generator_level::init() noexcept {}
+void generator_level::init() {}
 
-void generator_level::update(thr::ecs::milliseconds_f delta_time) noexcept {
+void generator_level::update(thr::ecs::milliseconds_f delta_time) {
     constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
     if (m_window->hasFocus()) {
         const float                        move_length = velocity_per_millisecond * delta_time.count();
@@ -195,7 +191,7 @@ void generator_level::update(thr::ecs::milliseconds_f delta_time) noexcept {
     }
 }
 
-void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) noexcept {
+void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) {
     auto &level_info = m_registry.ctx().get<thr::ecs::level_info>();
 
     THR_ASSERT_MSG(!m_points.empty(), "`.m_points` 内部处理错误。");
@@ -353,7 +349,7 @@ void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) noexc
     add_line_strips();
 }
 
-void generator_level::add_line_strips() noexcept {
+void generator_level::add_line_strips() {
     auto &lines = m_registry.ctx().get<thr::ecs::line_strips>();
     lines.vertexs.clear();
 
@@ -517,7 +513,7 @@ void generator_level::add_line_strips() noexcept {
     }
 }
 
-// void generator_level::remove_last_point() noexcept {
+// void generator_level::remove_last_point() {
 //     if (m_points.empty()) {
 //         return;
 //     }
@@ -552,14 +548,16 @@ void generator_level::add_line_strips() noexcept {
 //     }
 // }
 
-void generator_level::reset_level() noexcept {
+void generator_level::reset_level() {
     m_points.clear();
     m_started_painting = false;
 
     auto &lines = m_registry.ctx().get<thr::ecs::line_strips>();
     lines.vertexs.clear();
 
-    for (const entt::entity entity : m_segment_entities) { m_registry.destroy(entity); }
+    for (const entt::entity entity : m_segment_entities) {
+        m_registry.destroy(entity);
+    }
     m_segment_entities.clear();
 
     auto &level_info = m_registry.ctx().get<thr::ecs::level_info>();
@@ -574,7 +572,7 @@ void generator_level::reset_level() noexcept {
         thr::ecs::player_under_ground{.position = start_position, .prev_dir = std::nullopt});
 }
 
-void generator_level::save_level() noexcept {
+void generator_level::save_level() {
     const std::filesystem::path output_path = "assets/json/generated_level.json";
     std::filesystem::create_directories(output_path.parent_path());
 
@@ -584,14 +582,18 @@ void generator_level::save_level() noexcept {
         return;
     }
 
-    for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) { seg.walked_precent = 0; }
+    for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) {
+        seg.walked_precent = 0;
+    }
     const nlohmann::json json = thr::ecs::level_serialization_system::serialize_to_json(m_registry);
-    for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) { seg.walked_precent = 1; }
+    for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) {
+        seg.walked_precent = 1;
+    }
     output << json.dump(4) << '\n';
     spdlog::info("已保存生成器关卡到 {}", output_path.string());
 }
 
-bool generator_level::handle_event(const sf::Event &event) noexcept {
+bool generator_level::handle_event(const sf::Event &event) {
 
     // if (const auto *mouse = event.getIf<sf::Event::MouseButtonReleased>()) {
     //     if (mouse->button == sf::Mouse::Button::Left) {
@@ -619,7 +621,7 @@ bool generator_level::handle_event(const sf::Event &event) noexcept {
     return false;
 }
 
-void generator_level::draw() noexcept { thr::ecs::level_render_system::draw(m_registry, *m_window); }
+void generator_level::draw() { thr::ecs::level_render_system::draw(m_registry, *m_window); }
 
 int  main() {
 
@@ -648,7 +650,9 @@ int  main() {
     auto prev = thr::ecs::clock::now();
     while (true) {
         // handle event
-        while (const std::optional event = window.pollEvent()) { manager.handle_event(*event); }
+        while (const std::optional event = window.pollEvent()) {
+            manager.handle_event(*event);
+        }
         if (!window.isOpen()) {
             break;
         }
