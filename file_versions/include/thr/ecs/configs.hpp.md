@@ -2,6 +2,12 @@
 
 # configs.hpp 版本历史
 
+## \[0.1.0-3] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加配置 `node_side_length`。
+
 ## \[0.1.0-2] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

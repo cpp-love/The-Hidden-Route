@@ -2,8 +2,8 @@
  * @file generate_level.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 关卡辅助生成器。
- * @version 0.1.0-1
- * @date 2026-07-15
+ * @version 0.1.0-2
+ * @date 2026-08-01
  * 
  * @copyright cpp-love
  * 
@@ -149,43 +149,36 @@ void generator_level::update(thr::ecs::milliseconds_f delta_time) {
                     const sf::Vector2f prev_position = under_ground.position;
                     under_ground.position += thr::ecs::direction_to_vector2f(*dir, move_length);
 
-                    under_ground.prev_dir =
-                        under_ground.prev_dir
-                            .transform([&](thr::ecs::direction prev_dir) {
-                                if (*dir == thr::ecs::negate_direction(prev_dir)) {
-                                    // 不能动。
-                                    under_ground.position -=
-                                        thr::ecs::direction_to_vector2f(*dir, move_length);
-                                    return prev_dir;
-                                }
-                                if (*dir != prev_dir) {
-                                    // 换方向了，需要添加点。
-                                    THR_ASSERT_MSG(m_started_painting,
-                                                   "`under_ground.prev_dir` 的内部处理错误。");
-                                    move(prev_dir, prev_position);
-                                }
-                                return *dir;
-                            })
-                            .or_else([&] -> std::optional<thr::ecs::direction> {
-                                if (m_started_painting) {
-                                    // 刚开始画，添加初始点。
-                                    THR_ASSERT_MSG(m_points.empty(), "`.m_points` 内部处理错误。");
-                                    m_points.push_back(prev_position);
-                                    const auto &lines = m_registry.ctx().get<thr::ecs::line_strips>();
-                                    const auto &level_info =
-                                        m_registry.ctx().get<thr::ecs::level_info>();
-                                    THR_ASSERT_MSG(m_segment_entities.empty(),
-                                                   "`.m_points` 内部处理错误。");
-                                    THR_ASSERT_MSG(level_info.start_segment_entity == entt::null,
-                                                   "`.m_points` 内部处理错误。");
-                                    THR_ASSERT_MSG(level_info.end_segment_entity == entt::null,
-                                                   "`.m_points` 内部处理错误。");
-                                    THR_ASSERT_MSG(lines.vertexs.empty(), "`.m_points` 内部处理错误。");
+                    if (under_ground.prev_dir != thr::ecs::combined_direction::none) {
+                        thr::ecs::direction prev_dir =
+                            *thr::ecs::combined_direction_to_direction(under_ground.prev_dir);
+                        if (*dir == thr::ecs::negate_direction(prev_dir)) {
+                            // 不能动。
+                            under_ground.position -= thr::ecs::direction_to_vector2f(*dir, move_length);
+                        } else if (*dir != prev_dir) {
+                            // 换方向了，需要添加点。
+                            THR_ASSERT_MSG(m_started_painting,
+                                           "`under_ground.prev_dir` 的内部处理错误。");
+                            move(prev_dir, prev_position);
+                            under_ground.prev_dir = thr::ecs::direction_to_combined_direction(*dir);
+                        }
+                    } else {
+                        if (m_started_painting) {
+                            // 刚开始画，添加初始点。
+                            THR_ASSERT_MSG(m_points.empty(), "`.m_points` 内部处理错误。");
+                            m_points.push_back(prev_position);
+                            const auto &lines = m_registry.ctx().get<thr::ecs::line_strips>();
+                            const auto &level_info = m_registry.ctx().get<thr::ecs::level_info>();
+                            THR_ASSERT_MSG(m_segment_entities.empty(), "`.m_points` 内部处理错误。");
+                            THR_ASSERT_MSG(level_info.start_segment_entity == entt::null,
+                                           "`.m_points` 内部处理错误。");
+                            THR_ASSERT_MSG(level_info.end_segment_entity == entt::null,
+                                           "`.m_points` 内部处理错误。");
+                            THR_ASSERT_MSG(lines.vertexs.empty(), "`.m_points` 内部处理错误。");
 
-                                    return dir;
-                                }
-                                return std::nullopt;
-                            });
+                            under_ground.prev_dir = thr::ecs::direction_to_combined_direction(*dir);
+                        }
+                    }
                 });
         }
     }
@@ -568,8 +561,7 @@ void generator_level::reset_level() {
     m_registry.destroy(m_player_entity);
     m_player_entity = m_registry.create();
     m_registry.emplace<thr::ecs::player_under_ground>(
-        m_player_entity,
-        thr::ecs::player_under_ground{.position = start_position, .prev_dir = std::nullopt});
+        m_player_entity, thr::ecs::player_under_ground{.position = start_position});
 }
 
 void generator_level::save_level() {

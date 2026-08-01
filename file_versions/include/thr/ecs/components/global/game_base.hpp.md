@@ -2,6 +2,16 @@
 
 # game_base.hpp 版本历史
 
+## \[0.1.0-5] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加函数 `thr::ecs::combined_direction_to_vector2f` 和 `thr::ecs::combined_direction_to_vector2f_2` 和 `thr::ecs::combined_direction` 的 `&` 和 `&=` 运算符重载。
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将函数 `thr::ecs::is_orthogonal_directions` 和 `thr::ecs::is_diagonal_directions` 改名为 `thr::ecs::is_orthogonal` 和 `thr::ecs::is_diagonal`。
+
 ## \[0.1.0-4] - 2026-07-27 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

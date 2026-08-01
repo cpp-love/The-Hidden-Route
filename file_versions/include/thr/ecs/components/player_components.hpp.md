@@ -2,6 +2,12 @@
 
 # player_components.hpp 版本历史
 
+## \[0.1.0-3] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将 `thr::ecs::player_under_ground::prev_dir` 的类型修改为 `combined_direction`。
+
 ## \[0.1.0-2] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)

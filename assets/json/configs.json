@@ -5,6 +5,7 @@
         "b": 0
     },
     "segment_width": 20,
+    "node_side_length": 20,
     "segments_render_opacity": {
         "r": 255,
         "g": 255,

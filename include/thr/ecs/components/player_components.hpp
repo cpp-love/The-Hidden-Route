@@ -2,8 +2,8 @@
  * @file player_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了玩家相关的组件。
- * @version 0.1.0-2
- * @date 2026-07-12
+ * @version 0.1.0-3
+ * @date 2026-08-01
  * 
  * @copyright cpp-love
  * 
@@ -47,22 +47,22 @@ namespace thr::ecs {
          * @brief 从配置中获取玩家颜色。
          * @return sf::Color 玩家颜色。
          */
-        static sf::Color color() { return configs::singleton().player_under_ground_color; }
+        static sf::Color   color() { return configs::singleton().player_under_ground_color; }
         /**
          * @brief 从配置中获取玩家边长。
          * @return float 玩家边长。
          */
-        static float     side_length() { return configs::singleton().player_under_ground_side_length; }
+        static float       side_length() { return configs::singleton().player_under_ground_side_length; }
 
-        sf::Vector2f     position;           ///< 玩家所在位置。
-        std::optional<direction> prev_dir{}; ///< 玩家上一次走的方向。
+        sf::Vector2f       position;                           ///< 玩家所在位置。
+        combined_direction prev_dir{combined_direction::none}; ///< 玩家上一次走的方向。
 
         /**
          * @brief 在构造 @ref player_under_ground 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
          * @param [in] entity 构造了 @ref player_under_ground 的实体。
          */
-        static void              on_construct(entt::registry &registry, entt::entity entity) {
+        static void        on_construct(entt::registry &registry, entt::entity entity) {
             const auto  &under_ground = registry.get<player_under_ground>(entity);
             sf::Vector2f start = under_ground.position
                                  - sf::Vector2f{player_under_ground::side_length() / 2,

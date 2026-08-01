@@ -2,8 +2,8 @@
  * @file configs.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了集中获取一些配置的类。
- * @version 0.1.0-1
- * @date 2026-06-20
+ * @version 0.1.0-3
+ * @date 2026-08-01
  * 
  * @copyright cpp-love
  * 
@@ -32,6 +32,7 @@ namespace thr::ecs {
         float                         segment_width{};                   ///< 路径宽度。
         sf::Color                     segment_color;                     ///< 路径颜色。
         sf::Color                     segments_render_opacity;           ///< 路径渲染透明度。
+        float                         node_side_length{};                ///< “死胡同”边长。
         sf::Color                     player_on_ground_color;            ///< 在地面上的玩家颜色。
         sf::Color                     player_under_ground_color;         ///< 在地面下的玩家颜色。
         float                         player_on_ground_side_length{};    ///< 在地面上的玩家边长。
@@ -75,6 +76,7 @@ namespace thr::ecs {
                 configs.segment_width = json.at("segment_width");
                 configs.segment_color = json.at("segment_color");
                 configs.segments_render_opacity = json.at("segments_render_opacity");
+                configs.node_side_length = json.at("node_side_length");
                 configs.player_on_ground_color = json.at("player_on_ground_color");
                 configs.player_under_ground_color = json.at("player_under_ground_color");
                 configs.player_on_ground_side_length = json.at("player_on_ground_side_length");

@@ -2,6 +2,12 @@
 
 # maze_components.hpp 版本历史
 
+## \[0.1.0-5] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将 `node::side_length` 改为静态函数，内部通过配置获取。
+
 ## \[0.1.0-4] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

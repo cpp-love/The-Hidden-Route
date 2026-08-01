@@ -2,8 +2,8 @@
  * @file game_base.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了游戏 ECS 系统的基础组件。
- * @version 0.1.0-4
- * @date 2026-07-27
+ * @version 0.1.0-5
+ * @date 2026-08-01
  * 
  * @copyright cpp-love
  * 
@@ -19,6 +19,7 @@
 #include <bit>
 #include <chrono>
 #include <entt/process/fwd.hpp>
+#include <numbers>
 #include <ratio>
 #include <stdexcept>
 #include <string_view>
@@ -78,7 +79,7 @@ namespace thr {
         }
 
         /**
-         * @brief 以指定长度转换到 `sf::Vector2f`。
+         * @brief 将方向以指定长度转换到 `sf::Vector2f`。
          * @param [in] dir 方向。
          * @param [in] length 指定的长度。
          * @return sf::Vector2f 转换结果。
@@ -178,8 +179,8 @@ namespace thr {
 
         /**
          * @brief 重载或运算，用于组合方向。
-         * @param [in] lhs 方向1。
-         * @param [in] rhs 方向2。
+         * @param [in] lhs 方向 1。
+         * @param [in] rhs 方向 2。
          * @return combined_direction 组合后的方向。
          * @note 此函数只会保留至多两种方向，如果出现 `left | right` 或 `up | down` 这种情况会自动抵消。
          */
@@ -210,9 +211,19 @@ namespace thr {
         }
 
         /**
+         * @brief 重载与运算，用于获取两个方向的共同方向。
+         * @param [in] lhs 方向 1。
+         * @param [in] rhs 方向 2。
+         * @return combined_direction 两个方向的共同方向。
+         */
+        constexpr combined_direction operator&(combined_direction lhs, combined_direction rhs) noexcept {
+            return static_cast<combined_direction>(std::to_underlying(lhs) & std::to_underlying(rhs));
+        }
+
+        /**
          * @brief 重载或赋值运算，用于组合方向。
-         * @param [in, out] lhs 方向1。
-         * @param [in] rhs 方向2。
+         * @param [in, out] lhs 方向 1。
+         * @param [in] rhs 方向 2。
          * @return combined_direction& 组合后的方向。
          * @note 此函数只会保留至多两种方向，如果出现 `left | right` 或 `up | down` 这种情况会自动抵消。
          */
@@ -223,12 +234,24 @@ namespace thr {
         }
 
         /**
+         * @brief 重载或赋值运算，用于获取两个方向的共同方向。
+         * @param [in, out] lhs 方向 1。
+         * @param [in] rhs 方向 2。
+         * @return combined_direction& 两个方向的共同方向。
+         */
+        constexpr combined_direction &operator&=(combined_direction &lhs,
+                                                 combined_direction  rhs) noexcept {
+            lhs = lhs & rhs;
+            return lhs;
+        }
+
+        /**
          * @brief 综合方向是不是单一方向（仅有上下左右）。
          * @param [in] cdir 综合方向。
          * @return true 是单一方向。
          * @return false 不是单一方向。
          */
-        constexpr bool is_orthogonal_directions(combined_direction cdir) noexcept {
+        constexpr bool is_orthogonal(combined_direction cdir) noexcept {
             auto val = std::to_underlying(cdir);
             return (val != 0 && (val & (val - 1u)) == 0);
         }
@@ -239,7 +262,7 @@ namespace thr {
          * @return true 是斜对角方向。
          * @return false 不是斜对角方向。
          */
-        constexpr bool is_diagonal_directions(combined_direction cdir) noexcept {
+        constexpr bool is_diagonal(combined_direction cdir) noexcept {
             auto val = std::to_underlying(cdir);
             return (val & (val - 1u)) != 0;
         }
@@ -265,7 +288,7 @@ namespace thr {
          */
         constexpr std::optional<direction>
         combined_direction_to_direction(combined_direction cdir) noexcept {
-            if (is_orthogonal_directions(cdir)) {
+            if (is_orthogonal(cdir)) {
                 // 将 switch-case 表优化。
                 return static_cast<direction>(std::countr_zero(std::to_underlying(cdir)));
             }
@@ -320,6 +343,46 @@ namespace thr {
                 & static_cast<std::underlying_type_t<combined_direction>>(
                     std::to_underlying(combined_direction::up)
                     | std::to_underlying(combined_direction::down)));
+        }
+
+        /**
+         * @brief 将综合方向以指定的每个方向上的长度转换到 `sf::Vector2f`。
+         * @param [in] cdir 综合方向。
+         * @param [in] side_length 指定的每个方向上的长度。
+         * @return sf::Vector2f 转换结果。
+         * @warning `side_length` 参数不代表转换结果的长度（`.length()`）！
+         *          若要达到这个效果，请使用 @ref combined_direction_to_vector2f_2 。
+         */
+        constexpr sf::Vector2f combined_direction_to_vector2f(combined_direction cdir,
+                                                              float              side_length) noexcept {
+            sf::Vector2f ret;
+            if (has_direction(cdir, direction::right)) {
+                ret.x = side_length;
+            } else if (has_direction(cdir, direction::left)) {
+                ret.x = -side_length;
+            }
+            if (has_direction(cdir, direction::down)) {
+                ret.y = side_length;
+            } else if (has_direction(cdir, direction::up)) {
+                ret.y = -side_length;
+            }
+            return ret;
+        }
+
+        /**
+         * @brief 将综合方向以指定的转换结果向量的长度转换到 `sf::Vector2f`。
+         * @param [in] cdir 综合方向。
+         * @param [in] length 指定的转换结果向量的长度（即 `combined_direction_to_vector2f_2(<cdir>, <length>).length() == <length>`）。
+         * @return sf::Vector2f 转换结果。
+         * @warning `length` 参数不代表转换结果的每个方向上的长度！
+         *          若要达到这个效果，请使用 @ref combined_direction_to_vector2f 。
+         */
+        constexpr sf::Vector2f combined_direction_to_vector2f_2(combined_direction cdir,
+                                                                float              length) noexcept {
+            if (is_diagonal(cdir)) {
+                length /= std::numbers::sqrt2_v<float>;
+            }
+            return combined_direction_to_vector2f(cdir, length);
         }
 
         using clock = std::chrono::steady_clock; ///< 时钟类型。

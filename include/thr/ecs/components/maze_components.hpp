@@ -2,8 +2,8 @@
  * @file maze_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了迷宫组件。
- * @version 0.1.0-4
- * @date 2026-07-22
+ * @version 0.1.0-5
+ * @date 2026-08-01
  * 
  * @copyright cpp-love
  * 
@@ -192,21 +192,26 @@ namespace thr::ecs {
 
     /// @brief 路径中的“死胡同”。
     struct node {
-        constexpr static float side_length = 20.f;         ///< “死胡同”的边长。
-        sf::Vector2f           position;                   ///< 中心位置。
-        entt::entity           segment_entity{entt::null}; ///< 指向的节点位置。
+        /**
+         * @brief 从配置中获取“死胡同”的边长。
+         * @return float “死胡同”的边长。
+         */
+        static float side_length() { return configs::singleton().node_side_length; }
+
+        sf::Vector2f position;                   ///< 中心位置。
+        entt::entity segment_entity{entt::null}; ///< 指向的节点位置。
 
         /**
          * @brief 在构造 @ref node 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
          * @param [in] entity 构造了 @ref node 的实体。
          */
-        static void            on_construct(entt::registry &registry, entt::entity entity) {
+        static void  on_construct(entt::registry &registry, entt::entity entity) {
             const auto  &node = registry.get<struct node>(entity);
             sf::Vector2f start =
-                node.position - sf::Vector2f{node::side_length / 2, node::side_length / 2};
+                node.position - sf::Vector2f{node::side_length() / 2, node::side_length() / 2};
             sf::Vector2f end =
-                node.position + sf::Vector2f{node::side_length / 2, node::side_length / 2};
+                node.position + sf::Vector2f{node::side_length() / 2, node::side_length() / 2};
             int col_start = static_cast<int>(start.x / block_side_length);
             int col_end = static_cast<int>(end.x / block_side_length);
             int row_start = static_cast<int>(start.y / block_side_length);

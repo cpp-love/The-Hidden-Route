@@ -2,6 +2,13 @@
 
 # player_movement_system.cpp 版本历史
 
+## \[0.1.0-5] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. 将 `thr::ecs::player_movement_system::udate` 的主要逻辑处理从集中在 `thr::ecs::direction` 的重载改为集中在 `thr::ecs::combined_direction` 的重载。
+2. 实现了更好的撤回，保证每一次记录移动历史时玩家都至少移动了一段距离。
+
 ## \[0.1.0-4] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
