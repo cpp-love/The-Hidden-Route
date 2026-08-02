@@ -27,6 +27,7 @@
 #include <iostream>
 #include <print>
 #include <set>
+#include <span>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -206,8 +207,7 @@ bool add_file_pages(const std::filesystem::path &workspace_folder) {
 
 int main(int argc, char *argv[]) {
 
-    std::vector<char *>   args(argv,
-                               argv + argc); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::span<char *>     args(argv, argc);
 
     // 处理命令行参数或接收输入
     std::filesystem::path workspace_folder; //< 工作区目录

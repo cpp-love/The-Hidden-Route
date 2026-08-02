@@ -17,8 +17,8 @@
 #ifndef THR_ECS_COMPONENTS_GLOBAL_SCENE_COMPONENTS_HPP
 #define THR_ECS_COMPONENTS_GLOBAL_SCENE_COMPONENTS_HPP
 
-#include "thr/base/config.hpp"
 #include <entt/fwd.hpp>
+#include <limits>
 #include <map>
 #include <set>
 
@@ -27,16 +27,15 @@ namespace thr::ecs {
     using scene_identifier_type = std::uint16_t; ///< 场景标识符类型。
 
     /**
-     * @brief 
-     * @param [in] row 
-     * @param [in] col 
-     * @return constexpr scene_identifier_type 
-     * @details 
-     * @note 
+     * @brief 使用行列制作场景标识符。
+     * @param [in] row 行。
+     * @param [in] col 列。
+     * @return scene_identifier_type 场景标识符。
      */
-    constexpr scene_identifier_type make_scene_identifier(scene_identifier_type row,
-                                                          scene_identifier_type col) {
-        return (static_cast<unsigned int>(row) << 8u) | (static_cast<unsigned int>(col) & 0xffu);
+    constexpr scene_identifier_type make_scene_identifier(std::uint8_t row, std::uint8_t col) {
+        return static_cast<scene_identifier_type>(
+                   row << static_cast<std::uint8_t>(std::numeric_limits<std::uint8_t>::digits))
+               | static_cast<scene_identifier_type>(col);
     }
 
     /// @brief 总场景组件

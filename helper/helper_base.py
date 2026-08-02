@@ -50,7 +50,7 @@ def filter_invalid_path(
     raise ValueError(f"路径 {path} 不符合 {path_type_should_be} 的要求。")
 
 
-C_CPP_FILE_EXTENSION: Final[list[str]] = [
+C_CPP_FILE_EXTENSIONS: Final[list[str]] = [
     ".cpp",
     ".hpp",
     ".c",

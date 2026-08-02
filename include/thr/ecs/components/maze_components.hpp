@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <entt/entity/registry.hpp>
 #include <optional>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -301,11 +302,11 @@ namespace thr::ecs {
          */
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
             for (const auto &strips : vertexs) {
-                for (std::size_t i = 1; i < strips.size(); ++i) {
-                    sf::Vector2f       line = strips[i] - strips[i - 1];
+                for (const auto &&[start, end] : strips | std::views::pairwise) {
+                    sf::Vector2f       line = end - start;
                     sf::Angle          angle = line.angle();
                     sf::RectangleShape rect{{line.length(), width}};
-                    rect.setPosition(strips[i - 1] + sf::Vector2f{0, -width / 2}.rotatedBy(angle));
+                    rect.setPosition(start + sf::Vector2f{0, -width / 2}.rotatedBy(angle));
                     rect.rotate(angle);
                     rect.setFillColor(color);
                     target.draw(rect, states);

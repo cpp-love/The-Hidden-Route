@@ -59,7 +59,7 @@ def get_folder_files(folder: Path) -> Iterator[Path]:
         文件夹中需要修改的文件。
     """
 
-    extensions: list[str] = [*helper_base.C_CPP_FILE_EXTENSION, ".md"]
+    extensions: list[str] = [*helper_base.C_CPP_FILE_EXTENSIONS, ".md"]
     files: Iterator[Path] = chain(
         chain.from_iterable(folder.rglob(f"*{extension}") for extension in extensions),
         folder.rglob("CMakeLists.txt"),
@@ -93,12 +93,12 @@ def main():
     source: Path = helper_base.filter_invalid_path(
         Path(args.source), helper_base.PathType.FILE
     )
-    if not source.suffix in helper_base.C_CPP_FILE_EXTENSION:
+    if not source.suffix in helper_base.C_CPP_FILE_EXTENSIONS:
         raise Exception("要移动的文件不是C/C++文件")
     destination: Path = helper_base.filter_invalid_path(
         Path(args.destination), helper_base.PathType.NOT_EXIST
     )
-    if not destination.suffix in helper_base.C_CPP_FILE_EXTENSION:
+    if not destination.suffix in helper_base.C_CPP_FILE_EXTENSIONS:
         raise Exception("要移动的文件不是C/C++文件")
     if destination.suffix != source.suffix:
         if input("warning: 原文件的后缀名与移动后的不一致，是否继续？(Y/[N])") != "Y":
