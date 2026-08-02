@@ -1,5 +1,5 @@
 /**
- * @file generate_level.cpp
+ * @file level_generator.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 关卡辅助生成器。
  * @version 0.1.0-2
@@ -49,6 +49,7 @@
 class generator_level : public thr::ecs::game_state_base {
   public:
     static constexpr sf::Vector2f start_position = {320.f, 240.f}; ///< 初始起始位置。
+    static constexpr float        move_epsilon = 7.f;              ///< 移动误差。
 
     /// @copydoc game_state_base::game_state_base()
     generator_level();
@@ -226,15 +227,11 @@ void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) {
 
         if (auto intersection = bounds.findIntersection(cur_bounds)) {
             if ((thr::ecs::is_vertical(dir)
-                 && thr::no_nan_inf_f{intersection->size.x,
-                                      thr::ecs::player_movement_system::move_epsilon}
-                        == thr::no_nan_inf_f{thr::ecs::segment::width(),
-                                             thr::ecs::player_movement_system::move_epsilon})
+                 && thr::no_nan_inf_f{intersection->size.x, move_epsilon}
+                        == thr::no_nan_inf_f{thr::ecs::segment::width(), move_epsilon})
                 || (thr::ecs::is_horizontal(dir)
-                    && thr::no_nan_inf_f{intersection->size.y,
-                                         thr::ecs::player_movement_system::move_epsilon}
-                           == thr::no_nan_inf_f{thr::ecs::segment::width(),
-                                                thr::ecs::player_movement_system::move_epsilon})) {
+                    && thr::no_nan_inf_f{intersection->size.y, move_epsilon}
+                           == thr::no_nan_inf_f{thr::ecs::segment::width(), move_epsilon})) {
                 intersections.push_back(
                     {intersection->position, intersection->position + intersection->size});
             }
@@ -292,8 +289,7 @@ void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) {
     for (const auto &[first, second] : intersections) {
         auto [proj_l, proj_r] = std::minmax({proj(first), proj(second)});
 
-        if (thr::no_nan_inf_f{proj_prev_end, thr::ecs::player_movement_system::move_epsilon}
-            >= thr::no_nan_inf_f{proj_l, thr::ecs::player_movement_system::move_epsilon}) {
+        if (thr::no_nan_inf_f{proj_prev_end, move_epsilon} >= thr::no_nan_inf_f{proj_l, move_epsilon}) {
             // 区间重复，不添加。
             // 更新结尾值。
             proj_prev_end = std::max(proj_r, proj_prev_end);
@@ -317,9 +313,8 @@ void generator_level::move(thr::ecs::direction dir, sf::Vector2f position) {
         proj_prev_end = proj_r;
     }
 
-    if (thr::no_nan_inf_f{proj_prev_end, thr::ecs::player_movement_system::move_epsilon}
-        < thr::no_nan_inf_f{length + (thr::ecs::segment::width() / 2),
-                            thr::ecs::player_movement_system::move_epsilon}) {
+    if (thr::no_nan_inf_f{proj_prev_end, move_epsilon}
+        < thr::no_nan_inf_f{length + (thr::ecs::segment::width() / 2), move_epsilon}) {
         // 创建 segment。
         const entt::entity new_entity = m_registry.create();
         thr::ecs::segment new_seg{.start_center =

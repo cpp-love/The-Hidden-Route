@@ -11,15 +11,15 @@ if(THR_BUILD_HELPER)
 	add_executable(generate_file_version
 		${CMAKE_CURRENT_SOURCE_DIR}/generate_file_version.cpp
 	)
-	add_executable(generate_level
-		${CMAKE_CURRENT_SOURCE_DIR}/generate_level.cpp
+	add_executable(level_generator
+		${CMAKE_CURRENT_SOURCE_DIR}/level_generator.cpp
 	)
 
 	# 链接第三方库
 	target_link_libraries(generate_file_version
 		PUBLIC thr_compiler_flags
 	)
-	target_link_libraries(generate_level
+	target_link_libraries(level_generator
 		PUBLIC
 			thr_compiler_flags
 			thr
@@ -29,7 +29,7 @@ if(THR_BUILD_HELPER)
 	install(
 		TARGETS
 			generate_file_version
-			generate_level
+			level_generator
 		RUNTIME DESTINATION bin/helper COMPONENT Helper
 	)
 
@@ -38,7 +38,7 @@ if(THR_BUILD_HELPER)
 		include(InstallRequiredSystemLibraries)
 
 		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_file_version.exe\" \"\" \"\")
-		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_level.exe\" \"\" \"\")
+		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/level_generator.exe\" \"\" \"\")
 		"
 		COMPONENT
 		Helper

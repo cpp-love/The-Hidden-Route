@@ -1,6 +1,6 @@
-<!--! \page generate_level_cpp generate_level.cpp 版本历史 -->
+<!--! \page level_generator_cpp level_generator.cpp 版本历史 -->
 
-# generate_level.cpp 版本历史
+# level_generator.cpp 版本历史
 
 ## \[0.1.0-2] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

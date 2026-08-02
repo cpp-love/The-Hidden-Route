@@ -286,6 +286,7 @@ namespace mainhelper {
         }
         return false;
     }
+
     void game_screen::update(thr::ecs::milliseconds_f delta_time) {
         constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
 
@@ -382,19 +383,21 @@ namespace mainhelper {
         m_remaining_time_after_winning = 3s;
 
         level_finished_event event; //< 关卡结束时间。
-        if (sol::protected_function function = (*m_lua)["on_level_finished"]; function.valid()) {
-            if (auto result = function(); !result.valid()) {
-                spdlog::warn("Failed to call to lua function on_level_finished: {}",
-                             result.get<sol::error>().what());
-                // 脚本运行错误，关卡结束事件回退到默认值。
-            } else {
-                // 脚本运行成功，使用脚本返回的关卡结束事件。
-                sol::variadic_results res = std::move(result);
-                for (auto &value : res) {
-                    if (auto opt = value.as<std::optional<bool>>()) {
-                        event.should_unlock_relative_levels = *opt;
-                    } else if (auto opt = value.as<std::optional<std::vector<std::string>>>()) {
-                        event.extra_levels = std::move(*opt);
+        if (m_lua.has_value()) {
+            if (sol::protected_function function = (*m_lua)["on_level_finished"]; function.valid()) {
+                if (auto result = function(); !result.valid()) {
+                    spdlog::warn("Failed to call to lua function on_level_finished: {}",
+                                 result.get<sol::error>().what());
+                    // 脚本运行错误，关卡结束事件回退到默认值。
+                } else {
+                    // 脚本运行成功，使用脚本返回的关卡结束事件。
+                    sol::variadic_results res = std::move(result);
+                    for (auto &value : res) {
+                        if (auto opt = value.as<std::optional<bool>>()) {
+                            event.should_unlock_relative_levels = *opt;
+                        } else if (auto opt = value.as<std::optional<std::vector<std::string>>>()) {
+                            event.extra_levels = std::move(*opt);
+                        }
                     }
                 }
             }
@@ -402,6 +405,7 @@ namespace mainhelper {
 
         m_outside_dispather->enqueue(event);
     }
+
     void game_screen::draw() {
         thr::ecs::level_render_system::draw(m_registry, *m_window);
 
