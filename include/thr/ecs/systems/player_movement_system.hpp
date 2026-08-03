@@ -48,9 +48,8 @@ namespace thr::ecs {
         /**
          * @brief 撤销上一次操作。
          * @param [in] registry 注册表。
-         * @param [in] player_entity 玩家实体。
          */
-        static void undo(entt::registry &registry, entt::entity player_entity);
+        static void undo(entt::registry &registry);
     };
 } // namespace thr::ecs
 

@@ -12,19 +12,8 @@
         "b": 255,
         "a": 90
     },
-    "player_on_ground_color": {
-        "r": 40,
-        "g": 40,
-        "b": 170
-    },
-    "player_under_ground_color": {
-        "r": 40,
-        "g": 40,
-        "b": 170,
-        "a": 128
-    },
-    "player_on_ground_side_length": 18,
-    "player_under_ground_side_length": 18,
+    "player_under_ground_render_alpha": 128,
+    "player_side_length": 18,
     "background_color": {
         "r": 25,
         "g": 125,

@@ -17,6 +17,7 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <TGUI/Font.hpp>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -29,17 +30,15 @@ namespace thr::ecs {
     /// @brief 集中获取一些配置的类（采用单例模式）。
     class configs {
       public:
-        float                         segment_width{};                   ///< 路径宽度。
-        sf::Color                     segment_color;                     ///< 路径颜色。
-        sf::Color                     segments_render_opacity;           ///< 路径渲染透明度。
-        float                         node_side_length{};                ///< “死胡同”边长。
-        sf::Color                     player_on_ground_color;            ///< 在地面上的玩家颜色。
-        sf::Color                     player_under_ground_color;         ///< 在地面下的玩家颜色。
-        float                         player_on_ground_side_length{};    ///< 在地面上的玩家边长。
-        float                         player_under_ground_side_length{}; ///< 在地面下的玩家边长。
-        sf::Color                     background_color;                  ///< 背景颜色。
-        std::filesystem::path         font_path;                         ///< 字体路径。
-        sf::Vector2u                  game_screen_size;                  ///< 游戏屏幕大小。
+        float                         segment_width{};                  ///< 路径宽度。
+        sf::Color                     segment_color;                    ///< 路径颜色。
+        sf::Color                     segments_render_opacity;          ///< 路径渲染透明度。
+        float                         node_side_length{};               ///< “死胡同”边长。
+        float                         player_side_length{};             ///< 玩家边长。
+        std::uint8_t                  player_under_ground_render_alpha; ///< 路径渲染透明度。
+        sf::Color                     background_color;                 ///< 背景颜色。
+        std::filesystem::path         font_path;                        ///< 字体路径。
+        sf::Vector2u                  game_screen_size;                 ///< 游戏屏幕大小。
         /**
          * @brief 获取 SFML 的字体。
          * @return const sf::Font& SFML 的字体。
@@ -77,10 +76,8 @@ namespace thr::ecs {
                 configs.segment_color = json.at("segment_color");
                 configs.segments_render_opacity = json.at("segments_render_opacity");
                 configs.node_side_length = json.at("node_side_length");
-                configs.player_on_ground_color = json.at("player_on_ground_color");
-                configs.player_under_ground_color = json.at("player_under_ground_color");
-                configs.player_on_ground_side_length = json.at("player_on_ground_side_length");
-                configs.player_under_ground_side_length = json.at("player_under_ground_side_length");
+                configs.player_under_ground_render_alpha = json.at("player_under_ground_render_alpha");
+                configs.player_side_length = json.at("player_side_length");
                 configs.background_color = json.at("background_color");
                 configs.game_screen_size = json.at("game_screen_size");
                 return configs;

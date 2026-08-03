@@ -15,8 +15,10 @@
 #include "thr/base/file.hpp"
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs.hpp"
+#include "thr/ecs/components/player_components.hpp"
 #include "thr/ecs/lua_bindings/lua_binding.hpp"
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -31,6 +33,7 @@
 #include <sol/sol.hpp>
 #include <spdlog/spdlog.h>
 #include <string_view>
+#include <variant>
 
 namespace mainhelper {
 
@@ -235,9 +238,11 @@ namespace mainhelper {
                                .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_serialization_system::deserialize_from_json(m_registry, json);
-        m_registry.emplace<thr::ecs::player_on_ground>(
-            m_player_entity, m_registry.ctx().get<thr::ecs::level_info>().start_segment_entity);
-        m_registry.emplace<thr::ecs::turning_history>(m_player_entity);
+        m_registry.emplace<thr::ecs::player>(
+            m_player_entity, sf::Color{40, 40, 170},
+            thr::ecs::player::on_ground{
+                m_registry.ctx().get<thr::ecs::level_info>().start_segment_entity});
+        m_registry.ctx().emplace<thr::ecs::turning_history>();
         if (const auto *script = m_registry.ctx().find<thr::ecs::level_script>()) {
             m_lua = sol::state{};
             thr::ecs::lua_bindings::bind_to_lua(*m_lua, m_registry);
@@ -276,7 +281,7 @@ namespace mainhelper {
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->control && key_pressed->code == sf::Keyboard::Key::Z) {
                 // Crtl+Z 撤销。
-                thr::ecs::player_movement_system::undo(m_registry, m_player_entity);
+                thr::ecs::player_movement_system::undo(m_registry);
                 return true;
             }
             if (key_pressed->code == sf::Keyboard::Key::Escape) {
@@ -340,8 +345,11 @@ namespace mainhelper {
 
         // 若走过有特殊标签的实体，触发 Lua 脚本。
         if (m_lua.has_value()) {
-            for (const auto &[entity, on_ground] :
-                 m_registry.view<thr::ecs::player_on_ground>().each()) {
+            for (const auto &[entity, player] : m_registry.view<thr::ecs::player>().each()) {
+                if (!std::holds_alternative<thr::ecs::player::on_ground>(player.status)) {
+                    continue;
+                }
+                const auto &on_ground = std::get<thr::ecs::player::on_ground>(player.status);
                 const auto *cur_tag = m_registry.try_get<thr::ecs::tag>(on_ground.segment_entity);
                 if (cur_tag == nullptr || cur_tag->tag_ids.empty()) {
                     // 走过的实体没有特殊标签。
@@ -362,10 +370,11 @@ namespace mainhelper {
 
         // 判断是否胜利。
         if (!(std::ranges::any_of(
-                  m_registry.view<thr::ecs::player_on_ground>(),
-                  [&](entt::entity entity) {
-                      return m_registry.get<thr::ecs::player_on_ground>(entity).segment_entity
-                             == m_registry.ctx().get<thr::ecs::level_info>().end_segment_entity;
+                  m_registry.view<thr::ecs::player>().each(),
+                  [&](std::pair<entt::entity, const thr::ecs::player &> pair) {
+                      return std::holds_alternative<thr::ecs::player::on_ground>(pair.second.status)
+                             && std::get<thr::ecs::player::on_ground>(pair.second.status).segment_entity
+                                    == m_registry.ctx().get<thr::ecs::level_info>().end_segment_entity;
                   }) /* 是否走到终点段 */
               && std::ranges::all_of(
                   m_registry.view<thr::ecs::segment>(),
@@ -428,12 +437,12 @@ namespace mainhelper {
     void game_screen::connect_dispatcher() {
         thr::ecs::segment::connect_listener(m_registry);
         thr::ecs::node::connect_listener(m_registry);
-        thr::ecs::player_under_ground::connect_listener(m_registry);
+        thr::ecs::player::connect_listener(m_registry);
     }
     void game_screen::disconnect_dispatcher() {
         thr::ecs::segment::disconnect_listener(m_registry);
         thr::ecs::node::disconnect_listener(m_registry);
-        thr::ecs::player_under_ground::disconnect_listener(m_registry);
+        thr::ecs::player::disconnect_listener(m_registry);
     }
 
     // pause_menu

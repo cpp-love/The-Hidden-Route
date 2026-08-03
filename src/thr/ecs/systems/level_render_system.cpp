@@ -10,6 +10,7 @@
  */
 
 #include "thr/ecs/systems/level_render_system.hpp"
+#include "thr/base/overload.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
@@ -29,12 +30,12 @@ namespace thr::ecs {
     void level_render_system::draw(const entt::registry &registry, sf::RenderTarget &render,
                                    const sf::RenderStates &states) {
         using namespace sf::Literals;
+
         // draw segments
         auto              list = registry.view<segment>();
         sf::RenderTexture render_texture{render.getSize()};
         render_texture.clear(configs::singleton().background_color);
-        for (entt::entity entity : list) {
-            const auto &seg = registry.get<segment>(entity);
+        for (const auto &[entity, seg] : list.each()) {
             if (seg.walked_precent != 0.f) {
                 sf::FloatRect      bound = seg.get_walked_bounds();
                 sf::RectangleShape rect{bound.size};
@@ -53,29 +54,26 @@ namespace thr::ecs {
         render.draw(lines, states);
 
         // draw players
-        const auto &player_on_grounds = registry.view<player_on_ground>();
-        for (entt::entity player : player_on_grounds) {
-            const auto        &on_ground = registry.get<player_on_ground>(player);
-            const auto        &seg = registry.get<segment>(on_ground.segment_entity);
-            sf::RectangleShape rect_shape{
-                {player_on_ground::side_length(), player_on_ground::side_length()}};
-            rect_shape.setPosition(seg.start_center
-                                   + direction_to_vector2f(seg.dir, seg.length * seg.walked_precent)
-                                   - sf::Vector2f{player_on_ground::side_length() / 2,
-                                                  player_on_ground::side_length() / 2});
-            rect_shape.setFillColor(player_on_ground::color());
-            render.draw(rect_shape, states);
-        }
-        const auto &player_under_grounds = registry.view<player_under_ground>();
-        for (entt::entity player : player_under_grounds) {
-            const auto        &under_ground = registry.get<player_under_ground>(player);
-            sf::RectangleShape rect_shape{
-                {player_under_ground::side_length(), player_under_ground::side_length()}};
-            rect_shape.setPosition(under_ground.position
-                                   - sf::Vector2f{player_under_ground::side_length() / 2,
-                                                  player_under_ground::side_length() / 2});
-            rect_shape.setFillColor(player_under_ground::color());
-            render.draw(rect_shape, states);
+        const auto        &players = registry.view<player>();
+        const sf::Vector2f player_size{player::side_length(), player::side_length()};
+        for (const auto &[entity, player] : players.each()) {
+            std::visit(make_overloaded(
+                           [&](const player::on_ground &on_ground) {
+                               sf::RectangleShape rect_shape{player_size};
+                               const auto        &seg = registry.get<segment>(on_ground.segment_entity);
+                               rect_shape.setPosition(seg.get_current_center() - player_size / 2.f);
+                               rect_shape.setFillColor(player.color);
+                               render.draw(rect_shape, states);
+                           },
+                           [&](const player::under_ground &under_ground) {
+                               sf::RectangleShape rect_shape{player_size};
+                               rect_shape.setPosition(under_ground.position - player_size / 2.f);
+                               sf::Color color = player.color;
+                               color.a = configs::singleton().player_under_ground_render_alpha;
+                               rect_shape.setFillColor(color);
+                               render.draw(rect_shape, states);
+                           }),
+                       player.status);
         }
 
         // draw texts

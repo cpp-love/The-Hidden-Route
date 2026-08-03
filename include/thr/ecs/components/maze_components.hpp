@@ -63,6 +63,14 @@ namespace thr::ecs {
         }
 
         /**
+         * @brief 获取路径当前行走位置的中心。
+         * @return sf::Vector2f 路径当前行走位置的中心。
+         */
+        [[nodiscard]] sf::Vector2f get_current_center() const noexcept {
+            return start_center + direction_to_vector2f(dir, length * walked_precent);
+        }
+
+        /**
          * @brief 获取包围范围。
          * @return sf::FloatRect 包围范围。
          */

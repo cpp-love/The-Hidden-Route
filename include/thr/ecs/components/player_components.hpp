@@ -20,60 +20,63 @@
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/entity/registry.hpp>
+#include <optional>
+#include <utility>
 #include <variant>
 #include <vector>
 
 namespace thr::ecs {
 
-    /// @brief 在地面上的玩家。
-    struct player_on_ground {
-        /**
-         * @brief 从配置中获取玩家颜色。
-         * @return float 玩家颜色。
-         */
-        static sf::Color color() { return configs::singleton().player_on_ground_color; }
+    /// @brief 玩家。
+    struct player {
         /**
          * @brief 从配置中获取玩家边长。
          * @return float 玩家边长。
          */
-        static float     side_length() { return configs::singleton().player_on_ground_side_length; }
+        static float side_length() { return configs::singleton().player_side_length; }
 
-        entt::entity     segment_entity{entt::null}; ///< 玩家所在线段所属的实体。
-    };
+        /// @brief 在地面上的玩家。
+        struct on_ground {
+            entt::entity segment_entity{entt::null}; ///< 玩家所在线段所属的实体。
+        };
 
-    /// @brief 在地面下的玩家。
-    struct player_under_ground {
+        /// @brief 在地面下的玩家。
+        struct under_ground {
+            /**
+            * @brief 从配置中获取玩家在地面下时的渲染透明度。
+            * @return float 玩家在地面下时的渲染透明度。
+            */
+            static float render_alpha() { return configs::singleton().player_under_ground_render_alpha; }
+
+            sf::Vector2f position;                                          ///< 玩家所在位置。
+            combined_direction          prev_dir{combined_direction::none}; ///< 玩家上一次走的方向。
+            std::optional<sf::Vector2f> position_last_recorded{};           ///< 上一次记录的玩家位置。
+        };
+
+        sf::Color                             color;  ///< 玩家的颜色。
+        std::variant<on_ground, under_ground> status; ///< 玩家状态。
+
         /**
-         * @brief 从配置中获取玩家颜色。
-         * @return sf::Color 玩家颜色。
-         */
-        static sf::Color   color() { return configs::singleton().player_under_ground_color; }
-        /**
-         * @brief 从配置中获取玩家边长。
-         * @return float 玩家边长。
-         */
-        static float       side_length() { return configs::singleton().player_under_ground_side_length; }
-
-        sf::Vector2f       position;                           ///< 玩家所在位置。
-        combined_direction prev_dir{combined_direction::none}; ///< 玩家上一次走的方向。
-
-        /**
-         * @brief 在构造 @ref player_under_ground 时调用的函数，用于设置其所属场景。
+         * @brief 在构造 @ref player 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
-         * @param [in] entity 构造了 @ref player_under_ground 的实体。
+         * @param [in] entity 构造了 @ref player 的实体。
          */
-        static void        on_construct(entt::registry &registry, entt::entity entity) {
-            const auto  &under_ground = registry.get<player_under_ground>(entity);
-            sf::Vector2f start = under_ground.position
-                                 - sf::Vector2f{player_under_ground::side_length() / 2,
-                                                player_under_ground::side_length() / 2};
-            sf::Vector2f end = under_ground.position
-                               + sf::Vector2f{player_under_ground::side_length() / 2,
-                                              player_under_ground::side_length() / 2};
-            int          col_start = static_cast<int>(start.x / block_side_length);
-            int          col_end = static_cast<int>(end.x / block_side_length);
-            int          row_start = static_cast<int>(start.y / block_side_length);
-            int          row_end = static_cast<int>(end.y / block_side_length);
+        static void on_construct(entt::registry &registry, entt::entity entity) {
+            const auto &player = registry.get<struct player>(entity);
+            if (!std::holds_alternative<under_ground>(player.status)) {
+                // 不需要设置其所属场景。
+                return;
+            }
+            const auto  &under_ground = std::get<struct under_ground>(player.status);
+
+            sf::Vector2f start =
+                under_ground.position - sf::Vector2f{side_length() / 2, side_length() / 2};
+            sf::Vector2f end =
+                under_ground.position + sf::Vector2f{side_length() / 2, side_length() / 2};
+            int col_start = static_cast<int>(start.x / block_side_length);
+            int col_end = static_cast<int>(end.x / block_side_length);
+            int row_start = static_cast<int>(start.y / block_side_length);
+            int row_end = static_cast<int>(end.y / block_side_length);
             for (int row = row_start; row <= row_end; ++row) {
                 for (int col = col_start; col <= col_end; ++col) {
                     auto scene_id = make_scene_identifier(row, col);
@@ -83,9 +86,9 @@ namespace thr::ecs {
         }
 
         /**
-         * @brief 在更新 @ref player_under_ground 时调用的函数，用于设置其所属场景。
+         * @brief 在更新 @ref player 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
-         * @param [in] entity 更新了 @ref player_under_ground 的实体。
+         * @param [in] entity 更新了 @ref player 的实体。
          */
         static void on_update(entt::registry &registry, entt::entity entity) {
             // 移除之前的场景登记，然后重新按当前矩形覆盖块插入
@@ -94,9 +97,9 @@ namespace thr::ecs {
         }
 
         /**
-         * @brief 在移除 @ref player_under_ground 时调用的函数，用于设置其所属场景。
+         * @brief 在移除 @ref player 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
-         * @param [in] entity 移除了 @ref player_under_ground 的实体。
+         * @param [in] entity 移除了 @ref player 的实体。
          */
         static void on_destroy(entt::registry &registry, entt::entity entity) {
             scene_system::erase_from_all_scenes(registry, entity);
@@ -107,9 +110,9 @@ namespace thr::ecs {
          * @param [in] registry 注册表。
          */
         static void connect_listener(entt::registry &registry) {
-            registry.on_construct<player_under_ground>().connect<&on_construct>();
-            registry.on_update<player_under_ground>().connect<&on_update>();
-            registry.on_destroy<player_under_ground>().connect<&on_destroy>();
+            registry.on_construct<player>().connect<&on_construct>();
+            registry.on_update<player>().connect<&on_update>();
+            registry.on_destroy<player>().connect<&on_destroy>();
         }
 
         /**
@@ -117,15 +120,15 @@ namespace thr::ecs {
          * @param [in] registry 注册表。
          */
         static void disconnect_listener(entt::registry &registry) {
-            registry.on_construct<player_under_ground>().disconnect<&on_construct>();
-            registry.on_update<player_under_ground>().disconnect<&on_update>();
-            registry.on_destroy<player_under_ground>().disconnect<&on_destroy>();
+            registry.on_construct<player>().disconnect<&on_construct>();
+            registry.on_update<player>().disconnect<&on_update>();
+            registry.on_destroy<player>().disconnect<&on_destroy>();
         }
     };
 
     /// @brief 转向的历史记录。
     struct turning_history {
-        std::vector<std::variant<player_on_ground, player_under_ground>> turnings;
+        std::vector<std::pair<entt::entity, player>> turnings; ///< 转向前的记录点。
     };
 
 } // namespace thr::ecs
