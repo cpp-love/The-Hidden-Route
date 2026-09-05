@@ -36,11 +36,19 @@ namespace thr::ecs {
         sf::RenderTexture render_texture{render.getSize()};
         render_texture.clear(configs::singleton().background_color);
         for (const auto &[entity, seg] : list.each()) {
-            if (seg.walked_precent != 0.f) {
+            const auto &info = seg.infos.get_current_state();
+            if (info.prev_completed_entity.has_value()) {
+                sf::FloatRect      bound = seg.get_bounds();
+                sf::RectangleShape rect{bound.size};
+                rect.setPosition(bound.position);
+                rect.setFillColor(registry.get<player>(*info.prev_completed_entity).color);
+                render_texture.draw(rect);
+            }
+            if (info.current_walking_entity.has_value()) {
                 sf::FloatRect      bound = seg.get_walked_bounds();
                 sf::RectangleShape rect{bound.size};
                 rect.setPosition(bound.position);
-                rect.setFillColor(segment::color());
+                rect.setFillColor(registry.get<player>(*info.current_walking_entity).color);
                 render_texture.draw(rect);
             }
         }
@@ -57,6 +65,7 @@ namespace thr::ecs {
         const auto        &players = registry.view<player>();
         const sf::Vector2f player_size{player::side_length(), player::side_length()};
         for (const auto &[entity, player] : players.each()) {
+            const auto &status = player.statuses.get_current_state();
             std::visit(make_overloaded(
                            [&](const player::on_ground &on_ground) {
                                sf::RectangleShape rect_shape{player_size};
@@ -73,7 +82,7 @@ namespace thr::ecs {
                                rect_shape.setFillColor(color);
                                render.draw(rect_shape, states);
                            }),
-                       player.status);
+                       status);
         }
 
         // draw texts

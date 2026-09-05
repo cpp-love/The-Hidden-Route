@@ -14,6 +14,7 @@
 
 #include "thr/base.hpp"
 #include "thr/ecs.hpp"
+#include "thr/undo.hpp"
 
 /**
  * @brief *The Hidden Route* 游戏的命名空间。

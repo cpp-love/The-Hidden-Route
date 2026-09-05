@@ -12,6 +12,7 @@
 #ifndef THR_ECS_COMPONENTS_PLAYER_COMPONENTS_HPP
 #define THR_ECS_COMPONENTS_PLAYER_COMPONENTS_HPP
 
+#include "thr/base/with_history.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/scene_system.hpp"
@@ -21,9 +22,7 @@
 #include <entt/entity/fwd.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
-#include <utility>
 #include <variant>
-#include <vector>
 
 namespace thr::ecs {
 
@@ -53,21 +52,23 @@ namespace thr::ecs {
             std::optional<sf::Vector2f> position_last_recorded{};           ///< 上一次记录的玩家位置。
         };
 
-        sf::Color                             color;  ///< 玩家的颜色。
-        std::variant<on_ground, under_ground> status; ///< 玩家状态。
+        sf::Color color;                                           ///< 玩家的颜色。
+        using status_type = std::variant<on_ground, under_ground>; ///< 状态类型。
+        with_history<status_type> statuses;                        ///< 玩家状态。
 
         /**
          * @brief 在构造 @ref player 时调用的函数，用于设置其所属场景。
          * @param [in] registry 注册表。
          * @param [in] entity 构造了 @ref player 的实体。
          */
-        static void on_construct(entt::registry &registry, entt::entity entity) {
+        static void               on_construct(entt::registry &registry, entt::entity entity) {
             const auto &player = registry.get<struct player>(entity);
-            if (!std::holds_alternative<under_ground>(player.status)) {
+            if (!std::holds_alternative<under_ground>(player.statuses.get_current_state())) {
                 // 不需要设置其所属场景。
                 return;
             }
-            const auto  &under_ground = std::get<struct under_ground>(player.status);
+            const auto &under_ground =
+                std::get<struct under_ground>(player.statuses.get_current_state());
 
             sf::Vector2f start =
                 under_ground.position - sf::Vector2f{side_length() / 2, side_length() / 2};
@@ -124,11 +125,6 @@ namespace thr::ecs {
             registry.on_update<player>().disconnect<&on_update>();
             registry.on_destroy<player>().disconnect<&on_destroy>();
         }
-    };
-
-    /// @brief 转向的历史记录。
-    struct turning_history {
-        std::vector<std::pair<entt::entity, player>> turnings; ///< 转向前的记录点。
     };
 
 } // namespace thr::ecs

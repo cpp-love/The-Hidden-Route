@@ -10,13 +10,12 @@
  * @details 暂时使用思源宋体作为字体。
  */
 
-#include "game_states.hpp"
 #include "thr/base/assert_msg.hpp"
 #include "thr/base/file.hpp"
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs.hpp"
-#include "thr/ecs/components/player_components.hpp"
-#include "thr/ecs/lua_bindings/lua_binding.hpp"
+#include "thr/ecs/components/maze_components.hpp"
+#include "thr/undo.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -238,11 +237,14 @@ namespace mainhelper {
                                .value() /*实在不行就抛异常爆炸*/);
         fin >> json;
         thr::ecs::level_serialization_system::deserialize_from_json(m_registry, json);
-        m_registry.emplace<thr::ecs::player>(
-            m_player_entity, sf::Color{40, 40, 170},
-            thr::ecs::player::on_ground{
-                m_registry.ctx().get<thr::ecs::level_info>().start_segment_entity});
-        m_registry.ctx().emplace<thr::ecs::turning_history>();
+        entt::entity start_segment_entity =
+            m_registry.ctx().get<thr::ecs::level_info>().start_segment_entity;
+        thr::ecs::player player{.color = sf::Color{40, 40, 170},
+                                .statuses{{thr::ecs::player::on_ground{start_segment_entity}}}};
+        m_registry.emplace<thr::ecs::player>(m_player_entity, std::move(player));
+        m_registry.patch<thr::ecs::segment>(start_segment_entity, [&](thr::ecs::segment &seg) {
+            seg.infos.get_current_state_modifiable().current_walking_entity = m_player_entity;
+        });
         if (const auto *script = m_registry.ctx().find<thr::ecs::level_script>()) {
             m_lua = sol::state{};
             thr::ecs::lua_bindings::bind_to_lua(*m_lua, m_registry);
@@ -280,8 +282,13 @@ namespace mainhelper {
         }
         if (const auto *key_pressed = event.getIf<sf::Event::KeyPressed>()) {
             if (key_pressed->control && key_pressed->code == sf::Keyboard::Key::Z) {
-                // Crtl+Z 撤销。
-                thr::ecs::player_movement_system::undo(m_registry);
+                m_undo_manager.undo();
+                m_previous_direction.switch_to_previous();
+                return true;
+            }
+            if (key_pressed->control && key_pressed->code == sf::Keyboard::Key::Y) {
+                m_undo_manager.redo();
+                m_previous_direction.switch_to_next();
                 return true;
             }
             if (key_pressed->code == sf::Keyboard::Key::Escape) {
@@ -293,10 +300,8 @@ namespace mainhelper {
     }
 
     void game_screen::update(thr::ecs::milliseconds_f delta_time) {
-        constexpr float velocity_per_millisecond = 0.2f; ///< 移动速度。
-
         // update scheduler
-        auto           *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
+        auto *scheduler = m_registry.ctx().find<thr::ecs::scheduler>();
         if (scheduler != nullptr) {
             scheduler->update(delta_time);
         }
@@ -315,8 +320,6 @@ namespace mainhelper {
             // 窗口没有焦点，跳过。
             return;
         }
-
-        const float                  move_length = velocity_per_millisecond * delta_time.count();
 
         thr::ecs::combined_direction cdir = thr::ecs::combined_direction::none; //< 移动方向。
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
@@ -341,15 +344,22 @@ namespace mainhelper {
             return;
         }
 
-        thr::ecs::player_movement_system::update(m_registry, m_player_entity, move_length, cdir);
+        if (cdir != m_previous_direction.get_current_state()) {
+            // 换新方向了。
+            m_undo_manager.push(
+                std::make_unique<thr::undo::player_move_command>(m_registry, m_player_entity, cdir));
+            m_previous_direction.get_current_state_modifiable() = cdir;
+        }
+        m_undo_manager.update(delta_time);
 
         // 若走过有特殊标签的实体，触发 Lua 脚本。
         if (m_lua.has_value()) {
             for (const auto &[entity, player] : m_registry.view<thr::ecs::player>().each()) {
-                if (!std::holds_alternative<thr::ecs::player::on_ground>(player.status)) {
+                const auto &status = player.statuses.get_current_state();
+                if (!std::holds_alternative<thr::ecs::player::on_ground>(status)) {
                     continue;
                 }
-                const auto &on_ground = std::get<thr::ecs::player::on_ground>(player.status);
+                const auto &on_ground = std::get<thr::ecs::player::on_ground>(status);
                 const auto *cur_tag = m_registry.try_get<thr::ecs::tag>(on_ground.segment_entity);
                 if (cur_tag == nullptr || cur_tag->tag_ids.empty()) {
                     // 走过的实体没有特殊标签。
@@ -372,15 +382,18 @@ namespace mainhelper {
         if (!(std::ranges::any_of(
                   m_registry.view<thr::ecs::player>().each(),
                   [&](std::pair<entt::entity, const thr::ecs::player &> pair) {
-                      return std::holds_alternative<thr::ecs::player::on_ground>(pair.second.status)
-                             && std::get<thr::ecs::player::on_ground>(pair.second.status).segment_entity
+                      const auto &status = pair.second.statuses.get_current_state();
+                      return std::holds_alternative<thr::ecs::player::on_ground>(status)
+                             && std::get<thr::ecs::player::on_ground>(status).segment_entity
                                     == m_registry.ctx().get<thr::ecs::level_info>().end_segment_entity;
                   }) /* 是否走到终点段 */
               && std::ranges::all_of(
                   m_registry.view<thr::ecs::segment>(),
                   [&](entt::entity entity) {
-                      return thr::no_nan_inf_f{m_registry.get<thr::ecs::segment>(entity).walked_precent}
-                             == thr::no_nan_inf_f{1};
+                      const auto &info =
+                          m_registry.get<thr::ecs::segment>(entity).infos.get_current_state();
+                      return info.prev_completed_entity.has_value()
+                             || thr::no_nan_inf_f{info.walked_precent} == thr::no_nan_inf_f{1};
                   }) /* 是否所有段都走完 */
               )) {
             // 没赢。

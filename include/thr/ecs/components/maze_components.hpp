@@ -12,6 +12,7 @@
 #ifndef THR_ECS_COMPONENTS_MAZE_COMPONENTS_HPP
 #define THR_ECS_COMPONENTS_MAZE_COMPONENTS_HPP
 
+#include "thr/base/with_history.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include "thr/ecs/configs.hpp"
@@ -25,7 +26,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <cstddef>
+#include <entt/entity/fwd.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
 #include <ranges>
@@ -41,24 +42,34 @@ namespace thr::ecs {
          * @return float 路径宽度。
          */
         static float                width() { return configs::singleton().segment_width; }
-        /**
-         * @brief 从配置中获取路径颜色。
-         * @return sf::Color 路径颜色。
-         */
-        static sf::Color            color() { return configs::singleton().segment_color; }
 
         std::optional<entt::entity> prev{};                ///< （起始位置）连接的前一个路径实体。
         std::optional<entt::entity> next{};                ///< （终止位置）连接的后一个路径实体。
         sf::Vector2f                start_center;          ///< 路径起始位置中心。
         float                       length = 0.f;          ///< 路径长度。
-        float                       walked_precent = 0.f;  ///< 被走过的百分比。(范围：0~1)
         direction                   dir = direction::left; ///< 从起始位置到终止位置的方向。
+
+        /// @brief 段的行走相关的信息。
+        struct segment_walked_info {
+            std::optional<entt::entity> prev_completed_entity{};  ///< 之前完成这个段的玩家实体。
+            std::optional<entt::entity> current_walking_entity{}; ///< 正在这个段上走的玩家实体。
+            float                       walked_precent = 0.f;     ///< 被走过的百分比。(范围：0~1)
+
+            /**
+            * @brief 将 `walked_precent` 参数包装在 [0, 1] 区间内。
+            * @details 若其大于 1，则将其设为 1；若其小于 0，则将其设为 0。
+            */
+            void                        wrap_walked_precent() noexcept {
+                walked_precent = std::max(0.f, std::min(1.f, walked_precent));
+            }
+        };
+        with_history<segment_walked_info> infos{}; ///< 段的历史记录。
 
         /**
          * @brief 获取路径终止位置中心。
          * @return sf::Vector2f 路径终止位置中心。
          */
-        [[nodiscard]] sf::Vector2f  get_end_center() const noexcept {
+        [[nodiscard]] sf::Vector2f        get_end_center() const noexcept {
             return start_center + direction_to_vector2f(dir, length);
         }
 
@@ -67,7 +78,8 @@ namespace thr::ecs {
          * @return sf::Vector2f 路径当前行走位置的中心。
          */
         [[nodiscard]] sf::Vector2f get_current_center() const noexcept {
-            return start_center + direction_to_vector2f(dir, length * walked_precent);
+            return start_center
+                   + direction_to_vector2f(dir, length * infos.get_current_state().walked_precent);
         }
 
         /**
@@ -108,30 +120,26 @@ namespace thr::ecs {
             switch (dir) {
                 case direction::right:
                     position -= {segment::width() / 2, segment::width() / 2};
-                    size += {(length * walked_precent) + segment::width(), segment::width()};
+                    size += {(length * infos.get_current_state().walked_precent) + segment::width(),
+                             segment::width()};
                     break;
                 case direction::left:
                     position += {segment::width() / 2, segment::width() / 2};
-                    size -= {(length * walked_precent) + segment::width(), segment::width()};
+                    size -= {(length * infos.get_current_state().walked_precent) + segment::width(),
+                             segment::width()};
                     break;
                 case direction::down:
                     position -= {segment::width() / 2, segment::width() / 2};
-                    size += {segment::width(), (length * walked_precent) + segment::width()};
+                    size += {segment::width(),
+                             (length * infos.get_current_state().walked_precent) + segment::width()};
                     break;
                 case direction::up:
                     position += {segment::width() / 2, segment::width() / 2};
-                    size -= {segment::width(), (length * walked_precent) + segment::width()};
+                    size -= {segment::width(),
+                             (length * infos.get_current_state().walked_precent) + segment::width()};
                     break;
             }
             return {position, size};
-        }
-
-        /**
-         * @brief 将 `walked_precent` 参数包装在 [0, 1] 区间内。
-         * @details 若其大于 1，则将其设为 1；若其小于 0，则将其设为 0。
-         */
-        void wrap_walked_precent() noexcept {
-            walked_precent = std::max(0.f, std::min(1.f, walked_precent));
         }
 
         /**

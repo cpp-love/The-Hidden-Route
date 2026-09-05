@@ -36,7 +36,9 @@ namespace thr::ecs {
         vertexs.reserve(lines.vertexs.size());
         for (const auto &row : lines.vertexs) {
             auto json_row = nlohmann::json::array_t();
-            for (const sf::Vector2f &pos : row) { json_row.emplace_back(pos); }
+            for (const sf::Vector2f &pos : row) {
+                json_row.emplace_back(pos);
+            }
             vertexs.emplace_back(std::move(json_row));
         }
         json["line_strips"]["vertexs"] = std::move(vertexs);
@@ -46,7 +48,9 @@ namespace thr::ecs {
         auto segments = nlohmann::json::array_t();
         segments.reserve(list.size());
         std::map<entt::entity, std::size_t> list_map;
-        for (auto [idx, entity] : list | std::views::enumerate) { list_map.try_emplace(entity, idx); }
+        for (auto [idx, entity] : list | std::views::enumerate) {
+            list_map.try_emplace(entity, idx);
+        }
         auto transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
             auto iter = list_map.find(entity);
             if (iter == list_map.end()) {
@@ -60,7 +64,7 @@ namespace thr::ecs {
                                 {"next", seg.next.and_then(transform_entity)},
                                 {"start_center", seg.start_center},
                                 {"length", seg.length},
-                                {"walked_precent", seg.walked_precent},
+                                {"walked_precent", seg.infos.get_current_state().walked_precent},
                                 {"dir", direction_to_name(seg.dir)},
                                 {"tags", [&] {
                                      const auto *cur_tag = registry.try_get<tag>(entity);
@@ -104,7 +108,9 @@ namespace thr::ecs {
                 for (const auto &json_row : *vertexs_it) {
                     std::vector<sf::Vector2f> row;
                     row.reserve(json_row.size());
-                    for (const auto &pos : json_row) { row.emplace_back(pos); }
+                    for (const auto &pos : json_row) {
+                        row.emplace_back(pos);
+                    }
                     line_strips.vertexs.emplace_back(std::move(row));
                 }
             }
@@ -121,9 +127,10 @@ namespace thr::ecs {
         for (const auto &[seg_json, entity] : std::views::zip(segments_json, segment_entities)) {
             segment seg{.start_center = seg_json.at("start_center"),
                         .length = seg_json.at("length"),
-                        .walked_precent = seg_json.value("walked_precent", 0.f),
                         .dir = name_to_direction(seg_json.at("dir").get<std::string_view>())};
-            auto    prev = seg_json.value("prev", nlohmann::json());
+            seg.infos.store_current_state(
+                segment::segment_walked_info{.walked_precent = seg_json.value("walked_precent", 0.f)});
+            auto prev = seg_json.value("prev", nlohmann::json());
             if (!prev.is_null()) {
                 seg.prev = segment_entities.at(prev);
             } else {

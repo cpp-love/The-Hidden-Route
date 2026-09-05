@@ -1,4 +1,4 @@
-<!--! \page game_states_cpp game_states.cpp 版本历史 -->
+<!--! \page game_states.cpp game_states.cpp 版本历史 -->
 
 # game_states.cpp 版本历史
 
@@ -12,7 +12,8 @@
 ### Changed(修改)
 
 1. 简化了 `mainhelper::game_screen` 的更新玩家流程。
-1. 简化了 `mainhelper::game_screen` 的胜利后的流程。
+2. 简化了 `mainhelper::game_screen` 的胜利后的流程。
+3. **BREKING(不向下兼容):** 将文件从 `main` 移动到 `src/thr/ecs/components/global`。
 
 ## \[0.1.0-7] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

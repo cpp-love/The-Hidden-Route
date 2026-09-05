@@ -1,6 +1,12 @@
-<!--! \page game_state_components_hpp game_state_components.hpp 版本历史 -->
+<!--! \page game_state_base.hpp game_state_base.hpp 版本历史 -->
 
-# game_state_components.hpp 版本历史
+# game_state_base.hpp 版本历史
+
+## \[0.1.0-3] - 2026-09-05 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREKING(不向下兼容):** 将文件名从 `game_state_components.hpp` 改为 `game_state_base.hpp`。
 
 ## \[0.1.0-2] - 2026-06-19 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

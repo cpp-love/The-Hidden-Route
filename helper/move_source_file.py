@@ -27,6 +27,8 @@ def move_file(source: Path, destination: Path):
         destination: 文件移动后的位置。
     """
 
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
     result = subprocess.run(
         ["git", "mv", str(source), str(destination)],
         capture_output=True,

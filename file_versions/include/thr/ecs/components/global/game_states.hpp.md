@@ -1,4 +1,4 @@
-<!--! \page game_states_hpp game_states.hpp 版本历史 -->
+<!--! \page game_states.hpp game_states.hpp 版本历史 -->
 
 # game_states.hpp 版本历史
 
@@ -13,6 +13,7 @@
 
 1. **BREKING(不向下兼容):** 将所有 `thr::ecs::lua_bindings::lua_manager` 成员改为直接使用 `sol::state`。
 2. **BREKING(不向下兼容):** 将 `mainhelper::game_screen::m_winned_time` 成员改为 `mainhelper::game_screen::m_remaining_time_after_winning`，使得不需要使用 `thr::ecs::clock::now()` 函数。
+3. **BREKING(不向下兼容):** 将文件从 `main` 移动到 `include/thr/ecs/components/global`。
 
 ## \[0.1.0-6] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

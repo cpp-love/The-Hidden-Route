@@ -351,14 +351,7 @@ namespace thr {
  * ```
  */
 #ifdef NDEBUG
-#define THR_ASSERT_MSG(expr, ...)                                                                       \
-    do {                                                                                                \
-        if (std::is_constant_evaluated()) {                                                             \
-            if (expr) {                                                                                 \
-                std::unreachable();                                                                     \
-            }                                                                                           \
-        }                                                                                               \
-    } while (0)
+#define THR_ASSERT_MSG(expr, ...) [[assume(expr)]]
 #else
 #define THR_ASSERT_MSG(expr, ...)                                                                       \
     ::thr::details::assert_check(expr, #expr, std::source_location::current() __VA_OPT__(, ) __VA_ARGS__)

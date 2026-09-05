@@ -12,7 +12,7 @@
 #include "thr/base/assert_msg.hpp"
 #include "thr/base/floating_point_compare.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
 #include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/components/player_components.hpp"
@@ -570,11 +570,11 @@ void generator_level::save_level() {
     }
 
     for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) {
-        seg.walked_precent = 0;
+        seg.infos.get_current_state_modifiable().walked_precent = 0;
     }
     const nlohmann::json json = thr::ecs::level_serialization_system::serialize_to_json(m_registry);
     for (auto [entity, seg] : m_registry.view<thr::ecs::segment>().each()) {
-        seg.walked_precent = 1;
+        seg.infos.get_current_state_modifiable().walked_precent = 1;
     }
     output << json.dump(4) << '\n';
     spdlog::info("已保存生成器关卡到 {}", output_path.string());

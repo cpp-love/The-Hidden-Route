@@ -21,25 +21,21 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
-#include <cmath>
 #include <entt/entt.hpp>
 #include <numbers>
+#include <optional>
 #include <spdlog/spdlog.h>
 #include <utility>
 #include <variant>
 
 namespace thr::ecs {
 
-    bool player_movement_system::update(entt::registry &registry, entt::entity player_entity,
-                                        float delta_length, direction dir) {
-        return update(registry, player_entity, delta_length, direction_to_combined_direction(dir));
-    }
-
-    bool player_movement_system::update(entt::registry &registry, entt::entity player_entity,
-                                        float delta_length, combined_direction cdir) {
-        if (cdir == combined_direction::none) {
+    void player_movement_system::try_move(entt::registry &registry, entt::entity player_entity,
+                                          float delta_length, combined_direction cdir,
+                                          version_update_controller &controller) {
+        if (cdir == combined_direction::none || no_nan_inf_f{delta_length} == no_nan_inf_f{0}) {
             // 不用动。
-            return false;
+            return;
         }
 
         if (is_diagonal(cdir)) {
@@ -47,35 +43,35 @@ namespace thr::ecs {
             delta_length /= std::numbers::sqrt2_v<float>;
         }
 
-        auto       &turnings = registry.ctx().get<turning_history>().turnings;
         const auto &cur_player = registry.get<player>(player_entity);
 
-        return std::visit(
+        std::visit(
             make_overloaded(
                 [&](const player::on_ground &on_ground) {
                     // 地上模式。
                     entt::entity seg_entity = on_ground.segment_entity;
                     const auto  &seg = registry.get<segment>(seg_entity);
 
-                    bool         moved = false; //< 是否移动。
-                    if (no_nan_inf_f{seg.walked_precent} != no_nan_inf_f{1}) {
+                    if (no_nan_inf_f{seg.infos.get_current_state().walked_precent} != no_nan_inf_f{1}) {
                         // 没有走到底，所以尝试往前。
-                        if (has_direction(cdir, seg.dir)) {
-                            registry.patch<segment>(seg_entity, [&](segment &seg) {
-                                seg.walked_precent += delta_length / seg.length;
-                                seg.wrap_walked_precent();
-                            });
-
-                            cdir |= direction_to_combined_direction(negate_direction(seg.dir));
-
-                            if (no_nan_inf_f{seg.walked_precent} != no_nan_inf_f{1}
-                                || cdir == combined_direction::none) {
-                                // 还是没有走到底，或者方向为空，结束。
-                                return true;
-                            }
+                        if (!has_direction(cdir, seg.dir)) {
+                            // 无法移动，结束。
+                            return;
                         }
-                        // 无法移动，结束。
-                        return false;
+
+                        registry.patch<segment>(seg_entity, [&](segment &seg) {
+                            auto &info = controller.store_version(seg_entity, seg.infos);
+                            info.walked_precent += delta_length / seg.length;
+                            info.wrap_walked_precent();
+                        });
+
+                        cdir |= direction_to_combined_direction(negate_direction(seg.dir));
+
+                        if (no_nan_inf_f{seg.infos.get_current_state().walked_precent} != no_nan_inf_f{1}
+                            || cdir == combined_direction::none) {
+                            // 还是没有走到底，或者方向为空，结束。
+                            return;
+                        }
                     }
 
                     // 走到底了，继续。
@@ -83,62 +79,64 @@ namespace thr::ecs {
                         // 尝试进入下一段路。
                         const auto &next_seg = registry.get<segment>(*seg.next);
 
-                        if (!has_direction(cdir, next_seg.dir)) {
+                        if (!has_direction(cdir, next_seg.dir)
+                            || next_seg.infos.get_current_state().walked_precent
+                                   != 0 /*有别的玩家在上面走*/) {
                             // 不行。
-                            return moved;
+                            return;
                         }
 
-                        if (next_seg.walked_precent != 0) {
-                            // 关卡有 bug，但不需要崩溃。
-                            spdlog::warn("下一段路错误地已经被走过了");
-                        }
-
-                        registry.patch<segment>(*seg.next, [&](segment &next_seg) {
-                            next_seg.walked_precent = delta_length / seg.length;
-                            next_seg.wrap_walked_precent();
+                        registry.patch<segment>(seg_entity, [&](segment &cur_seg) {
+                            auto &info = controller.store_version(seg_entity, cur_seg.infos);
+                            info = {.prev_completed_entity = player_entity,
+                                    .current_walking_entity{},
+                                    .walked_precent = 0.f};
                         });
-                        turnings.emplace_back(player_entity, cur_player);
-                        registry.patch<player>(player_entity, [&seg](player &player) {
-                            player.status = player::on_ground{.segment_entity = *seg.next};
+                        registry.patch<segment>(*seg.next, [&](segment &next_seg) {
+                            auto &info = controller.store_version(*seg.next, next_seg.infos);
+                            info.current_walking_entity = player_entity;
+                            info.walked_precent = delta_length / seg.length;
+                            info.wrap_walked_precent();
+                        });
+                        registry.patch<player>(player_entity, [&](player &player) {
+                            auto &status = controller.store_version(player_entity, player.statuses);
+                            status = player::on_ground{.segment_entity = *seg.next};
                         });
                         // 都返回了，不需要再修改了。
                         // cdir |= direction_to_combined_direction(negate_direction(next_seg.dir));
-                        return true;
+                        return;
                     }
 
                     // 尝试进入地下模式。
                     if (seg_entity == registry.ctx().get<level_info>().end_segment_entity) {
                         // 防止未结束时误进入地下模式。
-                        return moved;
+                        return;
                     }
 
                     if (!has_direction(cdir, seg.dir)) {
                         // 不行。
-                        return moved;
+                        return;
                     }
 
-                    turnings.emplace_back(player_entity, cur_player);
                     registry.patch<player>(player_entity, [&](player &player) {
-                        player.status = player::under_ground{
+                        auto &status = controller.store_version(player_entity, player.statuses);
+                        status = player::under_ground{
                             .position = seg.get_end_center()
                                         + combined_direction_to_vector2f(cdir, delta_length),
                             .prev_dir = cdir};
                     });
                     // 都返回了，不需要再修改了。
                     // cdir |= direction_to_combined_direction(negate_direction(next_seg.dir));
-                    return true;
                 },
                 [&](const player::under_ground &under_ground) {
                     combined_direction ori_cdir = cdir;
                     // 地下模式。
                     if (delta_length > player::side_length()) {
-                        // 下面函数的处理可能会出问题，先警告一下。
+                        // 对于这种情况，下面函数的处理可能会出问题，但目前不想实现，所以警告一下。
                         /// @todo 完整此情况的处理。
                         spdlog::warn("当前移动的距离（大小：{}）大于玩家的边长，移动处理可能出问题。",
                                      delta_length);
                     }
-
-                    bool        moved = false; //< 是否走过。
 
                     const float half_length = player::side_length() / 2.f; //< 边长的一半。
                     const std::array<sf::Vector2f, 4> vertexs{{
@@ -167,13 +165,16 @@ namespace thr::ecs {
                                 continue;
                             }
 
-                            if (no_nan_inf_f{seg->walked_precent} == no_nan_inf_f{0}) {
+                            const auto &info = seg->infos.get_current_state();
+                            if (!info.prev_completed_entity.has_value() && info.walked_precent == 0) {
                                 // 段没走过，跳过。
                                 continue;
                             }
 
                             auto rect = [&] -> sf::FloatRect {
-                                sf::FloatRect rect = seg->get_walked_bounds();
+                                sf::FloatRect rect = info.prev_completed_entity.has_value()
+                                                         ? seg->get_bounds()
+                                                         : seg->get_walked_bounds();
                                 sf::Vector2f  start = rect.position;
                                 sf::Vector2f  end = rect.position + rect.size;
                                 auto [minx, maxx] = std::minmax(start.x, end.x);
@@ -197,18 +198,21 @@ namespace thr::ecs {
                                     || (*under_ground.position_last_recorded - under_ground.position)
                                                .length()
                                            > player::side_length()) {
-                                    turnings.emplace_back(player_entity, cur_player);
                                     registry.patch<player>(player_entity, [&](player &player) {
-                                        player.status = player::under_ground{.position = next_position,
-                                                                             .prev_dir = ori_cdir,
-                                                                             .position_last_recorded =
-                                                                                 under_ground.position};
+                                        auto &status =
+                                            controller.store_version(player_entity, player.statuses);
+                                        status = player::under_ground{.position = next_position,
+                                                                      .prev_dir = ori_cdir,
+                                                                      .position_last_recorded =
+                                                                          under_ground.position};
                                     });
                                 }
                             } else {
                                 registry.patch<player>(player_entity, [&](player &player) {
-                                    player.status = player::under_ground{.position = next_position,
-                                                                         .prev_dir = ori_cdir};
+                                    auto &status =
+                                        controller.store_version(player_entity, player.statuses);
+                                    status = player::under_ground{.position = next_position,
+                                                                  .prev_dir = ori_cdir};
                                 });
                             }
                         };
@@ -237,7 +241,7 @@ namespace thr::ecs {
 
                     if (check_and_move(cdir)) {
                         // 成功了。
-                        return true;
+                        return;
                     }
 
                     if (is_diagonal(cdir)) {
@@ -245,10 +249,8 @@ namespace thr::ecs {
                         combined_direction vertical = get_vertical_component(cdir);
                         combined_direction horizontal = get_horizontal_component(cdir);
                         if (check_and_move(vertical)) {
-                            moved = true;
                             cdir = horizontal;
                         } else if (check_and_move(horizontal)) {
-                            moved = true;
                             cdir = vertical;
                         }
                     }
@@ -257,7 +259,7 @@ namespace thr::ecs {
                         under_ground.position + combined_direction_to_vector2f(cdir, delta_length)};
 
                     if (is_diagonal(cdir)) {
-                        // 尝试分方向。
+                        // 记录分方向。
                         combined_direction vertical = get_vertical_component(cdir);
                         combined_direction horizontal = get_horizontal_component(cdir);
                         next_positions.reserve(3);
@@ -279,7 +281,8 @@ namespace thr::ecs {
                         }
 
                         const auto &next_seg = registry.get<segment>(node->segment_entity);
-                        if (!has_direction(cdir, next_seg.dir) || next_seg.walked_precent != 0.f) {
+                        if (!has_direction(cdir, next_seg.dir)
+                            || next_seg.infos.get_current_state().walked_precent != 0.f) {
                             // 下一个段不可用，跳过。
                             continue;
                         }
@@ -294,50 +297,22 @@ namespace thr::ecs {
                                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
                                 && rect.contains(next_position + vertexs[(segdir + 1) % 4])) {
                                 // 可以进入地表。
-                                turnings.emplace_back(player_entity, cur_player);
                                 registry.patch<player>(player_entity, [&](player &player) {
-                                    player.status =
-                                        player::on_ground{.segment_entity = node->segment_entity};
+                                    auto &status =
+                                        controller.store_version(player_entity, player.statuses);
+                                    status = player::on_ground{.segment_entity = node->segment_entity};
                                 });
-                                return true;
+                                registry.patch<segment>(node->segment_entity, [&](segment &seg) {
+                                    auto &info =
+                                        controller.store_version(node->segment_entity, seg.infos);
+                                    info.current_walking_entity = player_entity;
+                                });
+                                return;
                             }
                         }
                     }
-                    return moved;
                 }),
-            cur_player.status);
-    }
-
-    /// @todo 添加恢复操作。
-    void player_movement_system::undo(entt::registry &registry) {
-        auto &turnings = registry.ctx().get<turning_history>().turnings;
-        if (turnings.empty()) {
-            return;
-        }
-
-        /*
-        if (const auto *on_ground =) {
-            registry.patch<segment>(on_ground->segment_entity,
-                                    [](segment &seg) { seg.walked_precent = 0.f; });
-        }
-        registry.remove<player_on_ground>(player_entity);
-        registry.remove<player_under_ground>(player_entity);
-        auto prev_player_status = turnings.back();
-        turnings.pop_back();
-        std::visit(
-            make_overloaded(
-                [&](player_on_ground on_ground) {
-                    registry.emplace<player_on_ground>(player_entity, on_ground);
-                    THR_ASSERT_MSG(
-                        no_nan_inf_f{registry.get<segment>(on_ground.segment_entity).walked_precent}
-                            == no_nan_inf_f{1},
-                        "前一次的路径错误地没有走完。");
-                },
-                [&](player_under_ground under_ground) {
-                    registry.emplace<player_under_ground>(player_entity, under_ground);
-                }),
-            prev_player_status);
-        */
+            cur_player.statuses.get_current_state());
     }
 
 } // namespace thr::ecs

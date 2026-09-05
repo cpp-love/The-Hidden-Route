@@ -20,5 +20,6 @@
 #include "thr/base/observable.hpp"
 #include "thr/base/overload.hpp"
 #include "thr/base/sfml_helper.hpp"
+#include "thr/base/with_history.hpp"
 
 #endif // THR_BASE_HPP

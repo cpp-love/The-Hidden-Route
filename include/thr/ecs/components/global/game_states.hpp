@@ -12,8 +12,10 @@
 #ifndef THR_MAIN_GAME_STATES_HPP
 #define THR_MAIN_GAME_STATES_HPP
 
+#include "thr/base/with_history.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
+#include "thr/undo/undo_manager.hpp"
 #include <entt/entity/entity.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
@@ -193,10 +195,12 @@ namespace mainhelper {
         void disconnect_dispatcher();
         bool m_is_paused = false; ///< 是否暂停。
         std::optional<thr::ecs::milliseconds_f>
-                                  m_remaining_time_after_winning; ///< 胜利后等待的剩余时间。
-        std::optional<sol::state> m_lua;                          ///< Lua 状态。
-        entt::registry            m_registry;                     ///< 注册表。
-        entt::entity              m_player_entity{entt::null};    ///< 玩家实体。
+                                  m_remaining_time_after_winning;             ///< 胜利后等待的剩余时间。
+        std::optional<sol::state> m_lua;                                      ///< Lua 状态。
+        entt::registry            m_registry;                                 ///< 注册表。
+        entt::entity              m_player_entity{entt::null};                ///< 玩家实体。
+        thr::undo::undo_manager   m_undo_manager;                             ///< 撤销恢复管理器。
+        thr::with_history<thr::ecs::combined_direction> m_previous_direction; ///< 之前一次的移动方向。
     };
 
     /// @brief 暂停界面状态类。

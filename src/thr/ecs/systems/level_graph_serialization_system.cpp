@@ -29,7 +29,9 @@ namespace thr::ecs {
         auto           nodes = nlohmann::json::array_t();
         nodes.reserve(list.size());
         std::map<entt::entity, std::size_t> list_map;
-        for (auto [idx, entity] : list | std::views::enumerate) { list_map.try_emplace(entity, idx); }
+        for (auto [idx, entity] : list | std::views::enumerate) {
+            list_map.try_emplace(entity, idx);
+        }
         auto transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
             auto iter = list_map.find(entity);
             if (iter == list_map.end()) {
