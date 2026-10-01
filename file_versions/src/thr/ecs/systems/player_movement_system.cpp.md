@@ -2,6 +2,12 @@
 
 # player_movement_system.cpp 版本历史
 
+## \[0.1.0-6] - 2026-10-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREAKING(不向下兼容):** 按照头文件更新的接口重写整个文件。
+
 ## \[0.1.0-5] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)

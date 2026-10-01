@@ -2,11 +2,21 @@
 
 # maze_components.hpp 版本历史
 
+## \[0.1.0-6] - 2026-10-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Changed(修改)
+
+1. **BREAKING(不向下兼容):** 重构 `thr::ecs::segment` 的玩家历史纪录部分，适当调整一些其他部分。
+
+### Removed(移除)
+
+1. 删除 `thr::ecs::line_strips`，并入 `thr::ecs::segment::outline`。
+
 ## \[0.1.0-5] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将 `node::side_length` 改为静态函数，内部通过配置获取。
+1. **BREAKING(不向下兼容):** 将 `node::side_length` 改为静态函数，内部通过配置获取。
 
 ## \[0.1.0-4] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
@@ -31,7 +41,7 @@
 1. **BREAKING(不向下兼容):** 将文件名称从 `maze_line_components.hpp` 改为 `maze_components.hpp`。
 2. **BREAKING(不向下兼容):** 将 `thr::ecs::block_side_length`, `thr::ecs::direction` 及其一些相关函数移动到文件 [`include/thr/ecs/components/global/game_base.hpp`](../../../../../include/thr/ecs/components/global/game_base.hpp) 中。
 3. **BREAKING(不向下兼容):** 为避免实体所属场景处理错误，解除拥有 `thr::ecs::node` 的实体必须有 `thr::ecs::segment` 的限制，并为 `thr::ecs::node` 添加数据成员 `segment_entity` 表示指向的 `thr::ecs::segment` 所属的实体。
-4. **BREKING(不向下兼容):** 修改了一些参数。
+4. **BREAKING(不向下兼容):** 修改了一些参数。
 
 ### Fixed(bug 修复)
 

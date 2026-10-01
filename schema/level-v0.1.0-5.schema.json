@@ -49,13 +49,6 @@
                         "type": "number",
                         "minimum": 0.0
                     },
-                    "walked_precent": {
-                        "title": "路径段的被走过的百分比",
-                        "type": "number",
-                        "minimum": 0.0,
-                        "maximum": 1.0,
-                        "default": 0.0
-                    },
                     "dir": {
                         "title": "线段的方向",
                         "description": "从起始位置到终止位置的方向。",
@@ -67,6 +60,13 @@
                             "up"
                         ]
                     },
+                    "layer": {
+                        "title": "这个段的所属的层级编号",
+                        "description": "层级编号越小就代表显示在越前面。",
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                    },
                     "tags": {
                         "title": "路径段的标签",
                         "description": "用于标记路径段的标签列表。",
@@ -76,6 +76,32 @@
                             "type": "integer"
                         },
                         "default": []
+                    },
+                    "outline": {
+                        "title": "这一段路径的轮廓",
+                        "description": "只是一些装饰性的折线，不起其他作用。",
+                        "type": "object",
+                        "properties": {
+                            "color": {
+                                "title": "轮廓颜色",
+                                "$ref": "types.schema.json#/$defs/color"
+                            },
+                            "vertexs": {
+                                "title": "轮廓的所有折线的点集",
+                                "type": "array",
+                                "items": {
+                                    "title": "一条折线的点集",
+                                    "type": "array",
+                                    "items": {
+                                        "title": "一个点",
+                                        "$ref": "types.schema.json#/$defs/vector2f"
+                                    },
+                                    "minItems": 1
+                                },
+                                "default": []
+                            }
+                        },
+                        "default": {}
                     }
                 },
                 "required": [
@@ -86,37 +112,6 @@
             },
             "minItems": 1
         },
-        "line_strips": {
-            "title": "迷宫中的折线",
-            "description": "只是一些装饰性的折线，不操控玩家。",
-            "type": "object",
-            "properties": {
-                "width": {
-                    "title": "折线宽度",
-                    "type": "number",
-                    "minimum": 0.0,
-                    "default": 5.0
-                },
-                "color": {
-                    "title": "折线颜色",
-                    "$ref": "types.schema.json#/$defs/color"
-                },
-                "vertexs": {
-                    "title": "所有折线的点集",
-                    "type": "array",
-                    "items": {
-                        "title": "一条折线的点集",
-                        "type": "array",
-                        "items": {
-                            "title": "一个点",
-                            "$ref": "types.schema.json#/$defs/vector2f"
-                        },
-                        "minItems": 1
-                    },
-                    "default": []
-                }
-            }
-        },
         "level_script": {
             "title": "关卡对应的脚本",
             "description": "关卡脚本的文件名（相对于 `assets/lua_scripts/` 目录），若没有则为 null。",
@@ -126,30 +121,40 @@
             ],
             "default": null
         },
-        "level_info": {
-            "title": "关卡信息",
-            "properties": {
-                "start_segment_entity": {
-                    "title": "起始段落对应的实体",
-                    "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
-                    "type": "integer",
-                    "minimum": 0
+        "player_infos": {
+            "title": "玩家信息",
+            "type": "array",
+            "items": {
+                "title": "每一个玩家的信息",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "title": "玩家颜色",
+                        "$ref": "types.schema.json#/$defs/color"
+                    },
+                    "start_segment_entity": {
+                        "title": "起始段落对应的实体",
+                        "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "end_segment_entity": {
+                        "title": "结束段落对应的实体",
+                        "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
+                        "type": "integer",
+                        "minimum": 0
+                    }
                 },
-                "end_segment_entity": {
-                    "title": "结束段落对应的实体",
-                    "description": "应填写段落列表的索引（从 0 开始计数），且不应超过列表的最大索引；若没有，填写 null。",
-                    "type": "integer",
-                    "minimum": 0
-                }
-            },
-            "required": [
-                "start_segment_entity",
-                "end_segment_entity"
-            ]
+                "required": [
+                    "start_segment_entity",
+                    "end_segment_entity",
+                    "color"
+                ]
+            }
         }
     },
     "required": [
-        "level_info",
+        "player_infos",
         "segments"
     ]
 }

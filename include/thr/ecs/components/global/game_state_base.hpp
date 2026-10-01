@@ -1,9 +1,9 @@
 /**
- * @file game_state_components.hpp
+ * @file game_state_base.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏状态的组件。
  * @version 0.1.0-3
- * @date 2026-06-19
+ * @date 2026-09-05
  * 
  * @copyright cpp-love
  * 
@@ -11,8 +11,8 @@
  * 
  */
 
-#ifndef THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_COMPONENTS_HPP
-#define THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_COMPONENTS_HPP
+#ifndef THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_BASE_HPP
+#define THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_BASE_HPP
 
 #include "thr/ecs/components/global/game_base.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -104,4 +104,4 @@ namespace thr::ecs {
 
 } // namespace thr::ecs
 
-#endif // THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_COMPONENTS_HPP
+#endif // THR_ECS_COMPONENTS_GLOBAL_GAME_STATE_BASE_HPP

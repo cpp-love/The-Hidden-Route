@@ -22,7 +22,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 同步对应头文件中 API 的修改。
+1. **BREAKING(不向下兼容):** 同步对应头文件中 API 的修改。
 2. 将按钮的绝对坐标改为相对坐标。
 
 ## \[0.1.0-2] - 2026-07-07 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)

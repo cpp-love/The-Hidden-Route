@@ -2,8 +2,8 @@
  * @file maze_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了迷宫组件。
- * @version 0.1.0-5
- * @date 2026-08-01
+ * @version 0.1.0-6
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -12,6 +12,8 @@
 #ifndef THR_ECS_COMPONENTS_MAZE_COMPONENTS_HPP
 #define THR_ECS_COMPONENTS_MAZE_COMPONENTS_HPP
 
+#include "thr/base/assert_msg.hpp"
+#include "thr/base/with_history.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include "thr/ecs/configs.hpp"
@@ -25,7 +27,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <cstddef>
+#include <algorithm>
+#include <entt/entity/fwd.hpp>
 #include <entt/entity/registry.hpp>
 #include <optional>
 #include <ranges>
@@ -41,24 +44,85 @@ namespace thr::ecs {
          * @return float 路径宽度。
          */
         static float                width() { return configs::singleton().segment_width; }
-        /**
-         * @brief 从配置中获取路径颜色。
-         * @return sf::Color 路径颜色。
-         */
-        static sf::Color            color() { return configs::singleton().segment_color; }
-
         std::optional<entt::entity> prev{};                ///< （起始位置）连接的前一个路径实体。
         std::optional<entt::entity> next{};                ///< （终止位置）连接的后一个路径实体。
         sf::Vector2f                start_center;          ///< 路径起始位置中心。
         float                       length = 0.f;          ///< 路径长度。
-        float                       walked_precent = 0.f;  ///< 被走过的百分比。(范围：0~1)
         direction                   dir = direction::left; ///< 从起始位置到终止位置的方向。
+        int                         layer = 0; ///< 这个段的所属的层级编号，越小就代表显示在越前面。
+
+        /// @brief 段的行走相关的信息。
+        struct segment_walked_info {
+            std::optional<entt::entity> prev_completed_entity{};  ///< 之前完成这个段的玩家实体。
+            std::optional<entt::entity> current_walking_entity{}; ///< 正在这个段上走的玩家实体。
+            float                       walked_precent = 0.f;     ///< 被走过的百分比。(范围：0~1)
+
+            /**
+            * @brief 将 `walked_precent` 参数包装在 [0, 1] 区间内。
+            * @details 若其大于 1，则将其设为 1；若其小于 0，则将其设为 0。
+            */
+            void                        wrap_walked_precent() noexcept {
+                walked_precent = std::max(0.f, std::min(1.f, walked_precent));
+            }
+        };
+        with_history<segment_walked_info> infos{}; ///< 段的历史记录。
+
+        /// @brief 当前段路径的轮廓。
+        class outline : public sf::Drawable {
+          public:
+            std::vector<std::vector<sf::Vector2f>> vertexs; ///< 表示路径轮廓的连续的折线。
+            sf::Color                              color = sf::Color::White; ///< 路径颜色。
+
+            /**
+             * @brief 从配置中获取路径轮廓的宽度。
+             * @return float 路径轮廓的宽度。
+             */
+            static float width() { return configs::singleton().segment_outline_width; }
+
+            /// @brief 构造 line_strips 对象。
+            outline() = default;
+            /**
+             * @brief 构造 line_strips 对象。
+             * @param [in] vertexs 连续的折线。
+             * @param [in] color 线段颜色。
+             */
+            explicit outline(std::vector<std::vector<sf::Vector2f>> vertexs,
+                             sf::Color                              color = sf::Color::White)
+                : vertexs(std::move(vertexs)), color(color) {}
+
+          protected:
+            /**
+             * @brief 绘制折线。
+             * @param [in] target 渲染目标。
+             * @param [in] states 渲染状态。
+             */
+            void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
+                for (const auto &strips : vertexs) {
+                    for (const auto &&[start, end] : strips | std::views::pairwise) {
+                        sf::Vector2f       line = end - start;
+                        sf::Angle          angle = line.angle();
+                        sf::RectangleShape rect{{line.length(), width()}};
+                        rect.setPosition(start + sf::Vector2f{0, -width() / 2}.rotatedBy(angle));
+                        rect.rotate(angle);
+                        rect.setFillColor(color);
+                        target.draw(rect, states);
+                    }
+                    for (const sf::Vector2f &point : strips) {
+                        sf::CircleShape circle{width() / 2};
+                        circle.setPosition(point - sf::Vector2f{width() / 2, width() / 2});
+                        circle.setFillColor(color);
+                        target.draw(circle, states);
+                    }
+                }
+            }
+        };
+        outline                    outline{}; ///< 路径轮廓。
 
         /**
          * @brief 获取路径终止位置中心。
          * @return sf::Vector2f 路径终止位置中心。
          */
-        [[nodiscard]] sf::Vector2f  get_end_center() const noexcept {
+        [[nodiscard]] sf::Vector2f get_end_center() const noexcept {
             return start_center + direction_to_vector2f(dir, length);
         }
 
@@ -67,7 +131,8 @@ namespace thr::ecs {
          * @return sf::Vector2f 路径当前行走位置的中心。
          */
         [[nodiscard]] sf::Vector2f get_current_center() const noexcept {
-            return start_center + direction_to_vector2f(dir, length * walked_precent);
+            return start_center
+                   + direction_to_vector2f(dir, length * infos.get_current_state().walked_precent);
         }
 
         /**
@@ -75,63 +140,27 @@ namespace thr::ecs {
          * @return sf::FloatRect 包围范围。
          */
         [[nodiscard]] sf::FloatRect get_bounds() const {
-            sf::Vector2f position = start_center;
-            sf::Vector2f size;
-            switch (dir) {
-                case direction::right:
-                    position -= {segment::width() / 2, segment::width() / 2};
-                    size += {length + segment::width(), segment::width()};
-                    break;
-                case direction::left:
-                    position += {segment::width() / 2, segment::width() / 2};
-                    size -= {length + segment::width(), segment::width()};
-                    break;
-                case direction::down:
-                    position -= {segment::width() / 2, segment::width() / 2};
-                    size += {segment::width(), length + segment::width()};
-                    break;
-                case direction::up:
-                    position += {segment::width() / 2, segment::width() / 2};
-                    size -= {segment::width(), length + segment::width()};
-                    break;
-            }
-            return {position, size};
+            const sf::Vector2f end_center = get_end_center();
+            const float        half_width = width() / 2;
+            auto [minx, maxx] = std::minmax(start_center.x, end_center.x);
+            auto [miny, maxy] = std::minmax(start_center.y, end_center.y);
+            const sf::Vector2f top_left{minx - half_width, miny - half_width};
+            const sf::Vector2f bottom_right{maxx + half_width, maxy + half_width};
+            return {top_left, bottom_right - top_left};
         }
 
         /**
-         * @brief 获取行走过的包围范围。
-         * @return sf::FloatRect 行走过的包围范围。
+         * @brief 获取当前行走过的包围范围。
+         * @return sf::FloatRect 当前行走过的包围范围。
          */
-        [[nodiscard]] sf::FloatRect get_walked_bounds() const {
-            sf::Vector2f position = start_center;
-            sf::Vector2f size;
-            switch (dir) {
-                case direction::right:
-                    position -= {segment::width() / 2, segment::width() / 2};
-                    size += {(length * walked_precent) + segment::width(), segment::width()};
-                    break;
-                case direction::left:
-                    position += {segment::width() / 2, segment::width() / 2};
-                    size -= {(length * walked_precent) + segment::width(), segment::width()};
-                    break;
-                case direction::down:
-                    position -= {segment::width() / 2, segment::width() / 2};
-                    size += {segment::width(), (length * walked_precent) + segment::width()};
-                    break;
-                case direction::up:
-                    position += {segment::width() / 2, segment::width() / 2};
-                    size -= {segment::width(), (length * walked_precent) + segment::width()};
-                    break;
-            }
-            return {position, size};
-        }
-
-        /**
-         * @brief 将 `walked_precent` 参数包装在 [0, 1] 区间内。
-         * @details 若其大于 1，则将其设为 1；若其小于 0，则将其设为 0。
-         */
-        void wrap_walked_precent() noexcept {
-            walked_precent = std::max(0.f, std::min(1.f, walked_precent));
+        [[nodiscard]] sf::FloatRect get_current_bounds() const {
+            const sf::Vector2f current_center = get_current_center();
+            const float        half_width = width() / 2;
+            auto [minx, maxx] = std::minmax(start_center.x, current_center.x);
+            auto [miny, maxy] = std::minmax(start_center.y, current_center.y);
+            const sf::Vector2f top_left{minx - half_width, miny - half_width};
+            const sf::Vector2f bottom_right{maxx + half_width, maxy + half_width};
+            return {top_left, bottom_right - top_left};
         }
 
         /**
@@ -144,12 +173,10 @@ namespace thr::ecs {
             sf::FloatRect bounds = seg.get_bounds();
             sf::Vector2f  start = bounds.position;
             sf::Vector2f  end = bounds.position + bounds.size;
-            auto [minx, maxx] = std::minmax(start.x, end.x);
-            auto [miny, maxy] = std::minmax(start.y, end.y);
-            int col_start = static_cast<int>(minx / block_side_length);
-            int col_end = static_cast<int>(maxx / block_side_length);
-            int row_start = static_cast<int>(miny / block_side_length);
-            int row_end = static_cast<int>(maxy / block_side_length);
+            int           col_start = static_cast<int>(start.x / block_side_length);
+            int           col_end = static_cast<int>(end.x / block_side_length);
+            int           row_start = static_cast<int>(start.y / block_side_length);
+            int           row_end = static_cast<int>(end.y / block_side_length);
             for (int row = row_start; row <= row_end; ++row) {
                 for (int col = col_start; col <= col_end; ++col) {
                     auto scene_id = make_scene_identifier(row, col);
@@ -271,61 +298,6 @@ namespace thr::ecs {
             registry.on_construct<node>().disconnect<&on_construct>();
             registry.on_update<node>().disconnect<&on_update>();
             registry.on_destroy<node>().disconnect<&on_destroy>();
-        }
-    };
-
-    /// @brief 多段连续的折线。
-    class line_strips : public sf::Drawable {
-      public:
-        std::vector<std::vector<sf::Vector2f>> vertexs;                  ///< 连续的折线。
-        static constexpr float                 default_width = 5.f;      ///< 默认线段宽度。
-        float                                  width = default_width;    ///< 线段宽度。
-        sf::Color                              color = sf::Color::White; ///< 线段颜色。
-
-        /// @brief 构造 line_strips 对象。
-        line_strips() = default;
-        /**
-         * @brief 构造 line_strips 对象。
-         * @param [in] vertexs 连续的折线。
-         * @param [in] width 线段宽度。
-         * @param [in] color 线段颜色。
-         */
-        explicit line_strips(std::vector<std::vector<sf::Vector2f>> vertexs, float width,
-                             sf::Color color = sf::Color::White)
-            : vertexs(std::move(vertexs)), width(width), color(color) {}
-        /**
-         * @brief 构造 line_strips 对象。
-         * @param [in] vertexs 连续的折线。
-         * @param [in] color 线段颜色。
-         */
-        explicit line_strips(std::vector<std::vector<sf::Vector2f>> vertexs,
-                             sf::Color                              color = sf::Color::White)
-            : vertexs(std::move(vertexs)), color(color) {}
-
-      protected:
-        /**
-         * @brief 绘制折线。
-         * @param [in] target 渲染目标。
-         * @param [in] states 渲染状态。
-         */
-        void draw(sf::RenderTarget &target, sf::RenderStates states) const override {
-            for (const auto &strips : vertexs) {
-                for (const auto &&[start, end] : strips | std::views::pairwise) {
-                    sf::Vector2f       line = end - start;
-                    sf::Angle          angle = line.angle();
-                    sf::RectangleShape rect{{line.length(), width}};
-                    rect.setPosition(start + sf::Vector2f{0, -width / 2}.rotatedBy(angle));
-                    rect.rotate(angle);
-                    rect.setFillColor(color);
-                    target.draw(rect, states);
-                }
-                for (const sf::Vector2f &point : strips) {
-                    sf::CircleShape circle{width / 2};
-                    circle.setPosition(point - sf::Vector2f{width / 2, width / 2});
-                    circle.setFillColor(color);
-                    target.draw(circle, states);
-                }
-            }
         }
     };
 

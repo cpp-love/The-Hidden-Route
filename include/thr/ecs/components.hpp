@@ -13,7 +13,8 @@
 #define THR_ECS_COMPONENTS_HPP
 
 #include "thr/ecs/components/global/game_base.hpp"
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
+#include "thr/ecs/components/global/game_states.hpp"
 #include "thr/ecs/components/global/scene_components.hpp"
 #include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/level_graph_components.hpp"

@@ -9,7 +9,7 @@
  * 
  */
 
-#include "game_states.hpp"
+#include "thr/ecs/components/global/game_states.hpp"
 #include "thr/ecs/configs.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include <SFML/Graphics.hpp>
@@ -50,7 +50,9 @@ int main() {
     auto prev = thr::ecs::clock::now();
     while (true) {
         // handle event
-        while (const std::optional event = window.pollEvent()) { manager.handle_event(*event); }
+        while (const std::optional event = window.pollEvent()) {
+            manager.handle_event(*event);
+        }
         if (!window.isOpen()) {
             break;
         }

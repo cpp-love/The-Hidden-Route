@@ -33,8 +33,8 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 在 `thr::ecs::game_state_manager` 的构造函数中添加 `window` 参数。
-2. **BREKING(不向下兼容):** 删除 `thr::ecs::game_state_manager::draw` 的 `render` 参数，改为使用数据成员 `m_window`。
+1. **BREAKING(不向下兼容):** 在 `thr::ecs::game_state_manager` 的构造函数中添加 `window` 参数。
+2. **BREAKING(不向下兼容):** 删除 `thr::ecs::game_state_manager::draw` 的 `render` 参数，改为使用数据成员 `m_window`。
 
 ## \[0.1.0-1] - 2026-05-02 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

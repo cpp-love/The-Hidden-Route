@@ -10,7 +10,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将函数 `thr::ecs::is_orthogonal_directions` 和 `thr::ecs::is_diagonal_directions` 改名为 `thr::ecs::is_orthogonal` 和 `thr::ecs::is_diagonal`。
+1. **BREAKING(不向下兼容):** 将函数 `thr::ecs::is_orthogonal_directions` 和 `thr::ecs::is_diagonal_directions` 改名为 `thr::ecs::is_orthogonal` 和 `thr::ecs::is_diagonal`。
 
 ## \[0.1.0-4] - 2026-07-27 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

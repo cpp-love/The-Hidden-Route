@@ -2,14 +2,15 @@
  * @file level_render_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了关卡渲染系统。
- * @version 0.1.0-4
- * @date 2026-07-14
+ * @version 0.1.0-5
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
  */
 
 #include "thr/ecs/systems/level_render_system.hpp"
+#include "thr/base/assert_msg.hpp"
 #include "thr/base/overload.hpp"
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
@@ -17,6 +18,8 @@
 #include "thr/ecs/configs.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -34,13 +37,25 @@ namespace thr::ecs {
         // draw segments
         auto              list = registry.view<segment>();
         sf::RenderTexture render_texture{render.getSize()};
-        render_texture.clear(configs::singleton().background_color);
+        render_texture.clear(sf::Color::Transparent);
         for (const auto &[entity, seg] : list.each()) {
-            if (seg.walked_precent != 0.f) {
-                sf::FloatRect      bound = seg.get_walked_bounds();
+            // draw lines
+            render.draw(seg.outline, states);
+
+            // draw walked info
+            const auto &info = seg.infos.get_current_state();
+            if (info.prev_completed_entity.has_value()) {
+                sf::FloatRect      bound = seg.get_bounds();
                 sf::RectangleShape rect{bound.size};
                 rect.setPosition(bound.position);
-                rect.setFillColor(segment::color());
+                rect.setFillColor(registry.get<player>(*info.prev_completed_entity).color);
+                render_texture.draw(rect);
+            }
+            if (info.current_walking_entity.has_value()) {
+                sf::FloatRect      bound = seg.get_current_bounds();
+                sf::RectangleShape rect{bound.size};
+                rect.setPosition(bound.position);
+                rect.setFillColor(registry.get<player>(*info.current_walking_entity).color);
                 render_texture.draw(rect);
             }
         }
@@ -49,14 +64,11 @@ namespace thr::ecs {
         sprite.setColor(configs::singleton().segments_render_opacity);
         render.draw(sprite, states);
 
-        // draw lines
-        const auto &lines = registry.ctx().get<line_strips>();
-        render.draw(lines, states);
-
         // draw players
         const auto        &players = registry.view<player>();
         const sf::Vector2f player_size{player::side_length(), player::side_length()};
         for (const auto &[entity, player] : players.each()) {
+            const auto &status = player.statuses.get_current_state();
             std::visit(make_overloaded(
                            [&](const player::on_ground &on_ground) {
                                sf::RectangleShape rect_shape{player_size};
@@ -73,7 +85,7 @@ namespace thr::ecs {
                                rect_shape.setFillColor(color);
                                render.draw(rect_shape, states);
                            }),
-                       player.status);
+                       status);
         }
 
         // draw texts

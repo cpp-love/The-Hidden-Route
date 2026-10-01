@@ -10,7 +10,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将文件名从 `sfml_formatter.hpp` 改为 `sfml_helper.hpp`。
+1. **BREAKING(不向下兼容):** 将文件名从 `sfml_formatter.hpp` 改为 `sfml_helper.hpp`。
 
 ### Fixed(bug 修复)
 

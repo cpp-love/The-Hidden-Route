@@ -6,7 +6,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 为 `thr::no_nan_inf` 和 `thr::has_nan_inf` 的静态成员 `epsilon` 改为非静态的，允许用户自定义误差范围，在比较时取两个操作数定义的误差范围的较小值。
+1. **BREAKING(不向下兼容):** 为 `thr::no_nan_inf` 和 `thr::has_nan_inf` 的静态成员 `epsilon` 改为非静态的，允许用户自定义误差范围，在比较时取两个操作数定义的误差范围的较小值。
 
 ## \[0.1.0-1] - 2026-05-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

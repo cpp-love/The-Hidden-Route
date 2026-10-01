@@ -2,8 +2,8 @@
  * @file configs.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了集中获取一些配置的类。
- * @version 0.1.0-3
- * @date 2026-08-01
+ * @version 0.1.0-4
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -31,7 +31,7 @@ namespace thr::ecs {
     class configs {
       public:
         float                         segment_width{};                  ///< 路径宽度。
-        sf::Color                     segment_color;                    ///< 路径颜色。
+        float                         segment_outline_width{};          ///< 路径轮廓的宽度。
         sf::Color                     segments_render_opacity;          ///< 路径渲染透明度。
         float                         node_side_length{};               ///< “死胡同”边长。
         float                         player_side_length{};             ///< 玩家边长。
@@ -73,7 +73,7 @@ namespace thr::ecs {
                     get_existing_full_path(std::filesystem::path("assets/fonts") / json.at("font_path"))
                         .value()};
                 configs.segment_width = json.at("segment_width");
-                configs.segment_color = json.at("segment_color");
+                configs.segment_outline_width = json.at("segment_outline_width");
                 configs.segments_render_opacity = json.at("segments_render_opacity");
                 configs.node_side_length = json.at("node_side_length");
                 configs.player_under_ground_render_alpha = json.at("player_under_ground_render_alpha");

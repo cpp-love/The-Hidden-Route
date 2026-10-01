@@ -2,8 +2,8 @@
  * @file level_components.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 定义了关卡相关的组件。
- * @version 0.1.0-1
- * @date 2026-07-09
+ * @version 0.1.0-2
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -17,12 +17,6 @@
 #include <set>
 
 namespace thr::ecs {
-
-    /// @brief 关卡的基本信息。
-    struct level_info {
-        entt::entity start_segment_entity{entt::null}; ///< 起始段落对应的实体。
-        entt::entity end_segment_entity{entt::null};   ///< 结束段落对应的实体。
-    };
 
     /// @brief 关卡对应的脚本。
     struct level_script {

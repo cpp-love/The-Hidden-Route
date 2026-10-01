@@ -4,10 +4,10 @@
 
 Affiliated with the project: The Hidden Route.
 project version: 0.1.0
-file version: 0.1.0-3
-last modified date: 2026-06-20
+file version: 0.1.0-4
+last modified date: 2026-10-01
 changes:
-1. 修复不会自动更改头文件守卫的问题。
+1. 修复不会自动更改 `file_versions.dox` 的问题。
 """
 
 import re
@@ -26,6 +26,8 @@ def move_file(source: Path, destination: Path):
         source: 要移动的文件。
         destination: 文件移动后的位置。
     """
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
 
     result = subprocess.run(
         ["git", "mv", str(source), str(destination)],
@@ -160,7 +162,10 @@ def main():
                             line,
                         )
                     line = re.sub(r"\b" + source.name + r"\b", destination.name, line)
-                    line = re.sub(source.stem.upper(), destination.stem.upper(), line)
+                    if file.samefile(source):
+                        line = re.sub(source.stem.upper(), destination.stem.upper(), line)
+                    if file.is_relative_to(workspace_folder / "file_versions"):
+                        line = re.sub(r"\b" + source.stem + r"_" + source.suffix[1:] + r"\b", destination.stem + r"_" + destination.suffix[1:], line)
                     if line_unchanged != line:
                         print(f"{file} 文件的第 {line_number} 行发生变化：")
                         print(f"{line_unchanged.rstrip('\n')}")

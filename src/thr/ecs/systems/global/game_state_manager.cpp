@@ -11,7 +11,7 @@
 
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/base/assert_msg.hpp"
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
 #include "thr/ecs/configs.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <TGUI/Container.hpp>

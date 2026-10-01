@@ -2,7 +2,7 @@
 
 # game_states.hpp 版本历史
 
-## \[0.1.0-7] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+## \[0.1.0-7] - 2026-09-05 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 
@@ -11,8 +11,9 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将所有 `thr::ecs::lua_bindings::lua_manager` 成员改为直接使用 `sol::state`。
-2. **BREKING(不向下兼容):** 将 `mainhelper::game_screen::m_winned_time` 成员改为 `mainhelper::game_screen::m_remaining_time_after_winning`，使得不需要使用 `thr::ecs::clock::now()` 函数。
+1. **BREAKING(不向下兼容):** 将所有 `thr::ecs::lua_bindings::lua_manager` 成员改为直接使用 `sol::state`。
+2. **BREAKING(不向下兼容):** 将 `mainhelper::game_screen::m_winned_time` 成员改为 `mainhelper::game_screen::m_remaining_time_after_winning`，使得不需要使用 `thr::ecs::clock::now()` 函数。
+3. **BREAKING(不向下兼容):** 将文件从 `main` 移动到 `include/thr/ecs/components/global`。
 
 ## \[0.1.0-6] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
@@ -44,7 +45,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 修改部分内容，使其配合 [game_states.cpp](../../main/game_states.cpp)。
+1. **BREAKING(不向下兼容):** 修改部分内容，使其配合 [game_states.cpp](../../main/game_states.cpp)。
 
 ## \[0.1.0-1] - 2026-05-02 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

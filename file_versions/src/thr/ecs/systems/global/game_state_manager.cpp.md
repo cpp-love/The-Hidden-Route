@@ -30,7 +30,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 同步 `thr::ecs::game_state_manager` 和 `thr::ecs::game_state_base` 的修改。
+1. **BREAKING(不向下兼容):** 同步 `thr::ecs::game_state_manager` 和 `thr::ecs::game_state_base` 的修改。
 
 ## \[0.1.0-1] - 2026-05-02 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

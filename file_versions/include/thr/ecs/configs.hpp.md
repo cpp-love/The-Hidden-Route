@@ -2,6 +2,16 @@
 
 # configs.hpp 版本历史
 
+## \[0.1.0-4] - 2026-10-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 添加配置 `segment_outline_width`。
+
+### Removed(移除)
+
+1. 移除配置 `segment_color`。
+
 ## \[0.1.0-3] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)

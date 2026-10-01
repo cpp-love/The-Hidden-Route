@@ -2,7 +2,7 @@
 
 # game_states.cpp 版本历史
 
-## \[0.1.0-8] - 2026-07-22 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+## \[0.1.0-8] - 2026-10-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Added(新增)
 
@@ -12,7 +12,8 @@
 ### Changed(修改)
 
 1. 简化了 `mainhelper::game_screen` 的更新玩家流程。
-1. 简化了 `mainhelper::game_screen` 的胜利后的流程。
+2. 简化了 `mainhelper::game_screen` 的胜利后的流程。
+3. **BREAKING(不向下兼容):** 将文件从 `main` 移动到 `src/thr/ecs/components/global`。
 
 ## \[0.1.0-7] - 2026-07-14 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
@@ -50,7 +51,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 重写整个文件，使其实现一个游戏简陋原型。
+1. **BREAKING(不向下兼容):** 重写整个文件，使其实现一个游戏简陋原型。
 
 ## \[0.1.0-1] - 2026-05-02 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

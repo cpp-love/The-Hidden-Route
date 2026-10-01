@@ -2,8 +2,8 @@
  * @file level_serialization_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了序列化迷宫的系统。
- * @version 0.1.0-7
- * @date 2026-07-29
+ * @version 0.1.0-8
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -15,6 +15,7 @@
 #include "thr/ecs/components/global/game_base.hpp"
 #include "thr/ecs/components/level_components.hpp"
 #include "thr/ecs/components/maze_components.hpp"
+#include "thr/ecs/components/player_components.hpp"
 #include <SFML/Graphics/Text.hpp>
 #include <entt/entity/registry.hpp>
 #include <filesystem>
@@ -29,24 +30,14 @@ namespace thr::ecs {
     nlohmann::json level_serialization_system::serialize_to_json(const entt::registry &registry) {
         nlohmann::json json;
 
-        // serialize line_strips
-        const auto    &lines = registry.ctx().get<line_strips>();
-        json["line_strips"] = {{"color", lines.color}, {"width", lines.width}};
-        auto vertexs = nlohmann::json::array_t();
-        vertexs.reserve(lines.vertexs.size());
-        for (const auto &row : lines.vertexs) {
-            auto json_row = nlohmann::json::array_t();
-            for (const sf::Vector2f &pos : row) { json_row.emplace_back(pos); }
-            vertexs.emplace_back(std::move(json_row));
-        }
-        json["line_strips"]["vertexs"] = std::move(vertexs);
-
         // serialize segments
-        auto list = registry.view<segment>();
-        auto segments = nlohmann::json::array_t();
+        auto           list = registry.view<segment>();
+        auto           segments = nlohmann::json::array_t();
         segments.reserve(list.size());
         std::map<entt::entity, std::size_t> list_map;
-        for (auto [idx, entity] : list | std::views::enumerate) { list_map.try_emplace(entity, idx); }
+        for (auto [idx, entity] : list | std::views::enumerate) {
+            list_map.try_emplace(entity, idx);
+        }
         auto transform_entity = [&](entt::entity entity) -> std::optional<std::size_t> {
             auto iter = list_map.find(entity);
             if (iter == list_map.end()) {
@@ -54,21 +45,35 @@ namespace thr::ecs {
             }
             return iter->second;
         };
-        for (entt::entity entity : list) {
-            const auto &seg = registry.get<segment>(entity);
+        for (const auto &[entity, seg] : list.each()) {
+            const auto &outline = seg.outline;
+            auto        vertexs = nlohmann::json::array_t();
+            vertexs.reserve(outline.vertexs.size());
+            for (const auto &row : outline.vertexs) {
+                auto json_row = nlohmann::json::array_t();
+                for (const sf::Vector2f &pos : row) {
+                    json_row.emplace_back(pos);
+                }
+                vertexs.emplace_back(std::move(json_row));
+            }
+            nlohmann::json outline_json = {{"color", outline.color}, {"vertexs", std::move(vertexs)}};
+
             segments.push_back({{"prev", seg.prev.and_then(transform_entity)},
                                 {"next", seg.next.and_then(transform_entity)},
                                 {"start_center", seg.start_center},
                                 {"length", seg.length},
-                                {"walked_precent", seg.walked_precent},
+                                {"walked_precent", seg.infos.get_current_state().walked_precent},
                                 {"dir", direction_to_name(seg.dir)},
-                                {"tags", [&] {
+                                {"layer", seg.layer},
+                                {"tags",
+                                 [&] {
                                      const auto *cur_tag = registry.try_get<tag>(entity);
                                      if (cur_tag) {
                                          return cur_tag->tag_ids;
                                      }
                                      return std::set<int>{};
-                                 }() | std::ranges::to<std::vector>()}});
+                                 }() | std::ranges::to<std::vector>()},
+                                {"outline", outline_json}});
         }
         json["segments"] = std::move(segments);
 
@@ -80,39 +85,22 @@ namespace thr::ecs {
             json["level_script"] = nullptr;
         }
 
-        // serialize level_info
-        const auto &level_info = registry.ctx().get<thr::ecs::level_info>();
-        json["level_info"] = {
-            {"start_segment_entity", transform_entity(level_info.start_segment_entity)},
-            {"end_segment_entity", transform_entity(level_info.end_segment_entity)}};
+        // serialize player_infos
+        const auto &players = registry.view<player>();
+        auto        player_infos = nlohmann::json::array_t();
+        for (const auto &[entity, player] : players.each()) {
+            player_infos.push_back(
+                {{"start_segment_entity", transform_entity(player.start_segment_entity).value()},
+                 {"end_segment_entity", transform_entity(player.end_segment_entity).value()},
+                 {"color", player.color}});
+        }
+        json["player_infos"] = std::move(player_infos);
 
         return json;
     }
 
     void level_serialization_system::deserialize_from_json(entt::registry       &registry,
                                                            const nlohmann::json &json) {
-
-        // deserialize line_strips
-        if (auto line_strips_it = json.find("line_strips"); line_strips_it != json.end()) {
-            const auto &json_line_strips = *line_strips_it;
-            line_strips line_strips;
-            line_strips.color = json_line_strips.value("color", nlohmann::json("white"));
-            line_strips.width = json_line_strips.value("width", line_strips::default_width);
-            if (auto vertexs_it = json_line_strips.find("vertexs");
-                vertexs_it != json_line_strips.end()) {
-                line_strips.vertexs.reserve(vertexs_it->size());
-                for (const auto &json_row : *vertexs_it) {
-                    std::vector<sf::Vector2f> row;
-                    row.reserve(json_row.size());
-                    for (const auto &pos : json_row) { row.emplace_back(pos); }
-                    line_strips.vertexs.emplace_back(std::move(row));
-                }
-            }
-            registry.ctx().insert_or_assign(line_strips);
-        } else {
-            registry.ctx().insert_or_assign(line_strips{});
-        }
-
         // deserialize segments
         const auto               &segments_json = json.at("segments");
         std::vector<entt::entity> segment_entities(segments_json.size());
@@ -121,8 +109,9 @@ namespace thr::ecs {
         for (const auto &[seg_json, entity] : std::views::zip(segments_json, segment_entities)) {
             segment seg{.start_center = seg_json.at("start_center"),
                         .length = seg_json.at("length"),
-                        .walked_precent = seg_json.value("walked_precent", 0.f),
-                        .dir = name_to_direction(seg_json.at("dir").get<std::string_view>())};
+                        .dir = name_to_direction(seg_json.at("dir").get<std::string_view>()),
+                        .layer = seg_json.value("layer", 0)};
+
             auto    prev = seg_json.value("prev", nlohmann::json());
             if (!prev.is_null()) {
                 seg.prev = segment_entities.at(prev);
@@ -146,6 +135,22 @@ namespace thr::ecs {
                 registry.emplace<tag>(entity, std::set<int>(std::from_range, tags));
             }
 
+            if (auto outline_it = seg_json.find("outline"); outline_it != seg_json.end()) {
+                const auto &outline_json = *outline_it;
+                seg.outline.color = outline_json.value("color", nlohmann::json("white"));
+                if (auto vertexs_it = outline_json.find("vertexs"); vertexs_it != outline_json.end()) {
+                    seg.outline.vertexs.reserve(vertexs_it->size());
+                    for (const auto &json_row : *vertexs_it) {
+                        std::vector<sf::Vector2f> row;
+                        row.reserve(json_row.size());
+                        for (const auto &pos : json_row) {
+                            row.emplace_back(pos);
+                        }
+                        seg.outline.vertexs.emplace_back(std::move(row));
+                    }
+                }
+            }
+
             registry.emplace<segment>(entity, seg);
         }
 
@@ -158,32 +163,38 @@ namespace thr::ecs {
                 return 0;
             });
 
-        // deserialize level_info
-        const auto &level_info_json = json.at("level_info");
-        level_info  level_info{
-            .start_segment_entity = segment_entities.at(level_info_json.at("start_segment_entity")),
-            .end_segment_entity = segment_entities.at(level_info_json.at("end_segment_entity"))};
-        registry.ctx().emplace<struct level_info>(level_info);
+        // deserialize player_infos
+        const auto &player_infos_json = json.at("player_infos");
+        for (const auto &player_info_json : player_infos_json) {
+            auto start_segment_entity = segment_entities.at(player_info_json.at("start_segment_entity"));
+            auto end_segment_entity = segment_entities.at(player_info_json.at("end_segment_entity"));
+            sf::Color    color = player_info_json.at("color");
 
-        const auto                &start_seg = registry.get<segment>(level_info.start_segment_entity);
-        entt::entity               start_entity = registry.create();
-        constexpr std::string_view start_string = "始";
-        sf::Text start_text{configs::singleton().get_sfml_font(),
-                            sf::String::fromUtf8(start_string.begin(), start_string.end()), 10};
-        auto     start_bound = start_text.getLocalBounds();
-        start_text.setOrigin(start_bound.getCenter());
-        start_text.setPosition(start_seg.start_center);
-        registry.emplace<sf::Text>(start_entity, start_text);
+            entt::entity player_entity = registry.create();
+            {
+                player player = {.color = color,
+                                 .start_segment_entity = start_segment_entity,
+                                 .end_segment_entity = end_segment_entity,
+                                 .statuses{{thr::ecs::player::on_ground{start_segment_entity}}}};
+                registry.emplace<ecs::player>(player_entity, std::move(player));
+            }
+            registry.patch<thr::ecs::segment>(start_segment_entity, [&](thr::ecs::segment &seg) {
+                seg.infos.get_current_state_modifiable().current_walking_entity = player_entity;
+            });
 
-        const auto                &end_seg = registry.get<segment>(level_info.end_segment_entity);
-        entt::entity               end_entity = registry.create();
-        constexpr std::string_view end_string = "终";
-        sf::Text end_text{configs::singleton().get_sfml_font(),
-                          sf::String::fromUtf8(end_string.begin(), end_string.end()), 10};
-        auto     end_bound = end_text.getLocalBounds();
-        end_text.setOrigin(end_bound.getCenter());
-        end_text.setPosition(end_seg.get_end_center());
-        registry.emplace<sf::Text>(end_entity, end_text);
+            auto create_endpoint_label = [&](std::string_view text, sf::Vector2f position) {
+                constexpr unsigned int character_size = 10;
+                sf::Text label{configs::singleton().get_sfml_font(),
+                               sf::String::fromUtf8(text.begin(), text.end()), character_size};
+                label.setOrigin(label.getLocalBounds().getCenter());
+                label.setPosition(position);
+                label.setFillColor(color);
+                registry.emplace<sf::Text>(registry.create(), std::move(label));
+            };
+
+            create_endpoint_label("始", registry.get<segment>(start_segment_entity).start_center);
+            create_endpoint_label("终", registry.get<segment>(end_segment_entity).get_end_center());
+        }
     }
 
 } // namespace thr::ecs

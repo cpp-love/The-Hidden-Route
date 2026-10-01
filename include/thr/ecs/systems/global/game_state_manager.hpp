@@ -12,7 +12,7 @@
 #ifndef THR_ECS_SYSTEMS_GLOBAL_GAME_STATE_MANAGER_HPP
 #define THR_ECS_SYSTEMS_GLOBAL_GAME_STATE_MANAGER_HPP
 
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <TGUI/Backend/SFML-Graphics.hpp>

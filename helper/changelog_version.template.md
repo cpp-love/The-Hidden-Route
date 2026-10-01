@@ -7,7 +7,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):**
+1. **BREAKING(不向下兼容):**
 
 ### Deprecated(废弃)
 

@@ -9,7 +9,7 @@
  * 
  */
 
-#include "thr/ecs/components/global/game_state_components.hpp"
+#include "thr/ecs/components/global/game_state_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/level_render_system.hpp"

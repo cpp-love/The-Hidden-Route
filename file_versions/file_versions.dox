@@ -7,6 +7,8 @@
  * 
  * \subpage base_hpp
  * 
+ * \subpage command_base_hpp
+ * 
  * \subpage components_hpp
  * 
  * \subpage concepts_hpp
@@ -29,7 +31,7 @@
  * 
  * \subpage game_base_hpp
  * 
- * \subpage game_state_components_hpp
+ * \subpage game_state_base_hpp
  * 
  * \subpage game_state_manager_cpp
  * 
@@ -43,7 +45,7 @@
  * 
  * \subpage level_components_hpp
  * 
- * \subpage level_generator_cpp
+ * \subpage level_maker_cpp
  * 
  * \subpage level_graph_components_hpp
  * 
@@ -83,6 +85,8 @@
  * 
  * \subpage player_components_hpp
  * 
+ * \subpage player_move_command_hpp
+ * 
  * \subpage player_movement_system_cpp
  * 
  * \subpage player_movement_system_hpp
@@ -120,5 +124,11 @@
  * \subpage test_sfml_helper_cpp
  * 
  * \subpage thr_hpp
+ * 
+ * \subpage undo_hpp
+ * 
+ * \subpage undo_manager_hpp
+ * 
+ * \subpage with_history_hpp
  * 
  */

@@ -18,7 +18,7 @@
 ### Changed(修改)
 
 1. 将其内部实现方式改为使用 `entt::handle`。
-2. **BREKING(不向下兼容):** 将 `entt::registry` 相关函数从使用 `std::reference_wrapper` 包装改为使用引用包装。
+2. **BREAKING(不向下兼容):** 将 `entt::registry` 相关函数从使用 `std::reference_wrapper` 包装改为使用引用包装。
 
 ## \[0.1.0-1] - 2026-07-08 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

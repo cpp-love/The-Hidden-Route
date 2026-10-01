@@ -6,7 +6,7 @@
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 重写整个文件。
+1. **BREAKING(不向下兼容):** 重写整个文件。
 
 ## \[0.1.0-1] - 2026-05-23 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

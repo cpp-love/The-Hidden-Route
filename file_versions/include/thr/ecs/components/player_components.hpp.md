@@ -2,17 +2,27 @@
 
 # player_components.hpp 版本历史
 
+## \[0.1.0-4] - 2026-10-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
+
+### Added(新增)
+
+1. 为 `thr::ecs::player` 添加字段 `start_segment_entity` 和 `end_segment_entity`。
+
+### Changed(修改)
+
+1. **BREAKING(不向下兼容):** 合并 `thr::ecs::player_under_ground` 和 `thr::ecs::player_on_ground` 为 `thr::ecs::player`。
+
 ## \[0.1.0-3] - 2026-08-01 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将 `thr::ecs::player_under_ground::prev_dir` 的类型修改为 `combined_direction`。
+1. **BREAKING(不向下兼容):** 将 `thr::ecs::player_under_ground::prev_dir` 的类型修改为 `combined_direction`。
 
 ## \[0.1.0-2] - 2026-07-12 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 
 ### Changed(修改)
 
-1. **BREKING(不向下兼容):** 将 `thr::ecs::level_info` 移至 文件[`thr/ecs/components/level_components.hpp`](../../../../../include/thr/ecs/components/level_components.hpp)
+1. **BREAKING(不向下兼容):** 将 `thr::ecs::level_info` 移至 文件[`thr/ecs/components/level_components.hpp`](../../../../../include/thr/ecs/components/level_components.hpp)
 
 ## \[0.1.0-1] - 2026-05-23 - cpp-love(<207296385+cpp-love@users.noreply.github.com>)
 

@@ -45,9 +45,6 @@ log/**
 # Files for issues
 code_issues/**
 
-# Files for tests
-test_data/**
-
 # Temporary files
 tmp/**
 

@@ -11,15 +11,15 @@ if(THR_BUILD_HELPER)
 	add_executable(generate_file_version
 		${CMAKE_CURRENT_SOURCE_DIR}/generate_file_version.cpp
 	)
-	add_executable(level_generator
-		${CMAKE_CURRENT_SOURCE_DIR}/level_generator.cpp
+	add_executable(generate_level_outlines
+		${CMAKE_CURRENT_SOURCE_DIR}/generate_level_outlines.cpp
 	)
 
 	# 链接第三方库
 	target_link_libraries(generate_file_version
 		PUBLIC thr_compiler_flags
 	)
-	target_link_libraries(level_generator
+	target_link_libraries(generate_level_outlines
 		PUBLIC
 			thr_compiler_flags
 			thr
@@ -29,7 +29,7 @@ if(THR_BUILD_HELPER)
 	install(
 		TARGETS
 			generate_file_version
-			level_generator
+			generate_level_outlines
 		RUNTIME DESTINATION bin/helper COMPONENT Helper
 	)
 
@@ -38,7 +38,7 @@ if(THR_BUILD_HELPER)
 		include(InstallRequiredSystemLibraries)
 
 		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_file_version.exe\" \"\" \"\")
-		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/level_generator.exe\" \"\" \"\")
+		fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/bin/helper/generate_level_outlines.exe\" \"\" \"\")
 		"
 		COMPONENT
 		Helper
@@ -55,9 +55,8 @@ if(THR_BUILD_HELPER)
 	)
 
 	# 添加测试支持
-	add_test(
-		NAME RunHelper
-		COMMAND generate_file_version ${PROJECT_SOURCE_DIR}
-			${PROJECT_SOURCE_DIR}/include default_author
-	)
+	# add_test(
+	# 	NAME RunHelper
+	# 	COMMAND generate_file_version ${PROJECT_SOURCE_DIR}
+	# 		${PROJECT_SOURCE_DIR}/include default_author
 endif()

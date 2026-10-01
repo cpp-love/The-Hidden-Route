@@ -48,7 +48,6 @@
         },
         "color": {
             "title": "折线颜色",
-            "description": "目前仅支持： black, blue, cyan, green, magenta, red, transparent, white, yellow 这几种颜色。",
             "oneOf": [
                 {
                     "type": "string",
