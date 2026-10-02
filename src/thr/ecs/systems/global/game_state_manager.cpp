@@ -2,8 +2,8 @@
  * @file game_state_manager.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 实现了游戏状态系统。
- * @version 0.1.0-6
- * @date 2026-07-14
+ * @version 0.1.0-7
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -20,7 +20,7 @@
 #include <TGUI/RelFloatRect.hpp>
 #include <TGUI/String.hpp>
 #include <TGUI/Widget.hpp>
-#include <TGUI/Widgets/Panel.hpp>
+#include <TGUI/Widgets/Group.hpp>
 #include <entt/entity/entity.hpp>
 #include <memory>
 #include <ranges>
@@ -29,7 +29,7 @@
 
 namespace thr::ecs {
 
-    const tgui::String game_state_manager::game_screen_panel_name{"game_screen_panel"};
+    const tgui::String game_state_manager::game_screen_group_name{"game_screen_group"};
 
     game_state_manager::game_state_manager(sf::RenderWindow &window)
         : m_window(window), m_gui(m_window) {
@@ -38,9 +38,8 @@ namespace thr::ecs {
         m_gui.setFont(thr::ecs::configs::singleton().get_tgui_font());
         m_gui.setTextSize(14u);
         m_gui.setKeyboardNavigationEnabled(true);
-        tgui::Panel::Ptr game_screen_panel = tgui::Panel::create();
-        game_screen_panel->getRenderer()->setBackgroundColor(tgui::Color::Transparent);
-        m_gui.add(game_screen_panel, game_screen_panel_name);
+        auto game_screen_group = tgui::Group::create();
+        m_gui.add(game_screen_group, game_screen_group_name);
     }
 
     game_state_manager::~game_state_manager() {
@@ -97,26 +96,26 @@ namespace thr::ecs {
             sf::View view{m_window.getView()};
             float    old_view_ratio =
                 static_cast<float>(view.getSize().x) / static_cast<float>(view.getSize().y);
-            sf::FloatRect    viewport{{0, 0}, {1, 1}};
-            tgui::Panel::Ptr game_screen_panel =
-                m_gui.get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name);
+            sf::FloatRect viewport{{0, 0}, {1, 1}};
+            auto          game_screen_group =
+                m_gui.get<tgui::Group>(thr::ecs::game_state_manager::game_screen_group_name);
 
             // 根据长宽比计算视口位置和大小，确保黑边方向正确。
             if (window_ratio > old_view_ratio) {
                 // 窗口更扁，黑边在左右。
                 viewport.size.x = old_view_ratio / window_ratio;
                 viewport.position.x = (1 - viewport.size.x) / 2;
-                game_screen_panel->setPosition(
+                game_screen_group->setPosition(
                     {viewport.position.x * static_cast<float>(resized->size.x), 0});
-                game_screen_panel->setSize(
+                game_screen_group->setSize(
                     {viewport.size.x * static_cast<float>(resized->size.x), resized->size.y});
             } else {
                 // 窗口更瘦高，黑边在上下。
                 viewport.size.y = window_ratio / old_view_ratio;
                 viewport.position.y = (1 - viewport.size.y) / 2;
-                game_screen_panel->setPosition(
+                game_screen_group->setPosition(
                     {0, viewport.position.y * static_cast<float>(resized->size.y)});
-                game_screen_panel->setSize(
+                game_screen_group->setSize(
                     {resized->size.x, viewport.size.y * static_cast<float>(resized->size.y)});
             }
 

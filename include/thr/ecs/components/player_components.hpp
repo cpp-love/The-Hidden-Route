@@ -52,11 +52,11 @@ namespace thr::ecs {
             std::optional<sf::Vector2f> position_last_recorded{};           ///< 上一次记录的玩家位置。
         };
 
-        sf::Color    color;                                        ///< 玩家的颜色。
+        sf::Color    color{sf::Color::Transparent};                ///< 玩家的颜色。
         entt::entity start_segment_entity{entt::null};             ///< 起始段。
         entt::entity end_segment_entity{entt::null};               ///< 结束段。
         using status_type = std::variant<on_ground, under_ground>; ///< 状态类型。
-        with_history<status_type> statuses;                        ///< 玩家状态。
+        with_history<status_type> statuses{};                      ///< 玩家状态。
 
         /**
          * @brief 在构造 @ref player 时调用的函数，用于设置其所属场景。

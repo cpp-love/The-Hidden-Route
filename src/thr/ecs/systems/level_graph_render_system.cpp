@@ -24,7 +24,6 @@
 #include <TGUI/String.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/Button.hpp>
-#include <TGUI/Widgets/Panel.hpp>
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/entt.hpp>

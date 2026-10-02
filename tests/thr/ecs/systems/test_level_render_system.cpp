@@ -2,8 +2,8 @@
  * @file test_level_render_system.cpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief `thr::ecs::level_render_system` 的测试用例和使用示例。
- * @version 0.1.0-1
- * @date 2026-05-03
+ * @version 0.1.0-2
+ * @date 2026-10-02
  * 
  * @copyright cpp-love
  * 
@@ -11,6 +11,7 @@
 
 #include "thr/ecs/components/global/game_state_base.hpp"
 #include "thr/ecs/components/maze_components.hpp"
+#include "thr/ecs/components/player_components.hpp"
 #include "thr/ecs/systems/global/game_state_manager.hpp"
 #include "thr/ecs/systems/level_render_system.hpp"
 #include <SFML/Graphics.hpp>
@@ -29,26 +30,38 @@
 class test_state : public thr::ecs::game_state_base {
   public:
     test_state() {
-        m_registry.ctx().emplace<thr::ecs::line_strips>(
-            std::vector<std::vector<sf::Vector2f>>{{
-                                                       {1, 2},
-                                                       {300, 200},
-                                                       {100, 200},
-                                                   },
-                                                   {{100, 2}, {500, 200}, {400, 100}},
-                                                   {{1, 200}, {300, 400}, {600, 550}}},
-            sf::Color::Red);
+        entt::entity player_entity = m_registry.create();
+        entt::entity player_entity2 = m_registry.create();
         entt::entity entity = m_registry.create();
-        m_registry.emplace<thr::ecs::segment>(entity, thr::ecs::segment{.start_center = {600, 600},
-                                                                        .length = 100.f,
-                                                                        .walked_precent = 0.5f,
-                                                                        .dir = thr::ecs::direction::up});
         entt::entity entity2 = m_registry.create();
-        m_registry.emplace<thr::ecs::segment>(entity2,
-                                              thr::ecs::segment{.start_center = {250, 400},
-                                                                .length = 100.f,
-                                                                .walked_precent = 0.5f,
-                                                                .dir = thr::ecs::direction::right});
+        m_registry.emplace<thr::ecs::player>(
+            player_entity,
+            thr::ecs::player{.color = sf::Color::Green,
+                             .statuses{{thr::ecs::player::on_ground{.segment_entity = entity}}}});
+        m_registry.emplace<thr::ecs::player>(
+            player_entity2,
+            thr::ecs::player{.color = sf::Color::Red,
+                             .statuses{{thr::ecs::player::on_ground{.segment_entity = entity2}}}});
+        m_registry.emplace<thr::ecs::segment>(
+            entity,
+            thr::ecs::segment{
+                .start_center = {600, 600},
+                .length = 100.f,
+                .dir = thr::ecs::direction::up,
+                .infos{{thr::ecs::segment::segment_walked_info{.prev_completed_entity = player_entity2,
+                                                               .current_walking_entity = player_entity,
+                                                               .walked_precent = 0.5f}}},
+                .outline{{{{1, 2}, {300, 200}, {100, 200}},
+                          {{100, 2}, {500, 200}, {400, 100}},
+                          {{1, 200}, {300, 400}, {600, 550}}}}});
+        m_registry.emplace<thr::ecs::segment>(
+            entity2,
+            thr::ecs::segment{
+                .start_center = {250, 400},
+                .length = 100.f,
+                .dir = thr::ecs::direction::right,
+                .infos{{thr::ecs::segment::segment_walked_info{.current_walking_entity = player_entity2,
+                                                               .walked_precent = 0.5f}}}});
     }
 
     bool handle_event([[maybe_unused]] const sf::Event &event) noexcept override { return false; }
@@ -64,6 +77,7 @@ class test_state : public thr::ecs::game_state_base {
 
 constexpr sf::Vector2u video_mode{800, 600};
 
+// copied from `main.cpp`
 int                    main() {
 
 #ifdef _WIN32

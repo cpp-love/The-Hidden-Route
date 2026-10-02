@@ -121,13 +121,13 @@ namespace mainhelper {
     level_graph_screen::~level_graph_screen() {
         // adapted from thr::ecs::<thr/ecs/systems/level_graph_render_system.cpp's private namespace>::remove_existing_nodes
         // 清空按钮。
-        tgui::Panel::Ptr panel =
-            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name);
-        auto widgets = panel->getWidgets();
+        auto group =
+            m_global_gui->get<tgui::Group>(thr::ecs::game_state_manager::game_screen_group_name);
+        auto widgets = group->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName().starts_with(
                     tgui::String(thr::ecs::level_graph_render_system::widget_prefix))) {
-                panel->remove(widget);
+                group->remove(widget);
             }
         }
         m_global_gui->remove(m_global_gui->get("level_graph_screen_exit_button"));
@@ -148,7 +148,7 @@ namespace mainhelper {
     }
     void level_graph_screen::on_pause() {
         auto widgets =
-            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
+            m_global_gui->get<tgui::Group>(thr::ecs::game_state_manager::game_screen_group_name)
                 ->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName().starts_with(
@@ -161,7 +161,7 @@ namespace mainhelper {
     }
     void level_graph_screen::on_resume() {
         auto widgets =
-            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name)
+            m_global_gui->get<tgui::Group>(thr::ecs::game_state_manager::game_screen_group_name)
                 ->getWidgets();
         for (const auto &widget : widgets) {
             if (widget->getWidgetName().starts_with(
@@ -193,7 +193,7 @@ namespace mainhelper {
     void level_graph_screen::draw() {
         thr::ecs::level_graph_render_system::draw(
             m_registry,
-            m_global_gui->get<tgui::Panel>(thr::ecs::game_state_manager::game_screen_panel_name),
+            m_global_gui->get<tgui::Group>(thr::ecs::game_state_manager::game_screen_group_name),
             *m_window, m_registry.ctx().get<thr::ecs::start_level>().entity, [&](entt::entity entity) {
                 const auto &node = m_registry.get<thr::ecs::level_node>(entity);
                 spdlog::info("进入关卡 {}。", node.name);

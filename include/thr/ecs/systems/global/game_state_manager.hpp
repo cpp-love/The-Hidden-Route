@@ -2,8 +2,8 @@
  * @file game_state_manager.hpp
  * @author cpp-love (207296385+cpp-love@users.noreply.github.com)
  * @brief 声明了游戏状态管理系统。
- * @version 0.1.0-4
- * @date 2026-07-14
+ * @version 0.1.0-5
+ * @date 2026-10-01
  * 
  * @copyright cpp-love
  * 
@@ -40,7 +40,7 @@ namespace thr::ecs {
         bool                              m_is_dispatching{false}; ///< 当前是否正在处理调度器事件。
 
       public:
-        static const tgui::String game_screen_panel_name; ///< 有游戏界面大小的 UI 面板组件名称。
+        static const tgui::String game_screen_group_name; ///< 有游戏界面大小的 UI 组别的组件名称。
 
         /**
          * @brief 构造 game state manager 对象。

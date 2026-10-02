@@ -64,8 +64,8 @@ namespace thr::undo {
          * @note 此函数会自动调用 `command.update()`，无需用户手动调用。
          */
         constexpr void update(thr::ecs::milliseconds_f delta_time) {
-            [[unlikely]] if (m_position == 0) { return; }
             clear_history_behind();
+            [[unlikely]] if (m_position == 0) { return; }
             m_history.back()->update(delta_time);
         }
 

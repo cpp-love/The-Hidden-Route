@@ -23,6 +23,7 @@
 #include <windows.h>
 #endif // _WIN32
 
+/// @bug 有时在在地下时向左走后向右走再撤销会导致无法移动。
 int main() {
 
 #ifdef _WIN32
